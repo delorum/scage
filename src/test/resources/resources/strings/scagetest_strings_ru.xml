@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<messages>
+    <message id="error.nomessage">
+        Строка с кодом ? не найдена
+    </message>
+
+    <message id="hello.world">
+        Привет, Мир!
+    </message>
+
+    <message id="help">
+        WASD и Левая Кнопка Мыши,
+Колесико - приблизить/отдалить
+    </message>
+</messages>

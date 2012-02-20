@@ -1,0 +1,5 @@
+app.name = Color Test
+app.version = 1.1
+
+screen.width = 640
+screen.height = 480

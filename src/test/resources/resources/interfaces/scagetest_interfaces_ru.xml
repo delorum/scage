@@ -1,0 +1,26 @@
+<interfaces>
+    <interface id="scagetest.help" x="window_width/2" y="window_height/2" yinterval="-20" color="yellow">
+        <row id="help">
+WASD и Ле[rвая К[yн\[bопк\]а Мы\\[gши,
+Кол\\]есико - пр]иблизить/отд]алить
+        </row>
+        <row />
+        <row/>
+        <row id="trace.location" color="green">
+Location: $0
+        </row>
+        <row id="trace.point">
+Point: $0
+        </row>
+        <row id="fps" x="20" y="window_height-20">
+FPS: $0
+        </row>
+
+        <row id="inputtext">
+F1: [gInp[rut te]xt]
+        </row>
+        <row id="heretext">
+Your text: $0
+        </row>
+    </interface>
+</interfaces>
