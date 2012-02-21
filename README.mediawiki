@@ -1,21 +1,19 @@
-[[File:scage/raw/master/scage-logo.png]]
-
 ==Introduction.==
 Scage is a framework to write simple 2D opengl games. It is written in Scala and based on several java libraries:
-  * phys2d as a physics engine (http://phys2d.cokeandcode.com/)
-  * lwjgl as an opengl wrapper (http://lwjgl.org)
-  * slick as a resource and texture loader (http://slick.cokeandcode.com/)
+* phys2d as a physics engine (http://phys2d.cokeandcode.com/)
+* lwjgl as an opengl wrapper (http://lwjgl.org)
+* slick as a resource and texture loader (http://slick.cokeandcode.com/)
 
 The main purpose of this project is to give a convenient tool for game-developers to write a code of pure functionality without any boilerplate.
 
 ==Features.==
-  * Architechture similar to actors framework with different kinds of tasks executing on different stages of app lifecycle. Simililar to actors these tasks are anonymous functions, and you can add and remove them in runtime in any scope of your app. Its all singlethreaded, so you dont have to mess with messages.
-  * Vast drawing library for any kinds of 2D opengl primitives.
-  * Loading and utilizing fonts from ttf-files (based on 'slick' api but with improvements).
-  * i18n: loading strings from xml.
-  * Framework to build in-game interfaces from xml files of simple structure.
-  * Tracers framework: easy game objects tracking and interacting on two-dimensional game map.
-  * Lightweight wrapper upon phys2d engine.
-  * Easy app building/deploing (as a standalone or via webstart) using maven infrastructure.
-  * Client/server network api upon actors with simple text protocol based on json format.
+* Architechture similar to actors framework with different kinds of tasks executing on different stages of app lifecycle. Simililar to actors these tasks are anonymous functions, and you can add and remove them in runtime in any scope of your app. Its all singlethreaded, so you dont have to mess with messages.
+* Vast drawing library for any kinds of 2D opengl primitives.
+* Loading and utilizing fonts from ttf-files (based on 'slick' api but with improvements).
+* i18n: loading strings from xml.
+* Framework to build in-game interfaces from xml files of simple structure.
+* Tracers framework: easy game objects tracking and interacting on two-dimensional game map.
+* Lightweight wrapper upon phys2d engine.
+* Easy app building/deploing (as a standalone or via webstart) using maven infrastructure.
+* Client/server network api upon actors with simple text protocol based on json format.
 
