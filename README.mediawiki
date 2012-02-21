@@ -1,4 +1,4 @@
-[[File:http://scage.googlecode.com/svn/trunk/ScageMaven/scage-logo.png]]
+[[File:scage-logo.png]]
 
 ==Introduction.==
 Scage is a framework to write simple 2D opengl games. It is written in Scala and based on several java libraries:
