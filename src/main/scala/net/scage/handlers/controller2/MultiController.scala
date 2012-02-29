@@ -56,6 +56,54 @@ trait MultiController extends ScageController {
     mouse_wheel_downs += onWheelDown
   }
 
+  def delKeys(key_codes_to_delete: Int*) {
+    keyboard_keys --= key_codes_to_delete
+  }
+  def delAnyKey() {
+    anykeys.clear()
+  }
+  def delAllKeys() {
+    keyboard_keys.clear()
+  }
+
+  def delMouseButtons(mouse_buttons_to_delete:Int*) {
+    mouse_buttons --= mouse_buttons_to_delete
+  }
+  def delAllMouseButtons() {
+    mouse_buttons.clear()
+  }
+  def delMouseMotion() {
+    mouse_motions.clear()
+  }
+  def delMouseDrags(mouse_buttons_to_delete:Int*) {
+    mouse_drag_motions --= mouse_buttons_to_delete
+  }
+  def delAllMouseDrags() {
+    mouse_drag_motions.clear()
+  }
+  def delMouseWheelUp() {
+    mouse_wheel_ups.clear()
+  }
+  def delMouseWheelDown() {
+    mouse_wheel_downs.clear()
+  }
+  def delAllMouseWheelEvents() {
+    delMouseWheelUp()
+    delMouseWheelDown()
+  }
+  def delAllMouseEvents() {
+    delAllMouseButtons()
+    delMouseMotion()
+    delAllMouseDrags()
+    delAllMouseWheelEvents()
+  }
+
+  def delAllKeysAndMouseEvents() {
+    delAllKeys()
+    delAnyKey()
+    delAllMouseEvents()
+  }
+
   def checkControls() {
     for {
       (key, events_for_key) <- keyboard_keys

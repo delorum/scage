@@ -3,8 +3,7 @@ package net.scage.support.tracer3
 import net.scage.support.ScageId._
 import net.scage.support.{State, Vec}
 
-trait
-Trace {
+trait Trace {
   type ChangerType <: Trace // changer type must be the type of actual Trace's child in client code
   def changeState(changer:ChangerType, state:State) // maybe 'changeState' is not the right name..
   def state:State
@@ -15,7 +14,7 @@ Trace {
 }
 
 object Trace {
-  def apply(changeState:(Trace, State) => Unit = (changer, state) => {}, state:State = State()) = {
+  def apply(changeState:(Trace, State) => Unit = (changer, state) => {}, state: => State = State()) = {
     val (_changeState, _state) = (changeState, state)
     new Trace {
       override type ChangerType = Trace

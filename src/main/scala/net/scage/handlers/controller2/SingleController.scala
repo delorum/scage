@@ -11,10 +11,10 @@ trait SingleController extends ScageController {
   private var keyboard_keys = HashMap[Int, SingleKeyEvent]()  // was_pressed, last_pressed_time, repeat_time, onKeyDown, onKeyUp
   private var anykey: () => Any = () => {}
   private var mouse_buttons = HashMap[Int, SingleMouseButtonEvent]()
-  private var on_mouse_motion: Vec => Any = Vec => {}
+  private var on_mouse_motion: Vec => Any = v => {}
   private var on_mouse_drag_motion = HashMap[Int, Vec => Any]()
-  private var on_mouse_wheel_up: Vec => Any = Vec => {}
-  private var on_mouse_wheel_down: Vec => Any = Vec => {}
+  private var on_mouse_wheel_up: Vec => Any = v => {}
+  private var on_mouse_wheel_down: Vec => Any = v => {}
 
   def key(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) {
     keyboard_keys(key_code) = SingleKeyEvent(key_code, () => repeat_time, () => onKeyDown, () => onKeyUp)
@@ -51,6 +51,54 @@ trait SingleController extends ScageController {
   }
   def mouseWheelDown(onWheelDown: Vec => Any) {
     on_mouse_wheel_down = onWheelDown
+  }
+
+  def delKeys(key_codes_to_delete: Int*) {
+    keyboard_keys --= key_codes_to_delete
+  }
+  def delAnyKey() {
+    anykey = () => {}
+  }
+  def delAllKeys() {
+    keyboard_keys.clear()
+  }
+
+  def delMouseButtons(mouse_buttons_to_delete:Int*) {
+    mouse_buttons --= mouse_buttons_to_delete
+  }
+  def delAllMouseButtons() {
+    mouse_buttons.clear()
+  }
+  def delMouseMotion() {
+    on_mouse_motion = v => {}
+  }
+  def delMouseDrags(mouse_buttons_to_delete:Int*) {
+    on_mouse_drag_motion --= mouse_buttons_to_delete
+  }
+  def delAllMouseDrags() {
+    on_mouse_drag_motion.clear()
+  }
+  def delMouseWheelUp() {
+    on_mouse_wheel_up = v => {}
+  }
+  def delMouseWheelDown() {
+    on_mouse_wheel_down = v => {}
+  }
+  def delAllMouseWheelEvents() {
+    delMouseWheelUp()
+    delMouseWheelDown()
+  }
+  def delAllMouseEvents() {
+    delAllMouseButtons()
+    delMouseMotion()
+    delAllMouseDrags()
+    delAllMouseWheelEvents()
+  }
+
+  def delAllKeysAndMouseEvents() {
+    delAllKeys()
+    delAnyKey()
+    delAllMouseEvents()
   }
 
   def checkControls() {

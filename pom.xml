@@ -4,7 +4,7 @@
   <groupId>su.msk.dunno</groupId>
   <artifactId>scage</artifactId>
   <packaging>jar</packaging>
-  <version>0.8</version>
+  <version>0.9-SNAPSHOT</version>
   <inceptionYear>2011</inceptionYear>
 
   <name>Scage</name>
@@ -131,6 +131,13 @@
           <artifactId>scalaz-core_${scala.version}</artifactId>
           <version>6.0.3</version>
       </dependency>-->
+      <dependency>
+          <groupId>org.xerial.snappy</groupId>
+          <artifactId>snappy-java</artifactId>
+          <version>1.0.4.1</version>
+          <type>jar</type>
+          <scope>compile</scope>
+      </dependency>
   </dependencies>
 
   <build>

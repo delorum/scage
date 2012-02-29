@@ -50,6 +50,22 @@ trait ScageController extends Scage {
   def mouseWheelUp(onWheelUp: Vec => Any)
   def mouseWheelDown(onWheelDown: Vec => Any)
 
+  def delKeys(key_codes_to_delete: Int*)
+  def delAnyKey()
+  def delAllKeys()
+
+  def delMouseButtons(mouse_buttons_to_delete:Int*)
+  def delAllMouseButtons()
+  def delMouseMotion()
+  def delMouseDrags(mouse_buttons_to_delete:Int*)
+  def delAllMouseDrags()
+  def delMouseWheelUp()
+  def delMouseWheelDown()
+  def delAllMouseWheelEvents()
+  def delAllMouseEvents()
+
+  def delAllKeysAndMouseEvents()
+
   def checkControls()
 }
 
