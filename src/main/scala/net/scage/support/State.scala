@@ -2,12 +2,15 @@ package net.scage.support
 
 import collection.mutable.HashMap
 import parsers.JSONParser
+import com.weiglewilczek.slf4s.Logger
 
 /**
  * Represents JSON Object
  */
 // TODO: add example usages and tell about alphabetical order for keys in patterns!
 class State(args:Any*) extends HashMap[String, Any] {
+  private val log = Logger(this.getClass.getName)
+  
   add(args:_*)
 
   def neededKeys(foreach_func:PartialFunction[(String, Any), Any]) {  // maybe rename this func
@@ -67,6 +70,28 @@ class State(args:Any*) extends HashMap[String, Any] {
     }
     sb.append("}")
     sb.toString()
+  }
+  
+  def valueOrDefault[A : Manifest](key:String, default:A):A = {
+    get(key) match {
+      case Some(value) =>
+        val erasure = manifest[A] match {
+          case Manifest.Byte => classOf[java.lang.Byte]
+          case Manifest.Short => classOf[java.lang.Short]
+          case Manifest.Char => classOf[java.lang.Character]
+          case Manifest.Long => classOf[java.lang.Long]
+          case Manifest.Float => classOf[java.lang.Float]
+          case Manifest.Double => classOf[java.lang.Double]
+          case Manifest.Boolean => classOf[java.lang.Boolean]
+          case Manifest.Int => classOf[java.lang.Integer]
+          case m => m.erasure
+        }
+        if(erasure.isInstance(value)) value.asInstanceOf[A] else {
+          log.error("failed to use ("+key+" : "+value+") as "+erasure)
+          default
+        }
+      case None => default
+    }
   }
 }
 

@@ -21,6 +21,8 @@
 is_main_unit=true
 
 ----------------
+запилить функцию drawTraceLocations()
+
 перепилить Trace:
 trait Trace -> trait TraceTrait
 добавить отдельный класс Trace, где changerType = Trace
