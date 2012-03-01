@@ -18,7 +18,7 @@ import collection.mutable.ArrayBuffer
 import com.weiglewilczek.slf4s.Logger
 import net.scage.Scage
 import net.scage.support.messages.{ScageXML, ScageMessage}
-import net.scage.support.tracer3.ScageTracer
+import net.scage.support.tracer3.{Trace, ScageTracer}
 
 trait RendererLib {
   def backgroundColor = {
@@ -240,12 +240,15 @@ trait RendererLib {
 	  GL11.glPopMatrix()
   }
 
-  // ugly structural typing, but I don't know what to do with tracer's generic type
   def drawTraceGrid(tracer:ScageTracer[_], color:ScageColor = DEFAULT_COLOR) {
     import tracer._
     val x_lines = (field_from_x to field_to_x by h_x).foldLeft(List[Vec]())((lines, x) => Vec(x, field_from_y) :: Vec(x, field_to_y) :: lines)
     val y_lines = (field_from_y to field_to_y by h_y).foldLeft(List[Vec]())((lines, y) => Vec(field_from_x, y) :: Vec(field_to_x, y) :: lines)
     drawLines(x_lines ::: y_lines, color)
+  }
+
+  def drawTraceLocations[T <: Trace](tracer:ScageTracer[T], radius:Int = 3, color:ScageColor = DEFAULT_COLOR) {
+    tracer.tracesList.foreach(trace => drawFilledCircle(trace.location, radius, color))
   }
 
   def getTexture(format:String, in:InputStream):Texture = TextureLoader.getTexture(format, in)
