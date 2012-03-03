@@ -34,21 +34,34 @@ trait ScageController extends Scage {
   }
   
   def key(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {})
+  def keyNoPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {})
+
   def anykey(onKeyDown: => Any)
+  def anykeyNoPause(onKeyDown: => Any)
 
   def mouseCoord:Vec
   def isMouseMoved:Boolean
 
   def leftMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {})
+  def leftMouseNoPause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {})
+
   def rightMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {})
+  def rightMouseNoPause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {})
 
   def mouseMotion(onMotion: Vec => Any)
+  def mouseMotionNoPause(onMotion: Vec => Any)
 
   def leftMouseDrag(onDrag: Vec => Any)
+  def leftMouseDragNoPause(onDrag: Vec => Any)
+
   def rightMouseDrag(onDrag: Vec => Any)
+  def rightMouseDragNoPause(onDrag: Vec => Any)
 
   def mouseWheelUp(onWheelUp: Vec => Any)
+  def mouseWheelUpNoPause(onWheelUp: Vec => Any)
+
   def mouseWheelDown(onWheelDown: Vec => Any)
+  def mouseWheelDownNoPause(onWheelDown: Vec => Any)
 
   def delKeys(key_codes_to_delete: Int*)
   def delAnyKey()
@@ -61,10 +74,27 @@ trait ScageController extends Scage {
   def delAllMouseDrags()
   def delMouseWheelUp()
   def delMouseWheelDown()
-  def delAllMouseWheelEvents()
-  def delAllMouseEvents()
 
-  def delAllKeysAndMouseEvents()
+  def delAllMouseWheelEvents() {
+    delMouseWheelUp()
+    delMouseWheelDown()
+  }
+  def delAllMouseEvents() {
+    delAllMouseButtons()
+    delMouseMotion()
+    delAllMouseDrags()
+    delAllMouseWheelEvents()
+  }
+  def delAllKeysAndMouseEvents() {
+    delAllKeys()
+    delAnyKey()
+    delAllMouseEvents()
+  }
+
+  override def delAllOperations() {
+    delAllKeysAndMouseEvents()
+    super.delAllOperations()
+  }
 
   def checkControls()
 }

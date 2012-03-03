@@ -45,7 +45,7 @@ class ScageTest extends TestCase("app") {
 
         val trace = tracer.addTrace(Vec(window_width/2, window_height/2))
         render(10) {
-          drawTraceLocations(tracer, 1, GREEN)
+          drawTraceLocations(tracer, GREEN, 1)
         }
 
         val another_trace = tracer.addTrace(Vec(window_width/4, window_height/2))

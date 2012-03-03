@@ -71,12 +71,20 @@ trait Scage {
   }
 
   // I see exactly zero real purposes to have such method
-  /*def delAllOperations() {
-    dellAllInits()
+  def delAllOperations() {
+    delAllPreinits()
+    delAllInits()
     delAllActions()
     delAllClears()
     delAllDisposes()
-  }*/
+  }
+  def delAllOperationsExcept(operation_ids:Int*) {
+    delAllPreinitsExcept(operation_ids:_*)
+    delAllInitsExcept(operation_ids:_*)
+    delAllActionsExcept(operation_ids:_*)
+    delAllClearsExcept(operation_ids:_*)
+    delAllDisposesExcept(operation_ids:_*)
+  }
 
   // don't know exactly if I need this preinits, but I keep them for symmetry (because I already have disposes and I do need them - to stop NetServer/NetClient for example)
   private[scage] var preinits = ArrayBuffer[(Int, () => Any)]()
@@ -114,6 +122,9 @@ trait Scage {
     preinits.clear()
     scage_log.info("deleted all preinit operations")
   }
+  def delAllPreinitsExcept(operation_ids:Int*) = {
+    delPreinits(preinits.filter(preinit => !operation_ids.contains(preinit._1)).map(_._1):_*)
+  }
 
   private[scage] val inits = ArrayBuffer[(Int, () => Any)]()
   def init(init_func: => Any) = {
@@ -146,9 +157,12 @@ trait Scage {
       overall_result && deletion_result
     })
   }
-  def dellAllInits() {
+  def delAllInits() {
     inits.clear()
     scage_log.info("deleted all init operations")
+  }
+  def delAllInitsExcept(operation_ids:Int*) = {
+    delInits(inits.filter(init => !operation_ids.contains(init._1)).map(_._1):_*)
   }
 
   private[scage] var actions = ArrayBuffer[(Int, () => Any)]()
@@ -233,6 +247,9 @@ trait Scage {
     actions.clear()
     scage_log.info("deleted all action operations")
   }
+  def delAllActionsExcept(operation_ids:Int*) {
+    delActions(actions.filter(action => !operation_ids.contains(action._1)).map(_._1):_*)
+  }
 
   private[scage] var clears = ArrayBuffer[(Int, () => Any)]()
   def clear(clear_func: => Any) = {
@@ -267,6 +284,9 @@ trait Scage {
   def delAllClears() {
     clears.clear()
     scage_log.info("deleted all clear operations")
+  }
+  def delAllClearsExcept(operation_ids:Int*) = {
+    delClears(clears.filter(clear => !operation_ids.contains(clear._1)).map(_._1):_*)
   }
 
   private[scage] var disposes = ArrayBuffer[(Int, () => Any)]()
@@ -303,6 +323,9 @@ trait Scage {
   def delAllDisposes() {
     disposes.clear()
     scage_log.info("deleted all dispose operations")
+  }
+  def delAllDisposesExcept(operation_ids:Int*) = {
+    delDisposes(disposes.filter(dispose => !operation_ids.contains(dispose._1)).map(_._1):_*)
   }
 
   protected var on_pause = false

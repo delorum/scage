@@ -4,7 +4,7 @@ import net.scage.support.Vec
 import net.scage.support.ScageProperties._
 import com.weiglewilczek.slf4s.Logger
 
-class CoordTracer[T <: Trace](field_from_x:Int        = property("field.from.x", 0),
+class CoordTracer[T <: TraceTrait](field_from_x:Int        = property("field.from.x", 0),
                               field_to_x:Int          = property("field.to.x", property("screen.width", 800)),
                               field_from_y:Int        = property("field.from.y", 0),
                               field_to_y:Int          = property("field.to.y", property("screen.height", 600)),
@@ -130,7 +130,7 @@ object CoordTracer {
   }
 
   // maybe some other name for this factory method (like 'newTracer', etc)
-  def create[T <: Trace](field_from_x:Int        = property("field.from.x", 0),
+  def create[T <: TraceTrait](field_from_x:Int        = property("field.from.x", 0),
                          field_to_x:Int          = property("field.to.x", property("screen.width", 800)),
                          field_from_y:Int        = property("field.from.y", 0),
                          field_to_y:Int          = property("field.to.y", property("screen.height", 600)),

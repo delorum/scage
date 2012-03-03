@@ -17,10 +17,18 @@ trait MultiController extends ScageController {
   private var mouse_wheel_downs = ArrayBuffer[Vec => Any]()
 
   def key(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) {
+    if(keyboard_keys.contains(key_code)) keyboard_keys(key_code) += MultiKeyEvent(false, 0, () => repeat_time, () => if(!on_pause) onKeyDown, () => if(!on_pause) onKeyUp)
+    else keyboard_keys(key_code) = ArrayBuffer(MultiKeyEvent(false, 0, () => repeat_time, () => if(!on_pause) onKeyDown, () => if(!on_pause) onKeyUp))
+  }
+  def keyNoPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) {
     if(keyboard_keys.contains(key_code)) keyboard_keys(key_code) += MultiKeyEvent(false, 0, () => repeat_time, () => onKeyDown, () => onKeyUp)
     else keyboard_keys(key_code) = ArrayBuffer(MultiKeyEvent(false, 0, () => repeat_time, () => onKeyDown, () => onKeyUp))
   }
+
   def anykey(onKeyDown: => Any) {
+    anykeys += (() => if(!on_pause) onKeyDown)
+  }
+  def anykeyNoPause(onKeyDown: => Any) {
     anykeys += (() => onKeyDown)
   }
 
@@ -30,29 +38,58 @@ trait MultiController extends ScageController {
     if(mouse_buttons.contains(button_code)) mouse_buttons(button_code) += MultiMouseButtonEvent(false, 0, () => repeat_time, onButtonDown, onButtonUp)
     else mouse_buttons(button_code) = ArrayBuffer(MultiMouseButtonEvent(false, 0, () => repeat_time, onButtonDown, onButtonUp))
   }
+
   def leftMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) {
+    mouseButton(0, repeat_time, mouse_coord => if(!on_pause) onBtnDown(mouse_coord), mouse_coord => if(!on_pause) onBtnUp(mouse_coord))
+  }
+  def leftMouseNoPause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) {
     mouseButton(0, repeat_time, onBtnDown, onBtnUp)
   }
+
   def rightMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) {
+    mouseButton(1, repeat_time, mouse_coord => if(!on_pause) onBtnDown(mouse_coord), mouse_coord => if(!on_pause) onBtnUp(mouse_coord))
+  }
+  def rightMouseNoPause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) {
     mouseButton(1, repeat_time, onBtnDown, onBtnUp)
   }
+
   def mouseMotion(onMotion: Vec => Any) {
+    mouse_motions += (mouse_coord => if(!on_pause) onMotion(mouse_coord))
+  }
+  def mouseMotionNoPause(onMotion: Vec => Any) {
     mouse_motions += onMotion
   }
+
   private def mouseDrag(button_code:Int, onDrag: Vec => Any) {
     if(mouse_drag_motions.contains(button_code)) mouse_drag_motions(button_code) += onDrag
     else mouse_drag_motions(button_code) = ArrayBuffer(onDrag)
   }
+
   def leftMouseDrag(onDrag: Vec => Any) {
+    mouseDrag(0, mouse_coord => if(!on_pause) onDrag(mouse_coord))
+  }
+  def leftMouseDragNoPause(onDrag: Vec => Any) {
     mouseDrag(0, onDrag)
   }
+
   def rightMouseDrag(onDrag: Vec => Any) {
+    mouseDrag(1, mouse_coord => if(!on_pause) onDrag(mouse_coord))
+  }
+  def rightMouseDragNoPause(onDrag: Vec => Any) {
     mouseDrag(1, onDrag)
   }
+
   def mouseWheelUp(onWheelUp: Vec => Any) {
+    mouse_wheel_ups += (mouse_coord => if(!on_pause) onWheelUp(mouse_coord))
+  }
+  def mouseWheelUpNoPause(onWheelUp: Vec => Any) {
     mouse_wheel_ups += onWheelUp
   }
+
   def mouseWheelDown(onWheelDown: Vec => Any) {
+    mouse_wheel_downs += (mouse_coord => if(!on_pause) onWheelDown(mouse_coord))
+  }
+  def mouseWheelDownNoPause(onWheelDown: Vec => Any) {
     mouse_wheel_downs += onWheelDown
   }
 
@@ -65,6 +102,9 @@ trait MultiController extends ScageController {
   def delAllKeys() {
     keyboard_keys.clear()
   }
+  def delAllKeysExcept(key_codes_to_save: Int*) {
+    delKeys(keyboard_keys.filter(key => !key_codes_to_save.contains(key._1)).map(_._1).toSeq:_*)
+  }
 
   def delMouseButtons(mouse_buttons_to_delete:Int*) {
     mouse_buttons --= mouse_buttons_to_delete
@@ -72,6 +112,10 @@ trait MultiController extends ScageController {
   def delAllMouseButtons() {
     mouse_buttons.clear()
   }
+  def delAllMouseButtonsExcept(mouse_buttons_to_save:Int*) {
+    delMouseButtons(mouse_buttons.filter(btn => !mouse_buttons_to_save.contains(btn._1)).map(_._1).toSeq:_*)
+  }
+
   def delMouseMotion() {
     mouse_motions.clear()
   }
@@ -81,27 +125,15 @@ trait MultiController extends ScageController {
   def delAllMouseDrags() {
     mouse_drag_motions.clear()
   }
+  def delAllMouseDragsExcept(mouse_buttons_to_save:Int*) {
+    delMouseDrags(mouse_drag_motions.filter(btn => !mouse_buttons_to_save.contains(btn._1)).map(_._1).toSeq:_*)
+  }
+
   def delMouseWheelUp() {
     mouse_wheel_ups.clear()
   }
   def delMouseWheelDown() {
     mouse_wheel_downs.clear()
-  }
-  def delAllMouseWheelEvents() {
-    delMouseWheelUp()
-    delMouseWheelDown()
-  }
-  def delAllMouseEvents() {
-    delAllMouseButtons()
-    delMouseMotion()
-    delAllMouseDrags()
-    delAllMouseWheelEvents()
-  }
-
-  def delAllKeysAndMouseEvents() {
-    delAllKeys()
-    delAnyKey()
-    delAllMouseEvents()
   }
 
   def checkControls() {

@@ -17,9 +17,16 @@ trait SingleController extends ScageController {
   private var on_mouse_wheel_down: Vec => Any = v => {}
 
   def key(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) {
+    keyboard_keys(key_code) = SingleKeyEvent(key_code, () => repeat_time, () => if(!on_pause) onKeyDown, () => if(!on_pause) onKeyUp)
+  }
+   def keyNoPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) {
     keyboard_keys(key_code) = SingleKeyEvent(key_code, () => repeat_time, () => onKeyDown, () => onKeyUp)
   }
+
   def anykey(onKeyDown: => Any) {
+    anykey = () => if(!on_pause) onKeyDown
+  }
+  def anykeyNoPause(onKeyDown: => Any) {
     anykey = () => onKeyDown
   }
 
@@ -28,32 +35,61 @@ trait SingleController extends ScageController {
   private def mouseButton(button_code:Int, repeat_time: => Long = 0, onButtonDown: Vec => Any, onButtonUp: Vec => Any = Vec => {}) {
     mouse_buttons(button_code) = SingleMouseButtonEvent(button_code, () => repeat_time, onButtonDown, onButtonUp)
   }
+
   def leftMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) {
+    mouseButton(0, repeat_time, mouse_coord => if(!on_pause) onBtnDown(mouse_coord), mouse_coord => if(!on_pause) onBtnUp(mouse_coord))
+  }
+  def leftMouseNoPause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) {
     mouseButton(0, repeat_time, onBtnDown, onBtnUp)
   }
+
   def rightMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) {
+    mouseButton(1, repeat_time, mouse_coord => if(!on_pause) onBtnDown(mouse_coord), mouse_coord => if(!on_pause) onBtnUp(mouse_coord))
+  }
+  def rightMouseNoPause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) {
     mouseButton(1, repeat_time, onBtnDown, onBtnUp)
   }
+  
   def mouseMotion(onMotion: Vec => Any) {
+    on_mouse_motion = mouse_coord => if(!on_pause) onMotion(mouse_coord)
+  }
+  def mouseMotionNoPause(onMotion: Vec => Any) {
     on_mouse_motion = onMotion
   }
+
   private def mouseDrag(button_code:Int, onDrag: Vec => Any) {
     on_mouse_drag_motion(button_code) = onDrag
   }
+
   def leftMouseDrag(onDrag: Vec => Any) {
+    mouseDrag(0, mouse_coord => if(!on_pause) onDrag(mouse_coord))
+  }
+  def leftMouseDragNoPause(onDrag: Vec => Any) {
     mouseDrag(0, onDrag)
   }
+
   def rightMouseDrag(onDrag: Vec => Any) {
+    mouseDrag(1, mouse_coord => if(!on_pause) onDrag(mouse_coord))
+  }
+  def rightMouseDragNoPause(onDrag: Vec => Any) {
     mouseDrag(1, onDrag)
   }
+
   def mouseWheelUp(onWheelUp: Vec => Any) {
+    on_mouse_wheel_up = mouse_coord => if(!on_pause) onWheelUp(mouse_coord)
+  }
+  def mouseWheelUpNoPause(onWheelUp: Vec => Any) {
     on_mouse_wheel_up = onWheelUp
   }
+
   def mouseWheelDown(onWheelDown: Vec => Any) {
+    on_mouse_wheel_down = mouse_coord => if(!on_pause) onWheelDown(mouse_coord)
+  }
+  def mouseWheelDownNoPause(onWheelDown: Vec => Any) {
     on_mouse_wheel_down = onWheelDown
   }
 
-  def delKeys(key_codes_to_delete: Int*) {
+  def delKeys(key_codes_to_delete: Int*) {  // TODO: add logging and deletion result
     keyboard_keys --= key_codes_to_delete
   }
   def delAnyKey() {
@@ -62,6 +98,9 @@ trait SingleController extends ScageController {
   def delAllKeys() {
     keyboard_keys.clear()
   }
+  def delAllKeysExcept(key_codes_to_save: Int*) {
+    delKeys(keyboard_keys.filter(key => !key_codes_to_save.contains(key._1)).map(_._1).toSeq:_*)
+  }
 
   def delMouseButtons(mouse_buttons_to_delete:Int*) {
     mouse_buttons --= mouse_buttons_to_delete
@@ -69,36 +108,29 @@ trait SingleController extends ScageController {
   def delAllMouseButtons() {
     mouse_buttons.clear()
   }
+  def delAllMouseButtonsExcept(mouse_buttons_to_save:Int*) {
+    delMouseButtons(mouse_buttons.filter(btn => !mouse_buttons_to_save.contains(btn._1)).map(_._1).toSeq:_*)
+  }
+
   def delMouseMotion() {
     on_mouse_motion = v => {}
   }
+
   def delMouseDrags(mouse_buttons_to_delete:Int*) {
     on_mouse_drag_motion --= mouse_buttons_to_delete
   }
   def delAllMouseDrags() {
     on_mouse_drag_motion.clear()
   }
+  def delAllMouseDragsExcept(mouse_buttons_to_save:Int*) {
+    delMouseDrags(on_mouse_drag_motion.filter(btn => !mouse_buttons_to_save.contains(btn._1)).map(_._1).toSeq:_*)
+  }
+
   def delMouseWheelUp() {
     on_mouse_wheel_up = v => {}
   }
   def delMouseWheelDown() {
     on_mouse_wheel_down = v => {}
-  }
-  def delAllMouseWheelEvents() {
-    delMouseWheelUp()
-    delMouseWheelDown()
-  }
-  def delAllMouseEvents() {
-    delAllMouseButtons()
-    delMouseMotion()
-    delAllMouseDrags()
-    delAllMouseWheelEvents()
-  }
-
-  def delAllKeysAndMouseEvents() {
-    delAllKeys()
-    delAnyKey()
-    delAllMouseEvents()
   }
 
   def checkControls() {

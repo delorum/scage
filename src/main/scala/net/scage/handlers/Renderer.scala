@@ -247,7 +247,7 @@ trait RendererLib {
     drawLines(x_lines ::: y_lines, color)
   }
 
-  def drawTraceLocations[T <: Trace](tracer:ScageTracer[T], radius:Int = 3, color:ScageColor = DEFAULT_COLOR) {
+  def drawTraceLocations[T <: Trace](tracer:ScageTracer[T], color:ScageColor = DEFAULT_COLOR, radius:Int = 3) {
     tracer.tracesList.foreach(trace => drawFilledCircle(trace.location, radius, color))
   }
 
@@ -496,6 +496,9 @@ trait Renderer extends Scage {
     renders.clear()
     log.info("deleted all render operations")
   }
+  def delAllRendersExcept(operation_ids:Int*) = {
+    delRenders(renders.filter(render => !operation_ids.contains(render.operation_id)).map(_.operation_id).toSeq:_*)
+  }
 
   private val interfaces = ArrayBuffer[(Int, () => Any)]()
   def interface(interface_func: => Any):Int = {
@@ -528,6 +531,9 @@ trait Renderer extends Scage {
   def delAllInterfaces() {
     interfaces.clear()
     log.info("deleted all interface operations")
+  }
+  def delAllInterfacesExcept(operation_ids:Int*) = {
+    delInterfaces(interfaces.filter(interface => !operation_ids.contains(interface._1)).map(_._1):_*)
   }
 
   val TICKS_PER_SECOND = 60
@@ -599,9 +605,14 @@ trait Renderer extends Scage {
   }
 
   // I believe such method is of no use in real project
-  /*override def delAllOperations() {
+  override def delAllOperations() {
     delAllRenders()
     delAllInterfaces()
     super.delAllOperations()
-  }*/
+  }
+  override def delAllOperationsExcept(operation_ids:Int*) {
+    delAllRendersExcept(operation_ids:_*)
+    delAllInterfacesExcept(operation_ids:_*)
+    super.delAllOperationsExcept(operation_ids:_*)
+  }
 }
