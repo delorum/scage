@@ -48,20 +48,20 @@ trait RendererLib {
     list_code
   }
 
-  def localOpenglTransform(transform: => Unit) {
+  def openglLocalTransform(transform: => Unit) {
     GL11.glPushMatrix()
     transform
     GL11.glPopMatrix()
   }
 
   def openglMove(vec:Vec) {GL11.glTranslatef(vec.x, vec.y, 0)}
-  def openglLocalMove(move_func: => Unit) {localOpenglTransform(move_func)}
+  def openglMove(x:Float, y:Float) {GL11.glTranslatef(x, y, 0)}
 
-  def openglRotate(ang:Float) {GL11.glRotatef(ang, 0, 0, 1)}
-  def openglLocalRotate(rotate_func: => Unit) {localOpenglTransform(rotate_func)}
+  def openglRotate(ang_deg:Float) {GL11.glRotatef(ang_deg, 0, 0, 1)}
+  def openglRotateDeg(ang_deg:Float) {GL11.glRotatef(ang_deg, 0, 0, 1)}
+  def openglRotateRad(ang_rad:Float) {GL11.glRotatef((ang_rad*180f/math.Pi).toFloat, 0, 0, 1)}
 
   def openglScale(scale_factor:Float) {GL11.glScalef(scale_factor, scale_factor, 1)}
-  def openglLocalScale(scale_func: => Unit) {localOpenglTransform(scale_func)}
 
   private lazy val FILLED_CIRCLE = displayList {
     GL11.glBegin(GL11.GL_TRIANGLE_FAN);
@@ -381,7 +381,7 @@ trait RendererInitializer {
     Thread.sleep(1000)
 
     // drawing scage logo
-    if(property("screen.scagelogo", true)) {  // TODO: replace this with to different builds (under different maven profiles): with and without scagelogo
+    if(property("screen.scagelogo", true)) {  // TODO: replace this with two different builds (under different maven profiles): with and without scagelogo
       GL11.glClear(GL11.GL_COLOR_BUFFER_BIT/* | GL11.GL_DEPTH_BUFFER_BIT*/);
       val logo_texture = getTexture("resources/images/scage-logo.png")
       drawDisplayList(image(logo_texture, window_width, window_height, 0, 0, logo_texture.getImageWidth, logo_texture.getImageHeight), Vec(window_width/2, window_height/2))
