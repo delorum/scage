@@ -64,7 +64,7 @@ class ScageScreen(unit_name:String = "Scage Screen") extends Screen(unit_name) w
 class ScageScreenApp(unit_name:String = "Scage App",
                      window_width:Int  = property("screen.width", 800),
                      window_height:Int = property("screen.height", 600),
-                     title:String = property("app.name", "Scage App")) extends ScreenApp with SingleController
+                     title:String = property("app.name", "Scage App")) extends ScreenApp(unit_name, window_width, window_height, title) with SingleController
 
 /*class MultiControlledScreen(unit_name:String = "Scage App", is_main_unit:Boolean = false, properties:String = "")
 extends Screen(unit_name, is_main_unit, properties) with MultiController*/
