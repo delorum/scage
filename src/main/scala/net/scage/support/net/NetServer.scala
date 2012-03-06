@@ -76,7 +76,7 @@ class NetServer {
             actor {Thread.sleep(_ping_timeout); clients_actor ! "ping"}
           }
         case ("send_to_all", data:State) =>
-          client_handlers.foreach(_.send(data))
+          client_handlers.foreach(_.send(data))     // TODO: maybe check isOnline() before send
         case ("send_to_all_sync", data:State) =>
           client_handlers.foreach(_.sendSync(data))
           reply("finished sending")

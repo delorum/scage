@@ -21,9 +21,14 @@
 is_main_unit=true
 
 ----------------
-запилить функцию drawTraceLocations()
+пишут
+http://stackoverflow.com/questions/5740906/how-to-check-for-null-in-a-single-statement-in-scala
+что это scala-way избавляться везде от null и заменять на Option. Надо просмотреть код scage на предмет такого (например,
+net api)
 
-перепилить Trace:
+запилить функцию drawTraceLocations() (done!)
+
+перепилить Trace:                           (done!)
 trait Trace -> trait TraceTrait
 добавить отдельный класс Trace, где changerType = Trace
 

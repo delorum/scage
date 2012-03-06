@@ -49,11 +49,11 @@ class NetClient {
               log.info("disconnected from server "+socket_url)
             }
           }
-          log.info("start connecting to server "+server_url+" at port "+port)
           server_url = new_server_url
           port = new_port
           ping_timeout = new_ping_timeout
           onServerDataReceived = new_onServerDataReceived
+          log.info("start connecting to server "+server_url+" at port "+port)
           try {
             socket = new Socket(server_url, port)
             out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream, "UTF-8"))
