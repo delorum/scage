@@ -22,11 +22,11 @@ class NetServer {
   private var connection_port:Int = 0
   def connectionPort:Int = connection_port
 
-  private var ping_timeout:Int = 60000
-  def pingTimeout = ping_timeout
+  private var _ping_timeout:Int = 60000
+  def pingTimeout = _ping_timeout
 
-  private var max_clients = 0
-  def maxClients = max_clients
+  private var _max_clients = 0
+  def maxClients = _max_clients
 
   private var server_socket:ServerSocket = null
 
@@ -73,7 +73,7 @@ class NetServer {
           client_handlers += new_client
           if(is_first_client) {
             actor {Thread.sleep(10); clients_actor ! "check"}
-            actor {Thread.sleep(ping_timeout); clients_actor ! "ping"}
+            actor {Thread.sleep(_ping_timeout); clients_actor ! "ping"}
           }
         case ("send_to_all", data:State) =>
           client_handlers.foreach(_.send(data))
@@ -91,7 +91,7 @@ class NetServer {
             val offline_clients = client_handlers.filter(client => !client.isOnline)
             offline_clients.foreach(client => client.disconnect())
             client_handlers --= offline_clients
-            actor {Thread.sleep(ping_timeout); clients_actor ! "ping"}
+            actor {Thread.sleep(_ping_timeout); clients_actor ! "ping"}
           }
         case "length" =>
           reply(client_handlers.length)
@@ -134,8 +134,8 @@ class NetServer {
 
   def startServer(
     port:Int              = property("net.port", 9800),
-    new_max_clients:Int   = property("net.max_clients", 20),
-    new_ping_timeout:Int  = property("net.ping_timeout", 60000, {ping_timeout:Int => (ping_timeout >= 1000, "must be more 1000")}),
+    max_clients:Int   = property("net.max_clients", 20),
+    ping_timeout:Int  = property("net.ping_timeout", 60000, {ping_timeout:Int => (ping_timeout >= 1000, "must be more 1000")}),
     onNewConnection:ClientHandler => (Boolean, String) = client => (true, ""),
     onClientAccepted:ClientHandler => Any = client => {},
     onClientDataReceived:(ClientHandler, State) => Any = (client:ClientHandler, data:State) => {},
@@ -148,8 +148,8 @@ class NetServer {
         spawn {
           try {
             connection_port = nextAvailablePort(port)
-            max_clients = new_max_clients
-            ping_timeout = new_ping_timeout
+            _max_clients = max_clients
+            _ping_timeout = ping_timeout
             server_socket = new ServerSocket(connection_port)  // TODO: handle errors during startup (for example, port is busy)
             is_running = true
             while(true) {
@@ -157,11 +157,11 @@ class NetServer {
                 case len:Int => len
                 case _ => 0
               }
-              log.info("listening port "+connection_port+", "+clients_length+(if(max_clients > 0) "/"+max_clients else "unlimited")+" client(s) are connected")
+              log.info("listening port "+connection_port+", "+clients_length+(if(_max_clients > 0) "/"+_max_clients else "unlimited")+" client(s) are connected")
               val socket = server_socket.accept
               log.info("incoming connection from "+socket.getInetAddress.getHostAddress)
               val client = new ClientHandler(socket, onClientDataReceived, onClientDisconnected)
-              val (is_client_accepted, reason) = if(max_clients != 0 && clients_length >= max_clients) (false, "server is full")
+              val (is_client_accepted, reason) = if(_max_clients != 0 && clients_length >= _max_clients) (false, "server is full")
                                                  else onNewConnection(client)
               if(is_client_accepted) {
                 clients_actor ! ("add", client)
