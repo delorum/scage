@@ -89,8 +89,8 @@ class NetServer {
           if(!client_handlers.isEmpty) {
             client_handlers.foreach(_.send(State("ping")))
             val offline_clients = client_handlers.filter(client => !client.isOnline)
-            offline_clients.foreach(client => client.disconnect())
             client_handlers --= offline_clients
+            offline_clients.foreach(client => client.disconnect())
             actor {Thread.sleep(_ping_timeout); clients_actor ! "ping"}
           }
         case "length" =>

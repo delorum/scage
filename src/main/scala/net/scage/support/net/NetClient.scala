@@ -100,7 +100,7 @@ class NetClient {
             performSend(State("ping"))
             actor{Thread.sleep(ping_timeout); io_actor ! "ping"}
           } // will stop pinging otherwise
-        case ("disconnect") =>
+        case ("disconnect") =>    // TODO: maybe send to server some message on disconnect like server themselves do to quickly shutdown and remove this client
           is_connected = false
           if(socket != null) {
             val socket_url = socket.getInetAddress.getHostAddress
