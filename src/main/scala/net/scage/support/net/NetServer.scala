@@ -25,6 +25,9 @@ class NetServer {
   private var _ping_timeout:Int = 60000
   def pingTimeout = _ping_timeout
 
+  private var _offline_check_timeout:Int = 60000
+  def offlineCheckTimeout = _offline_check_timeout
+
   private var _max_clients = 0
   def maxClients = _max_clients
 
@@ -86,13 +89,13 @@ class NetServer {
           client_handlers.filter(c => client_ids.contains(c.id)).foreach(c => c.sendSync(data))
           reply("finished sending")
         case "ping" =>
-          if(!client_handlers.isEmpty) {
-            client_handlers.foreach(_.send(State("ping")))
-            val offline_clients = client_handlers.filter(client => !client.isOnline)
-            client_handlers --= offline_clients
-            offline_clients.foreach(client => client.disconnect())
-            actor {Thread.sleep(_ping_timeout); clients_actor ! "ping"}
-          }
+          client_handlers.foreach(_.send(State("ping")))
+          if(_ping_timeout > 0) actor {Thread.sleep(_ping_timeout); clients_actor ! "ping"}
+        case "offline_check_timeout" =>
+          val offline_clients = client_handlers.filter(client => !client.isOnline)
+          client_handlers --= offline_clients
+          offline_clients.foreach(client => client.disconnect())
+          if(_offline_check_timeout > 0) actor {Thread.sleep(_offline_check_timeout); clients_actor ! "offline_check_timeout"}
         case "length" =>
           reply(client_handlers.length)
         case "check" =>
@@ -100,10 +103,14 @@ class NetServer {
             client_handlers.foreach(client => client.check())
             actor {Thread.sleep(10); clients_actor ! "check"}
           }
+        case ("disconnect_client", client:ClientHandler) =>
+          client.disconnect()
+          client_handlers -= client
+          log.info(client_handlers.length+"/"+(if(_max_clients > 0) _max_clients else "unlimited")+" client(s) are connected")
         case "disconnect" =>
           log.info("shutting net server down...")
           if(!client_handlers.isEmpty) log.info("disconnecting all clients...")
-          client_handlers.foreach(client => client.sendSync(State("disconnect" -> "bye")))  // TODO: change message, make it optional or remove!
+          //client_handlers.foreach(client => client.sendSync(State("disconnect" -> "bye")))  // TODO: change message, make it optional or remove!
           client_handlers.foreach(client => client.disconnect())
           client_handlers.clear()
           reply("disconnected")
@@ -131,11 +138,14 @@ class NetServer {
      clients_actor !? (("send_to_clients_sync", data, client_ids.toList))
   }
   def sendToClientsSync(data:String, client_ids:Int*) {sendToClientsSync(State("raw" -> data), client_ids:_*)}
+  
+  def disconnectClient(client:ClientHandler) {clients_actor ! ("disconnect_client", client)}
 
   def startServer(
     port:Int              = property("net.port", 9800),
-    max_clients:Int   = property("net.max_clients", 20),
-    ping_timeout:Int  = property("net.ping_timeout", 60000, {ping_timeout:Int => (ping_timeout >= 1000, "must be more 1000")}),
+    max_clients:Int   = property("net.max_clients", 0),
+    ping_timeout:Int  = property("net.ping_timeout", 60000),
+    offline_check_timeout:Int  = property("net.offline_check_timeout", 60000),
     onNewConnection:ClientHandler => (Boolean, String) = client => (true, ""),
     onClientAccepted:ClientHandler => Any = client => {},
     onClientDataReceived:(ClientHandler, State) => Any = (client:ClientHandler, data:State) => {},
@@ -150,6 +160,7 @@ class NetServer {
             connection_port = nextAvailablePort(port)
             _max_clients = max_clients
             _ping_timeout = ping_timeout
+            _offline_check_timeout = offline_check_timeout
             server_socket = new ServerSocket(connection_port)  // TODO: handle errors during startup (for example, port is busy)
             is_running = true
             while(true) {
@@ -157,7 +168,7 @@ class NetServer {
                 case len:Int => len
                 case _ => 0
               }
-              log.info("listening port "+connection_port+", "+clients_length+(if(_max_clients > 0) "/"+_max_clients else "unlimited")+" client(s) are connected")
+              log.info("listening port "+connection_port+", "+clients_length+"/"+(if(_max_clients > 0) _max_clients else "unlimited")+" client(s) are connected")
               val socket = server_socket.accept
               log.info("incoming connection from "+socket.getInetAddress.getHostAddress)
               val client = new ClientHandler(socket, onClientDataReceived, onClientDisconnected)
@@ -194,8 +205,8 @@ class NetServer {
 }
 
 private[net] class ClientHandler(socket:Socket,
-                    onClientDataReceived:(ClientHandler, State) => Any = (client:ClientHandler, data:State) => {},
-                    onClientDisconnected:ClientHandler => Any = client => {}) {
+                                 onClientDataReceived:(ClientHandler, State) => Any = (client:ClientHandler, data:State) => {},
+                                 onClientDisconnected:ClientHandler => Any = client => {}) {
   private val log = Logger(this.getClass.getName)
 
   val id:Int = ScageId.nextId
@@ -266,7 +277,7 @@ private[net] class ClientHandler(socket:Socket,
   }
   def sendSync(data:String) {sendSync(State(("raw" -> data)))}
 
-  def disconnect() {
+  private[net] def disconnect() {
     io_actor !? "disconnect"
   }
 }

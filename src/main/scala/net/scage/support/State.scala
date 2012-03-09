@@ -72,6 +72,8 @@ class State(args:Any*) extends HashMap[String, Any] {
     sb.toString()
   }
   
+  def value[A](key:String):A = this(key).asInstanceOf[A]
+  
   def valueOrDefault[A : Manifest](key:String, default:A):A = {
     get(key) match {
       case Some(value) =>
