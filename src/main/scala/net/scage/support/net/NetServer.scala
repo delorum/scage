@@ -76,7 +76,8 @@ class NetServer {
           client_handlers += new_client
           if(is_first_client) {
             actor {Thread.sleep(10); clients_actor ! "check"}
-            actor {Thread.sleep(_ping_timeout); clients_actor ! "ping"}
+            if(_ping_timeout > 0) actor {Thread.sleep(_ping_timeout); clients_actor ! "ping"}
+            if(_offline_check_timeout > 0) actor {Thread.sleep(_offline_check_timeout); clients_actor ! "offline_check_timeout"}
           }
         case ("send_to_all", data:State) =>
           client_handlers.foreach(_.send(data))     // TODO: maybe check isOnline() before send
