@@ -25,6 +25,13 @@ class NetClient {
     var ping_timeout:Int = 60000
     var onServerDataReceived:(State => Any) = (s:State) => {}
 
+    def delayedAction(action: => Any, timeout:Long, wait_start:Long = System.currentTimeMillis()) {
+      actor {
+        if(System.currentTimeMillis() - wait_start > timeout) action
+        else delayedAction(action, timeout, wait_start)
+      }
+    }
+
     def performSend(data:State) {
       log.debug("sending data to server:\n"+data)
       if(is_connected) {
@@ -35,7 +42,7 @@ class NetClient {
           log.warn("failed to send data to server: write error!")
           actor{Thread.sleep(1000); io_actor ! ("connect", server_url, port, ping_timeout, onServerDataReceived)}
         }
-      } else log.warn("not connected to send data!")
+      } else log.warn("not connected to send data!")  // maybe perform connect here?
     }
 
     loop {
@@ -61,7 +68,7 @@ class NetClient {
             is_connected = true
             log.info("connected!")
             actor{Thread.sleep(10); io_actor ! "check"}
-            actor{Thread.sleep(ping_timeout); io_actor ! "ping"}
+            if(ping_timeout > 0) delayedAction(io_actor ! "ping", ping_timeout)
           } catch {
             case e:Exception => {
               log.error("failed to connect to server "+server_url+" at port "+port+": "+e);
@@ -98,7 +105,7 @@ class NetClient {
         case "ping" =>
           if(is_connected) {
             performSend(State("ping"))
-            actor{Thread.sleep(ping_timeout); io_actor ! "ping"}
+            if(ping_timeout > 0) delayedAction(io_actor ! "ping", ping_timeout)
           } // will stop pinging otherwise
         case ("disconnect") =>    // TODO: maybe send to server some message on disconnect like server themselves do to quickly shutdown and remove this client
           is_connected = false

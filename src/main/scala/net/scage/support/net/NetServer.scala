@@ -68,6 +68,13 @@ class NetServer {
   }
 
   private lazy val clients_actor:Actor = actor {
+    def delayedAction(action: => Any, timeout:Long, wait_start:Long = System.currentTimeMillis()) {
+      actor {
+        if(System.currentTimeMillis() - wait_start > timeout) action
+        else delayedAction(action, timeout, wait_start)
+      }
+    }
+
     var client_handlers = ArrayBuffer[ClientHandler]()
     loop {
       react {
@@ -76,8 +83,8 @@ class NetServer {
           client_handlers += new_client
           if(is_first_client) {
             actor {Thread.sleep(10); clients_actor ! "check"}
-            if(_ping_timeout > 0) actor {Thread.sleep(_ping_timeout); clients_actor ! "ping"}
-            if(_offline_check_timeout > 0) actor {Thread.sleep(_offline_check_timeout); clients_actor ! "offline_check_timeout"}
+            if(_ping_timeout > 0) delayedAction(clients_actor ! "ping", _ping_timeout)
+            if(_offline_check_timeout > 0) delayedAction(clients_actor ! "offline_check_timeout", _offline_check_timeout)
           }
         case ("send_to_all", data:State) =>
           client_handlers.foreach(_.send(data))     // TODO: maybe check isOnline() before send
@@ -91,18 +98,20 @@ class NetServer {
           reply("finished sending")
         case "ping" =>
           client_handlers.foreach(_.send(State("ping")))
-          if(_ping_timeout > 0) actor {Thread.sleep(_ping_timeout); clients_actor ! "ping"}
+          if(_ping_timeout > 0) {
+            delayedAction(clients_actor ! "ping", _ping_timeout)
+          }
         case "offline_check_timeout" =>
           val offline_clients = client_handlers.filter(client => !client.isOnline)
           client_handlers --= offline_clients
           offline_clients.foreach(client => client.disconnect())
-          if(_offline_check_timeout > 0) actor {Thread.sleep(_offline_check_timeout); clients_actor ! "offline_check_timeout"}
+          if(_offline_check_timeout > 0) delayedAction(clients_actor ! "offline_check_timeout", _offline_check_timeout)
         case "length" =>
           reply(client_handlers.length)
         case "check" =>
           if(!client_handlers.isEmpty) {
             client_handlers.foreach(client => client.check())
-            actor {Thread.sleep(10); clients_actor ! "check"}
+            actor {Thread.sleep(10); clients_actor ! "check"} // maybe separate checks inside every ClientHandler instead?
           }
         case ("disconnect_client", client:ClientHandler) =>
           client.disconnect()
@@ -264,7 +273,7 @@ private[net] class ClientHandler(socket:Socket,
     }
   }
   
-  def check() {
+  private[net] def check() {
     io_actor ! "check"
   }
 

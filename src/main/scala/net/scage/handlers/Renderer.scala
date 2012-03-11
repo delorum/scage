@@ -12,13 +12,13 @@ import _root_.net.scage.support.messages.ScageXML._
 import org.lwjgl.BufferUtils
 import net.scage.support.ScageId._
 import org.newdawn.slick.util.ResourceLoader
-import java.awt.Toolkit
 import net.scage.support.{SortedBuffer, ScageColor, Vec}
 import collection.mutable.ArrayBuffer
 import com.weiglewilczek.slf4s.Logger
 import net.scage.Scage
 import net.scage.support.messages.{ScageXML, ScageMessage}
 import net.scage.support.tracer3.{Trace, ScageTracer}
+import java.awt.GraphicsEnvironment
 
 trait RendererLib {
   def backgroundColor = {
@@ -334,30 +334,9 @@ trait RendererInitializer {
     Display.setVSyncEnabled(true);
     Display.setTitle(title);
     Display.create();
-
-    val (monitor_width, monitor_height) = {
-      val d = Toolkit.getDefaultToolkit.getScreenSize
-      (d.width, d.height)
-    }
     
-    /*val (monitor_width, monitor_height) = {
-      /*val gd_arr = GraphicsEnvironment.getLocalGraphicsEnvironment.getScreenDevices
-      if(gd_arr.length > 0) {
-        val dm = {
-          val preferred_monitor_num = {
-            if(gd_arr.length > 1 && property("screen.monitor", 0) < gd_arr.length) property("screen.monitor", 0)
-            else 0
-          }
-          gd_arr(preferred_monitor_num).getDisplayMode
-        }
-        (dm.getWidth, dm.getHeight)
-      } else {*/
-      val d = Toolkit.getDefaultToolkit.getScreenSize
-      (d.width, d.height)
-      /*}*/
-    }*/
-
-    Display.setLocation((monitor_width - window_width)/2, (monitor_height - window_height)/2)
+    val center_point = GraphicsEnvironment.getLocalGraphicsEnvironment.getCenterPoint
+    Display.setLocation(center_point.getX.toInt - window_width/2, center_point.getY.toInt - window_height/2)
 
     GL11.glEnable(GL11.GL_TEXTURE_2D);
     GL11.glClearColor(0,0,0,0);
