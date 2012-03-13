@@ -178,30 +178,30 @@ trait Scage {
   def action(action_func: => Any) = {
     addAction(action_func, true)
   }
-  def action(action_period: => Long)(action_func: => Unit) = {
-    val action_waiter = new ActionWaiterDynamic(action_period, action_func)
-    addAction(action_waiter.doAction(), true)
-  }
-  def actionStaticPeriod(action_period:Long)(action_func: => Unit) = {  // TODO: мб ActionStaticPeriod
+  def action(action_period:Long)(action_func: => Unit) = {
     if(action_period > 0) {
       val action_waiter = new ActionWaiterStatic(action_period, action_func)
       addAction(action_waiter.doAction(), true)
     } else addAction(action_func, true)
+  }
+  def actionDynamicPeriod(action_period: => Long)(action_func: => Unit) = {
+    val action_waiter = new ActionWaiterDynamic(action_period, action_func)
+    addAction(action_waiter.doAction(), true)
   }
 
   // non-pausable variants
   def actionNoPause(action_func: => Any) = {
     addAction(action_func, false)
   }
-  def actionNoPause(action_period: => Long)(action_func: => Unit) = {
-    val action_waiter = new ActionWaiterDynamic(action_period, action_func)
-    addAction(action_waiter.doAction(), false)
-  }
-  def actionStaticPeriodNoPause(action_period:Long)(action_func: => Unit) = { // TODO: мб ActionStaticPeriodNoPause
+  def actionNoPause(action_period:Long)(action_func: => Unit) = {
     if(action_period > 0) {
       val action_waiter = new ActionWaiterStatic(action_period, action_func)
       addAction(action_waiter.doAction(), false)
     } else addAction(action_func, false)
+  }
+  def actionDynamicPeriodNoPause(action_period: => Long)(action_func: => Unit) = {
+    val action_waiter = new ActionWaiterDynamic(action_period, action_func)
+    addAction(action_waiter.doAction(), false)
   }
 
   private[this] sealed abstract class ActionWaiter(action_func: => Unit) {

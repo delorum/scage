@@ -133,7 +133,7 @@ class NetClient {
   def startClient(
     server_url:String =  property("net.server", "localhost"),
     port:Int = property("net.port", 9800),
-    ping_timeout:Int = property("net.ping_timeout", 60000, {ping_timeout:Int => (ping_timeout >= 1000, "must be more than 1000")}),
+    ping_timeout:Int = property("net.ping_timeout", 60000),
     onServerDataReceived:(State) => Any = (state) => {}
   ) {
     io_actor ! ("connect", server_url, port, ping_timeout, onServerDataReceived)

@@ -111,7 +111,7 @@ class ScageTest extends TestCase("app") {
           if(x > 2*math.Pi) x = 0
           (125 * 0.25f*(math.sin(x)) + 1).toLong
         }
-        action(period) {  // test actions with non-static period defined as function
+        actionDynamicPeriod(period) {  // test actions with non-static period defined as function
           physics.step()
         }
         leftMouse(onBtnDown = {  // test left mouse event
@@ -258,7 +258,7 @@ class ScageTest extends TestCase("app") {
         }
 
         private var ang = 0f
-          actionStaticPeriod(100) {
+          action(100) {
           ang += 5
         }
 
