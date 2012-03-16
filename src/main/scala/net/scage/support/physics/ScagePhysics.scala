@@ -16,7 +16,7 @@ object ScagePhysics {
   }
 }
 
-class ScagePhysics {
+class ScagePhysics {  // TODO: make constructor parameters for _dt and gravity!
   private val log = Logger(this.getClass.getName);
   private var _dt = property("physics.dt", 5)
   def dt = _dt

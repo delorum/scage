@@ -11,6 +11,8 @@ trait TraceTrait {
   val id = nextId
   private[tracer3] var _location = Vec(0, 0)
   def location:Vec = _location
+
+  override def toString = getClass.getName+"(id="+id+", state="+state+")"
 }
 
 trait Trace extends TraceTrait {

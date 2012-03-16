@@ -3,7 +3,7 @@ package net.scage.support.physics
 import net.phys2d.math.Vector2f
 import _root_.net.scage.support.Vec
 import net.phys2d.raw.{CollisionEvent, Body, BodyList}
-import collection.mutable.ListBuffer
+import collection.mutable.ArrayBuffer
 
 trait Physical {
   def body:Body
@@ -35,12 +35,12 @@ trait Physical {
   }
 
   private var is_touching = false
-  private var touching_bodies:BodyList = new BodyList
-  private var touching_points:ListBuffer[(Vec, Vec)] = ListBuffer()
+  private val touching_bodies = new BodyList
+  private val touching_points = ArrayBuffer[(Vec, Vec)]()
   def isTouching = is_touching
   def isTouching(p:Physical) = touching_bodies.contains(p.body)
 
-  def clearTouches() {
+  private[physics] def clearTouches() {   // will remove private modifier if needed
     is_touching = false
     touching_bodies.clear()
     touching_points.clear()
