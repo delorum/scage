@@ -35,7 +35,10 @@ trait Physical {
   }
 
   private var is_touching = false
-  private val touching_bodies = new BodyList
+
+  private val touching_bodies = ArrayBuffer[Body]()
+  def touchingBodies = touching_bodies.toList
+
   private val touching_points = ArrayBuffer[(Vec, Vec)]()
   def isTouching = is_touching
   def isTouching(p:Physical) = touching_bodies.contains(p.body)
@@ -54,7 +57,7 @@ trait Physical {
         i <- 0 until new_touching_bodies.size
         body = new_touching_bodies.get(i)
         if !touching_bodies.contains(body)
-      } touching_bodies.add(body)
+      } touching_bodies += body
       for {
         ce <- collisions
         new_tp = (new Vec(ce.getPoint), new Vec(ce.getNormal))

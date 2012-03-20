@@ -35,7 +35,9 @@ extends ScageTracer[T](field_from_x,field_to_x,field_from_y,field_to_y,init_h_x,
         traces_by_ids -= trace.id
         traces_list -= trace
         log.debug("removed trace #"+trace.id)
-      } else log.warn("trace #"+trace.id+" not found")
+      } else {
+        log.warn("trace #"+trace.id+" not found")
+      }
     })
   }
 

@@ -50,7 +50,9 @@ class ScagePhysics {  // TODO: make constructor parameters for _dt and gravity!
         world.remove(p.body)
         _physicals -= p
         log.debug("removed physical "+p)
-      } else log.warn("physical "+p+" not found")
+      } else {
+        log.warn("physical "+p+" not found")
+      }
     }
   }
   def removeAll() {

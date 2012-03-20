@@ -521,7 +521,7 @@ trait Renderer extends Scage {
   private var loops = 0
 
   private var next_game_tick = System.currentTimeMillis()
-  def prepareRender() {
+  private[scage] def prepareRendering() {
     next_game_tick = System.currentTimeMillis()
   }
 
