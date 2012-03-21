@@ -115,26 +115,10 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int        = property("field
     else (point_matrix(point.ix)(point.iy)).toList
   }
 
-  def tracesInPointRange(xrange:Range, yrange:Range, condition:T => Boolean):IndexedSeq[T] = {
-    (for {
-      i <- xrange
-      j <- yrange
-      near_point = outsidePoint(Vec(i, j))
-      if isPointOnArea(near_point)
-      trace <- tracesInPoint(near_point, condition)
-    } yield trace)
-  }
-  def tracesInPointRange(xrange:Range, condition:T => Boolean):IndexedSeq[T] = tracesInPointRange(xrange, xrange, condition)
-  def tracesInPointRange(xrange:Range, yrange:Range):IndexedSeq[T] = {
-    (for {
-      i <- xrange
-      j <- yrange
-      near_point = outsidePoint(Vec(i, j))
-      if isPointOnArea(near_point)
-      trace <- tracesInPoint(near_point)
-    } yield trace)
-  }
-  def tracesInPointRange(xrange:Range):IndexedSeq[T] = tracesInPointRange(xrange, xrange)
+  def tracesInPointRange(xrange:Range, yrange:Range, condition:T => Boolean):IndexedSeq[T] = tracesNearPoint(Vec.zero, xrange, yrange, condition)
+  def tracesInPointRange(xrange:Range, condition:T => Boolean):IndexedSeq[T] = tracesNearPoint(Vec.zero, xrange, xrange, condition)
+  def tracesInPointRange(xrange:Range, yrange:Range):IndexedSeq[T] = tracesNearPoint(Vec.zero, xrange, yrange)
+  def tracesInPointRange(xrange:Range):IndexedSeq[T] = tracesNearPoint(Vec.zero, xrange, xrange)
 
   def tracesNearPoint(point:Vec, xrange:Range, yrange:Range, condition:T => Boolean):IndexedSeq[T] = {
     (for {
