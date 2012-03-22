@@ -28,9 +28,9 @@ abstract class Screen(val unit_name:String = "Scage Screen") extends Scage with 
 }
 abstract class ScreenApp(
   val unit_name:String = "Scage App",
-  val window_width:Int  = property("screen.width", 800),
-  val window_height:Int = property("screen.height", 600),
-  val title:String = property("app.name", "Scage App")
+  window_width:Int  = property("screen.width", 800),
+  window_height:Int = property("screen.height", 600),
+  title:String = property("app.name", "Scage App")
 ) extends Scage with ScageMain with Renderer with RendererInitializer with ScageController with App {
   override def run() {
     preinit()
@@ -50,7 +50,8 @@ abstract class ScreenApp(
 
   override def main(args:Array[String]) {
     scage_log.info("starting main screen "+unit_name+"...")
-    initgl()
+    initgl(window_width, window_height, title)
+    drawWelcomeMessages()
     super.main(args)
     run()
     destroygl()

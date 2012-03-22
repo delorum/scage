@@ -46,7 +46,7 @@ class ScageMessage(
 ) extends ScageMessageTrait {
   private val log = Logger(this.getClass.getName)
 
-  private lazy val font = try {
+  private var font = try {
     log.debug("loading font "+fonts_base+font_file+"...")
     new UnicodeFont(fonts_base+font_file, max_font_size, glyph_from, glyph_to)
   } catch {
@@ -55,6 +55,20 @@ class ScageMessage(
       log.error("please provide the path to some unicode ttf font")
       System.exit(1)
       null
+    }
+  }
+
+  def reloadFont() {
+    font = try {
+      log.debug("loading font "+fonts_base+font_file+"...")
+      new UnicodeFont(fonts_base+font_file, max_font_size, glyph_from, glyph_to)
+    } catch {
+      case e:Exception => {
+        log.error("failed to create font: "+e.getLocalizedMessage)
+        log.error("please provide the path to some unicode ttf font")
+        System.exit(1)
+        null
+      }
     }
   }
 

@@ -16,7 +16,7 @@ object ScageColorTest extends ScageScreenApp("Color Test") {
   var color_num = 1
   interface {
     if(color_num >= 0 && color_num < fields.length) {
-      print(colors(color_num), 20, window_height/2,
+      print(colors(color_num), 20, windowHeight/2,
         if("BLACK".equalsIgnoreCase(fields(color_num).getName)) WHITE else BLACK)
       try {backgroundColor = (colors(color_num))}
       catch {

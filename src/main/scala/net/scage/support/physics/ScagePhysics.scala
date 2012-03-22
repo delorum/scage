@@ -9,23 +9,24 @@ import collection.mutable.Set
 import com.weiglewilczek.slf4s.Logger
 
 object ScagePhysics {
-  def apply(physicals:Physical*) = {
-    val physics = new ScagePhysics
-    for(p <- physicals) physics.addPhysical(p)
-    physics
+  def apply(dt:Int = property("physics.dt", 5),
+            gravity:Vec = property("physics.gravity", Vec.zero)) = {
+    new ScagePhysics(dt, gravity)
   }
 }
 
-class ScagePhysics {  // TODO: make constructor parameters for _dt and gravity!
+class ScagePhysics(
+  private var _dt:Int = property("physics.dt", 5),
+  val gravity:Vec = property("physics.gravity", Vec.zero)
+) {
   private val log = Logger(this.getClass.getName);
-  private var _dt = property("physics.dt", 5)
+
   def dt = _dt
   def dt_=(new_dt:Int) {
-    if(new_dt > 0) _dt = new_dt
+    if(new_dt > 0) dt = new_dt
     else log.error("failed to update dt: must be more then zero but the value is "+new_dt)
   }
 
-  val gravity = property("physics.gravity", Vec.zero)
   val world = new World(new Vector2f(gravity.x, gravity.y), 10, new QuadSpaceStrategy(20,10));
   world.enableRestingBodyDetection(0.01f, 0.000001f, 0.01f)
   
@@ -66,7 +67,7 @@ class ScagePhysics {  // TODO: make constructor parameters for _dt and gravity!
   def step() {
     _physicals.foreach(_.clearTouches())
 
-    for(i <- 1 to _dt) {
+    for(i <- 1 to dt) {
       world.step()
       for(p <- _physicals) {
         p.updateCollisions(world.getContacts(p.body))
