@@ -40,12 +40,24 @@ trait RendererLib {
   }
   def currentColor_=(c:ScageColor) {if(c != DEFAULT_COLOR) GL11.glColor3f(c.red, c.green, c.blue)}
 
+  private val lists = ArrayBuffer[(Int, () => Unit)]()
   def displayList(func: => Unit) = {
     val list_code = /*nextDisplayListKey*/nextId
     GL11.glNewList(list_code, GL11.GL_COMPILE);
     func
     GL11.glEndList();
+    lists += (list_code, () => func)
     list_code
+  }
+  def reloadDisplayLists() {
+    println(lists.mkString("(", ", ", ")"))
+    for {
+      (list_code, func) <- lists
+    } {
+      GL11.glNewList(list_code, GL11.GL_COMPILE);
+      func()
+      GL11.glEndList();
+    }
   }
 
   def openglLocalTransform(transform: => Unit) {
@@ -316,6 +328,10 @@ trait RendererLib {
   def windowSize = {
     Vec(Display.getDisplayMode.getWidth, Display.getDisplayMode.getHeight)
   }
+
+  def windowWidth = Display.getDisplayMode.getWidth
+  def windowHeight = Display.getDisplayMode.getHeight
+  def title = Display.getTitle
 }
 
 object RendererLib extends RendererLib
@@ -327,18 +343,25 @@ trait RendererInitializer {
   private val log = Logger(this.getClass.getName)
 
   private var _window_width:Int = 800
-  def windowWidth = _window_width // maybe just Display.getDisplayMode.getWidth
+  //def windowWidth = _window_width // maybe just Display.getDisplayMode.getWidth
 
   private var _window_height:Int = 600
-  def windowHeight = _window_height
+  /*def windowHeight = _window_height*/
 
   private var _title:String = ""
-  def title = _title
+  /*def title = _title*/
 
   def changeResolution(new_window_width:Int = _window_width, new_window_height:Int = _window_height) {
-    destroygl()
-    initgl(new_window_width, new_window_height)
-    reloadFont()
+    if(new_window_width != _window_width && new_window_height != _window_height) {
+      val backup_background_color = backgroundColor
+      val backup_current_color = currentColor
+      destroygl()
+      initgl(new_window_width, new_window_height)
+      reloadFont()
+      reloadDisplayLists()
+      currentColor = backup_current_color
+      backgroundColor = backup_background_color
+    }
   }
 
   def changeTitle(new_title:String = _title) {
