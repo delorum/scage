@@ -20,6 +20,22 @@ import net.scage.support.messages.{ScageXML, ScageMessage}
 import net.scage.support.tracer3.{Trace, ScageTracer}
 import java.awt.GraphicsEnvironment
 
+object DisplayListsHolder {
+  private val lists = ArrayBuffer[(Int, () => Unit)]()
+  def addDisplayList(list_code:Int, func: => Unit) {
+    lists += (list_code, () => func)
+  }
+  def reloadDisplayLists() {  // TODO: add log messages
+    for {
+      (list_code, func) <- lists
+    } {
+      GL11.glNewList(list_code, GL11.GL_COMPILE);
+      func()
+      GL11.glEndList();
+    }
+  }
+}
+
 trait RendererLib {
   def backgroundColor = {
     val background_color = BufferUtils.createFloatBuffer(16)    
@@ -40,24 +56,13 @@ trait RendererLib {
   }
   def currentColor_=(c:ScageColor) {if(c != DEFAULT_COLOR) GL11.glColor3f(c.red, c.green, c.blue)}
 
-  private val lists = ArrayBuffer[(Int, () => Unit)]()
   def displayList(func: => Unit) = {
     val list_code = /*nextDisplayListKey*/nextId
     GL11.glNewList(list_code, GL11.GL_COMPILE);
     func
     GL11.glEndList();
-    lists += (list_code, () => func)
+    DisplayListsHolder.addDisplayList(list_code, func)
     list_code
-  }
-  def reloadDisplayLists() {
-    println(lists.mkString("(", ", ", ")"))
-    for {
-      (list_code, func) <- lists
-    } {
-      GL11.glNewList(list_code, GL11.GL_COMPILE);
-      func()
-      GL11.glEndList();
-    }
   }
 
   def openglLocalTransform(transform: => Unit) {
@@ -351,6 +356,7 @@ trait RendererInitializer {
   private var _title:String = ""
   /*def title = _title*/
 
+  // TODO: add log messages
   def changeResolution(new_window_width:Int = _window_width, new_window_height:Int = _window_height) {
     if(new_window_width != _window_width && new_window_height != _window_height) {
       val backup_background_color = backgroundColor
@@ -358,7 +364,7 @@ trait RendererInitializer {
       destroygl()
       initgl(new_window_width, new_window_height)
       reloadFont()
-      reloadDisplayLists()
+      DisplayListsHolder.reloadDisplayLists()
       currentColor = backup_current_color
       backgroundColor = backup_background_color
     }
