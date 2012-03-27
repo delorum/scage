@@ -139,20 +139,30 @@ trait MultiController extends ScageController {
   def checkControls() {
     for {
       (key, events_for_key) <- keyboard_keys
-      key_data <- events_for_key
-      MultiKeyEvent(was_pressed, last_pressed_time, repeat_time_func, onKeyDown, onKeyUp) = key_data
-      repeat_time = repeat_time_func()
-      is_repeatable = repeat_time > 0
+      key_press @ KeyPress(_, was_pressed, _) = keyPress(key)
     } {
       if(Keyboard.isKeyDown(key)) {
-        if(!was_pressed || (is_repeatable && System.currentTimeMillis() - last_pressed_time > repeat_time)) {
-          key_data.was_pressed = true
+        if(!was_pressed) {
+          key_press.was_pressed = true
+        }
+        for {
+          key_data <- events_for_key
+          MultiKeyEvent(_, last_pressed_time, repeat_time_func, onKeyDown, onKeyUp) = key_data
+          repeat_time = repeat_time_func()
+          is_repeatable = repeat_time > 0
+          if !was_pressed || (is_repeatable && System.currentTimeMillis() - last_pressed_time > repeat_time)
+        } {
           key_data.last_pressed_time = System.currentTimeMillis()
           onKeyDown()
         }
       } else if(was_pressed) {
-        key_data.was_pressed = false
-        onKeyUp()
+        key_press.was_pressed = false
+        for {
+          key_data <- events_for_key
+          MultiKeyEvent(_, _, _, _, onKeyUp) = key_data
+        } {
+          onKeyUp()
+        }
       }
     }
 
@@ -166,20 +176,30 @@ trait MultiController extends ScageController {
 
     for {
       (button, events_for_button) <- mouse_buttons
-      button_data <- events_for_button
-      MultiMouseButtonEvent(was_pressed, last_pressed_time, repeat_time_func, onButtonDown, onButtonUp) = button_data
-      repeat_time = repeat_time_func()
-      is_repeatable = repeat_time > 0
+      mouse_button_press @ MouseButtonPress(_, was_pressed, _) = mouseButtonPress(button)
     } {
       if(Mouse.isButtonDown(button)) {
-        if(!was_pressed || (is_repeatable && System.currentTimeMillis() - last_pressed_time > repeat_time)) {
-          button_data.was_pressed = true
+        if(!was_pressed) {
+          mouse_button_press.was_pressed = true
+        }
+        for {
+          button_data <- events_for_button
+          MultiMouseButtonEvent(_, last_pressed_time, repeat_time_func, onButtonDown, _) = button_data
+          repeat_time = repeat_time_func()
+          is_repeatable = repeat_time > 0
+          if !was_pressed || (is_repeatable && System.currentTimeMillis() - last_pressed_time > repeat_time)
+        } {
           button_data.last_pressed_time = System.currentTimeMillis()
           onButtonDown(mouse_coord)
         }
       } else if(was_pressed) {
-        button_data.was_pressed = false
-        onButtonUp(mouse_coord)
+        mouse_button_press.was_pressed = false
+        for {
+          button_data <- events_for_button
+          MultiMouseButtonEvent(_, _, _, _, onButtonUp) = button_data
+        } {
+          onButtonUp(mouse_coord)
+        }
       }
     }
 

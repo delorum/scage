@@ -21,11 +21,14 @@ import net.scage.support.tracer3.{Trace, ScageTracer}
 import java.awt.GraphicsEnvironment
 
 object DisplayListsHolder {
+  private val log = Logger(this.getClass.getName)
+
   private val lists = ArrayBuffer[(Int, () => Unit)]()
   def addDisplayList(list_code:Int, func: => Unit) {
     lists += (list_code, () => func)
   }
-  def reloadDisplayLists() {  // TODO: add log messages
+  def reloadDisplayLists() {
+    log.debug("reloading display lists...")
     for {
       (list_code, func) <- lists
     } {
@@ -356,9 +359,9 @@ trait RendererInitializer {
   private var _title:String = ""
   /*def title = _title*/
 
-  // TODO: add log messages
   def changeResolution(new_window_width:Int = _window_width, new_window_height:Int = _window_height) {
     if(new_window_width != _window_width && new_window_height != _window_height) {
+      log.debug("changing resolution to "+new_window_width+"x"+new_window_height+"...")
       val backup_background_color = backgroundColor
       val backup_current_color = currentColor
       destroygl()
