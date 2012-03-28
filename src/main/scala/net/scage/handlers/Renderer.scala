@@ -40,6 +40,8 @@ object DisplayListsHolder {
 }
 
 trait RendererLib {
+  private val log = Logger(this.getClass.getName)
+
   def backgroundColor = {
     val background_color = BufferUtils.createFloatBuffer(16)    
     GL11.glGetFloat(GL11.GL_COLOR_CLEAR_VALUE, background_color)
@@ -338,29 +340,22 @@ trait RendererLib {
   }
 
   def windowWidth = Display.getDisplayMode.getWidth
+  def windowWidth_=(_new_window_width:Int) {
+    changeResolution(new_window_width = _new_window_width)
+  }
+
   def windowHeight = Display.getDisplayMode.getHeight
-  def title = Display.getTitle
-}
+  def windowHeight_=(_new_window_height:Int) {
+    changeResolution(new_window_height = _new_window_height)
+  }
 
-object RendererLib extends RendererLib
+  def windowTitle = Display.getTitle
+  def windowTitle_=(new_title:String = windowTitle) {
+    Display.setTitle(new_title)
+  }
 
-import RendererLib._
-
-// TODO: maybe add func like isInitialized
-trait RendererInitializer {
-  private val log = Logger(this.getClass.getName)
-
-  private var _window_width:Int = 800
-  //def windowWidth = _window_width // maybe just Display.getDisplayMode.getWidth
-
-  private var _window_height:Int = 600
-  /*def windowHeight = _window_height*/
-
-  private var _title:String = ""
-  /*def title = _title*/
-
-  def changeResolution(new_window_width:Int = _window_width, new_window_height:Int = _window_height) {
-    if(new_window_width != _window_width && new_window_height != _window_height) {
+  def changeResolution(new_window_width:Int = windowWidth, new_window_height:Int = windowHeight) {
+    if(new_window_width != windowWidth && new_window_height != windowHeight) {
       log.debug("changing resolution to "+new_window_width+"x"+new_window_height+"...")
       val backup_background_color = backgroundColor
       val backup_current_color = currentColor
@@ -373,19 +368,11 @@ trait RendererInitializer {
     }
   }
 
-  def changeTitle(new_title:String = _title) {
-    Display.setTitle(new_title)
-  }
-
-  private[scage] def initgl(window_width:Int = _window_width, window_height:Int = _window_height, title:String = _title) {
+  private[scage] def initgl(window_width:Int = windowWidth, window_height:Int = windowHeight, title:String = windowTitle) {
     Display.setDisplayMode(new DisplayMode(window_width, window_height));
     //Display.setVSyncEnabled(true);
     Display.setTitle(title);
     Display.create();
-
-    _window_width = Display.getDisplayMode.getWidth
-    _window_height = Display.getDisplayMode.getHeight
-    _title = title
 
     val center_point = GraphicsEnvironment.getLocalGraphicsEnvironment.getCenterPoint
     Display.setLocation(center_point.getX.toInt - window_width/2, center_point.getY.toInt - window_height/2)
@@ -412,7 +399,7 @@ trait RendererInitializer {
   }
 
   private[scage] def drawWelcomeMessages() {
-    print(xmlOrDefault("renderer.loading", "Loading..."), 20, _window_height-25, GREEN)
+    print(xmlOrDefault("renderer.loading", "Loading..."), 20, windowHeight-25, GREEN)
     Display.update()
     Thread.sleep(1000)
 
@@ -420,7 +407,7 @@ trait RendererInitializer {
     if(property("screen.scagelogo", true)) {  // TODO: replace this with two different builds (under different maven profiles): with and without scagelogo
       GL11.glClear(GL11.GL_COLOR_BUFFER_BIT/* | GL11.GL_DEPTH_BUFFER_BIT*/);
       val logo_texture = getTexture("resources/images/scage-logo.png")
-      drawDisplayList(image(logo_texture, _window_width, _window_height, 0, 0, logo_texture.getImageWidth, logo_texture.getImageHeight), Vec(_window_width/2, _window_height/2))
+      drawDisplayList(image(logo_texture, windowWidth, windowHeight, 0, 0, logo_texture.getImageWidth, logo_texture.getImageHeight), Vec(windowWidth/2, windowHeight/2))
       Display.update()
       Thread.sleep(1000)
     }
@@ -431,7 +418,7 @@ trait RendererInitializer {
         try {
           GL11.glClear(GL11.GL_COLOR_BUFFER_BIT/* | GL11.GL_DEPTH_BUFFER_BIT*/);
           val splash_texture = getTexture(screen_splash_path)
-          drawDisplayList(image(splash_texture, _window_width, _window_height, 0, 0, splash_texture.getImageWidth, splash_texture.getImageHeight), Vec(_window_width/2, _window_height/2))
+          drawDisplayList(image(splash_texture, windowWidth, windowHeight, 0, 0, splash_texture.getImageWidth, splash_texture.getImageHeight), Vec(windowWidth/2, windowHeight/2))
           Display.update()
           Thread.sleep(1000)  // TODO: custom pause
         }
@@ -441,7 +428,7 @@ trait RendererInitializer {
       case _ => xmlOrDefault("app.welcome", "") match {
         case welcome_message if "" != welcome_message => {
           GL11.glClear(GL11.GL_COLOR_BUFFER_BIT/* | GL11.GL_DEPTH_BUFFER_BIT*/);
-          print(welcome_message, 20, _window_height-25, GREEN) // TODO: custom color and position
+          print(welcome_message, 20, windowHeight-25, GREEN) // TODO: custom color and position
           Display.update()
           Thread.sleep(1000)  // TODO: custom pause
         }
@@ -463,6 +450,9 @@ trait RendererInitializer {
     log.info("destroyed opengl system")
   }
 }
+
+object RendererLib extends RendererLib
+import RendererLib._
 
 trait Renderer extends Scage {
   private val log = Logger(this.getClass.getName)

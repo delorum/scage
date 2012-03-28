@@ -2,8 +2,9 @@ package net.scage
 
 import handlers.controller2.{ScageController, SingleController}
 import com.weiglewilczek.slf4s.Logger
-import handlers.{RendererInitializer, Renderer}
+import handlers.Renderer
 import support.ScageProperties._
+import handlers.RendererLib._
 
 // abstract classes instead of traits to make it easy to use with MultiController
 abstract class Screen(val unit_name:String = "Scage Screen") extends Scage with Renderer with ScageController {
@@ -31,7 +32,7 @@ abstract class ScreenApp(
   window_width:Int  = property("screen.width", 800),
   window_height:Int = property("screen.height", 600),
   title:String = property("app.name", "Scage App")
-) extends Screen(unit_name) with ScageMain with RendererInitializer with App {
+) extends Screen(unit_name) with App {
   override def run() {
     preinit()
     init()

@@ -16,16 +16,16 @@ object ScagePhysics {
 }
 
 class ScagePhysics(
-  private var _dt:Int = property("physics.dt", 5),
+  val dt:Int = property("physics.dt", 5),   // see exactly no purposes to make it changeable. If I find any - I will do it.
   val gravity:Vec = property("physics.gravity", Vec.zero)
 ) {
   private val log = Logger(this.getClass.getName);
 
-  def dt = _dt
+  /*def dt = _dt
   def dt_=(new_dt:Int) {
     if(new_dt > 0) dt = new_dt
     else log.error("failed to update dt: must be more then zero but the value is "+new_dt)
-  }
+  }*/
 
   val world = new World(new Vector2f(gravity.x, gravity.y), 10, new QuadSpaceStrategy(20,10));
   world.enableRestingBodyDetection(0.01f, 0.000001f, 0.01f)
