@@ -17,22 +17,25 @@ trait ScagePropertiesTrait {
   def intProperty(key:String, condition:(Int => (Boolean,  String))) = property(key, 0, (value:Int) => (true, ""))
   def floatProperty(key:String, condition:(Float => (Boolean,  String))) = property(key, 0.0f, (value:Float) => (true, ""))
   def booleanProperty(key:String, condition:(Boolean => (Boolean,  String))) = property(key, false, (value:Boolean) => (true, ""))
+
+  lazy val app_version:String = property("app.version", "Release")  // I think its not quite right to place this props definitions in trait but that way its much less code
 }
 
 object ScageProperties extends ScagePropertiesTrait {
   private val log = Logger(this.getClass.getName)
 
-  val properties:String = {
+  val properties:List[String] = {
     val system_property = System.getProperty("scage.properties")
-    if(system_property == null || "" == system_property) "scage.properties"
-    else system_property
+    if(system_property == null || "" == system_property) List("scage.properties")
+    else system_property.split(",").map(_.trim()).toList
   }
 
-  private lazy val props:Properties = load(properties)
-
-  private lazy val fileNotFound = {
-    log.error("failed to load properties: file "+properties+" not found")
-    new Properties
+  private lazy val props:List[Properties] = loadChain(properties ::: "maven.properties" :: Nil)
+  private def loadChain(property_filenames:List[String]):List[Properties] = {
+    property_filenames.toList match {
+      case property_filename :: tail => load(property_filename) :: loadChain(tail)
+      case Nil => Nil
+    }
   }
   private def load(property_filename:String):Properties = {
     try {
@@ -41,27 +44,36 @@ object ScageProperties extends ScagePropertiesTrait {
       log.info("loaded properties file "+property_filename)
       p
     } catch {
-      //case ex:FileNotFoundException =>
       case ex:Exception =>
         if(!property_filename.contains("properties/")) {
           load("properties/" + property_filename)
-        } else fileNotFound
+        } else {
+          log.error("failed to load properties: file "+properties+" not found")
+          new Properties
+        }
     }
   }
 
-  private def getProperty(key:String) = {
-    props.getProperty(key) match {
-      case p:String =>
-        log.debug("read property "+key+": "+p)
-        p.trim
-      case _ =>
-        log.warn("failed to find property "+key)
-        null
+  private def getProperty(key:String):Option[String] = {
+    def _getProperty(key:String, props_list:List[Properties]):Option[String] = {
+      props_list match {
+        case pew :: tail =>
+          pew.getProperty(key) match {
+            case p:String =>
+              log.debug("read property "+key+": "+p)
+              Some(p.trim)
+            case _ => _getProperty(key, tail)
+          }
+        case Nil =>
+          log.warn("failed to find property "+key)
+          None
+      }      
     }
+    _getProperty(key, props)
   }
   private def defaultValue[A](key:String, default:A) = {
     log.info("default value for property "+key+" is "+(if("".equals(default.toString)) "empty string" else default))
-    props.put(key, default.toString)
+    props.head.put(key, default.toString)
     default
   }
 
@@ -101,10 +113,8 @@ object ScageProperties extends ScagePropertiesTrait {
   }
   def property[A : Manifest](key:String, default:A):A = {
     getProperty(key) match {
-      case p:String =>
-        try {
-          parsedProperty(key, p)
-        }
+      case Some(p) =>
+        try {parsedProperty(key, p)}
         catch {
           case e:Exception =>
             log.warn("failed to use property ("+key+" : "+p+") as "+manifest[A]+": "+e)
@@ -116,7 +126,7 @@ object ScageProperties extends ScagePropertiesTrait {
 
   def property[A : Manifest](key:String, default:A, condition:(A => (Boolean,  String))):A = {
     getProperty(key) match {
-      case p:String =>
+      case Some(p) =>
         try {
           val value = parsedProperty(key, p)
           val (is_value_accepted, reason) = condition(value)
