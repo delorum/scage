@@ -1,10 +1,15 @@
 package net.scage.support
 
-import org.lwjgl.input.Keyboard
+import org.lwjgl.input.{Mouse, Keyboard}
+
 
 object LWJGLKeyboard extends LWJGLKeyboard
 
 trait LWJGLKeyboard {
+  lazy val MOUSE_LEFT_BUTTON   = 0
+  lazy val MOUSE_RIGHT_BUTTON  = 1
+  lazy val MOUSE_MIDDLE_BUTTON = 2  // need a test to prove that
+  
   lazy val KEY_ESCAPE = Keyboard.KEY_ESCAPE
   lazy val KEY_1 = Keyboard.KEY_1
   lazy val KEY_2 = Keyboard.KEY_2

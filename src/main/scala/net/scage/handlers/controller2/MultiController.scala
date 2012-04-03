@@ -3,6 +3,7 @@ package net.scage.handlers.controller2
 import net.scage.support.Vec
 import org.lwjgl.input.{Keyboard, Mouse}
 import collection.mutable.{HashMap, ArrayBuffer}
+import net.scage.support.ScageId._
 
 case class MultiKeyEvent(var was_pressed:Boolean, var last_pressed_time:Long, repeat_time: () => Long, onKeyDown: () => Any, onKeyUp: () => Any)
 case class MultiMouseButtonEvent(var was_pressed:Boolean, var last_pressed_time:Long, repeat_time: () => Long, onButtonDown: Vec => Any, onButtonUp: Vec => Any)
@@ -16,124 +17,137 @@ trait MultiController extends ScageController {
   private var mouse_wheel_ups = ArrayBuffer[Vec => Any]()
   private var mouse_wheel_downs = ArrayBuffer[Vec => Any]()
 
-  def key(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) {
-    if(keyboard_keys.contains(key_code)) keyboard_keys(key_code) += MultiKeyEvent(false, 0, () => repeat_time, () => if(!on_pause) onKeyDown, () => if(!on_pause) onKeyUp)
-    else keyboard_keys(key_code) = ArrayBuffer(MultiKeyEvent(false, 0, () => repeat_time, () => if(!on_pause) onKeyDown, () => if(!on_pause) onKeyUp))
+  def key(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) = {
+    val control_id = nextId
+    val event = MultiKeyEvent(false, 0, () => repeat_time, () => if(!on_pause) onKeyDown, () => if(!on_pause) onKeyUp)
+    if(keyboard_keys.contains(key_code)) keyboard_keys(key_code) += event
+    else keyboard_keys(key_code) = ArrayBuffer(event)
+    deletion_operations += control_id -> (() => keyboard_keys(key_code) -= event)
+    operations_mapping += control_id -> ControlOperations.Control
+    control_id
   }
-  def keyNoPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) {
-    if(keyboard_keys.contains(key_code)) keyboard_keys(key_code) += MultiKeyEvent(false, 0, () => repeat_time, () => onKeyDown, () => onKeyUp)
-    else keyboard_keys(key_code) = ArrayBuffer(MultiKeyEvent(false, 0, () => repeat_time, () => onKeyDown, () => onKeyUp))
+  def keyNoPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) = {
+    val control_id = nextId
+    val event = MultiKeyEvent(false, 0, () => repeat_time, () => onKeyDown, () => onKeyUp)
+    if(keyboard_keys.contains(key_code)) keyboard_keys(key_code) += event
+    else keyboard_keys(key_code) = ArrayBuffer(event)
+    deletion_operations += control_id -> (() => keyboard_keys(key_code) -= event)
+    operations_mapping += control_id -> ControlOperations.Control
+    control_id
   }
 
-  def anykey(onKeyDown: => Any) {
-    anykeys += (() => if(!on_pause) onKeyDown)
+  def anykey(onKeyDown: => Any) = {
+    val control_id = nextId
+    val event = () => if(!on_pause) onKeyDown
+    anykeys += event
+    deletion_operations += control_id -> (() => anykeys -= event)
+    operations_mapping += control_id -> ControlOperations.Control
+    control_id
   }
-  def anykeyNoPause(onKeyDown: => Any) {
-    anykeys += (() => onKeyDown)
+  def anykeyNoPause(onKeyDown: => Any) = {
+    val control_id = nextId
+    val event = () => onKeyDown
+    anykeys += event
+    deletion_operations += control_id -> (() => anykeys -= event)
+    operations_mapping += control_id -> ControlOperations.Control
+    control_id
   }
 
   def mouseCoord = Vec(Mouse.getX, Mouse.getY)
   def isMouseMoved = Mouse.getDX != 0 || Mouse.getDY != 0
-  private def mouseButton(button_code:Int, repeat_time: => Long = 0, onButtonDown: Vec => Any, onButtonUp: Vec => Any = Vec => {}) {
-    if(mouse_buttons.contains(button_code)) mouse_buttons(button_code) += MultiMouseButtonEvent(false, 0, () => repeat_time, onButtonDown, onButtonUp)
-    else mouse_buttons(button_code) = ArrayBuffer(MultiMouseButtonEvent(false, 0, () => repeat_time, onButtonDown, onButtonUp))
+  private def mouseButton(button_code:Int, repeat_time: => Long = 0, onButtonDown: Vec => Any, onButtonUp: Vec => Any = Vec => {}) = {
+    val control_id = nextId
+    val event = MultiMouseButtonEvent(false, 0, () => repeat_time, onButtonDown, onButtonUp)
+    if(mouse_buttons.contains(button_code)) mouse_buttons(button_code) += event
+    else mouse_buttons(button_code) = ArrayBuffer(event)
+    deletion_operations += control_id -> (() => mouse_buttons(button_code) -= event)
+    operations_mapping += control_id -> ControlOperations.Control
+    control_id
   }
 
-  def leftMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) {
+  def leftMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
     mouseButton(0, repeat_time, mouse_coord => if(!on_pause) onBtnDown(mouse_coord), mouse_coord => if(!on_pause) onBtnUp(mouse_coord))
   }
-  def leftMouseNoPause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) {
+  def leftMouseNoPause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
     mouseButton(0, repeat_time, onBtnDown, onBtnUp)
   }
 
-  def rightMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) {
+  def rightMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
     mouseButton(1, repeat_time, mouse_coord => if(!on_pause) onBtnDown(mouse_coord), mouse_coord => if(!on_pause) onBtnUp(mouse_coord))
   }
-  def rightMouseNoPause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) {
+  def rightMouseNoPause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
     mouseButton(1, repeat_time, onBtnDown, onBtnUp)
   }
 
-  def mouseMotion(onMotion: Vec => Any) {
-    mouse_motions += (mouse_coord => if(!on_pause) onMotion(mouse_coord))
+  def mouseMotion(onMotion: Vec => Any) = {
+    val control_id = nextId
+    val event = {mouse_coord:Vec => if(!on_pause) onMotion(mouse_coord)}
+    mouse_motions += event
+    deletion_operations += control_id -> (() => mouse_motions -= event)
+    operations_mapping += control_id -> ControlOperations.Control
+    control_id
   }
-  def mouseMotionNoPause(onMotion: Vec => Any) {
+  def mouseMotionNoPause(onMotion: Vec => Any) = {
+    val control_id = nextId
     mouse_motions += onMotion
+    deletion_operations += control_id -> (() => mouse_motions -= onMotion)
+    operations_mapping += control_id -> ControlOperations.Control
+    control_id
   }
 
-  private def mouseDrag(button_code:Int, onDrag: Vec => Any) {
+  private def mouseDrag(button_code:Int, onDrag: Vec => Any) = {
+    val control_id = nextId
     if(mouse_drag_motions.contains(button_code)) mouse_drag_motions(button_code) += onDrag
     else mouse_drag_motions(button_code) = ArrayBuffer(onDrag)
+    deletion_operations += control_id -> (() => mouse_drag_motions(button_code) -= onDrag)
+    operations_mapping += control_id -> ControlOperations.Control
+    control_id
   }
 
-  def leftMouseDrag(onDrag: Vec => Any) {
+  def leftMouseDrag(onDrag: Vec => Any) = {
     mouseDrag(0, mouse_coord => if(!on_pause) onDrag(mouse_coord))
   }
-  def leftMouseDragNoPause(onDrag: Vec => Any) {
+  def leftMouseDragNoPause(onDrag: Vec => Any) = {
     mouseDrag(0, onDrag)
   }
 
-  def rightMouseDrag(onDrag: Vec => Any) {
+  def rightMouseDrag(onDrag: Vec => Any) = {
     mouseDrag(1, mouse_coord => if(!on_pause) onDrag(mouse_coord))
   }
-  def rightMouseDragNoPause(onDrag: Vec => Any) {
+  def rightMouseDragNoPause(onDrag: Vec => Any) = {
     mouseDrag(1, onDrag)
   }
 
-  def mouseWheelUp(onWheelUp: Vec => Any) {
-    mouse_wheel_ups += (mouse_coord => if(!on_pause) onWheelUp(mouse_coord))
+  def mouseWheelUp(onWheelUp: Vec => Any) = {
+    val control_id = nextId
+    val event = {mouse_coord:Vec => if(!on_pause) onWheelUp(mouse_coord)}
+    mouse_wheel_ups += event
+    deletion_operations += control_id -> (() => mouse_wheel_ups -= event)
+    operations_mapping += control_id -> ControlOperations.Control
+    control_id
   }
-  def mouseWheelUpNoPause(onWheelUp: Vec => Any) {
+  def mouseWheelUpNoPause(onWheelUp: Vec => Any) = {
+    val control_id = nextId
     mouse_wheel_ups += onWheelUp
+    deletion_operations += control_id -> (() => mouse_wheel_ups -= onWheelUp)
+    operations_mapping += control_id -> ControlOperations.Control
+    control_id
   }
 
-  def mouseWheelDown(onWheelDown: Vec => Any) {
-    mouse_wheel_downs += (mouse_coord => if(!on_pause) onWheelDown(mouse_coord))
+  def mouseWheelDown(onWheelDown: Vec => Any) = {
+    val control_id = nextId
+    val event = {mouse_coord:Vec => if(!on_pause) onWheelDown(mouse_coord)}
+    mouse_wheel_downs += event
+    deletion_operations += control_id -> (() => mouse_wheel_downs -= event)
+    operations_mapping += control_id -> ControlOperations.Control
+    control_id
   }
-  def mouseWheelDownNoPause(onWheelDown: Vec => Any) {
+  def mouseWheelDownNoPause(onWheelDown: Vec => Any) = {
+    val control_id = nextId
     mouse_wheel_downs += onWheelDown
-  }
-
-  def delKeys(key_codes_to_delete: Int*) {
-    keyboard_keys --= key_codes_to_delete
-  }
-  def delAnyKey() {
-    anykeys.clear()
-  }
-  def delAllKeys() {
-    keyboard_keys.clear()
-  }
-  def delAllKeysExcept(key_codes_to_save: Int*) {
-    delKeys(keyboard_keys.filter(key => !key_codes_to_save.contains(key._1)).map(_._1).toSeq:_*)
-  }
-
-  def delMouseButtons(mouse_buttons_to_delete:Int*) {
-    mouse_buttons --= mouse_buttons_to_delete
-  }
-  def delAllMouseButtons() {
-    mouse_buttons.clear()
-  }
-  def delAllMouseButtonsExcept(mouse_buttons_to_save:Int*) {
-    delMouseButtons(mouse_buttons.filter(btn => !mouse_buttons_to_save.contains(btn._1)).map(_._1).toSeq:_*)
-  }
-
-  def delMouseMotion() {
-    mouse_motions.clear()
-  }
-  def delMouseDrags(mouse_buttons_to_delete:Int*) {
-    mouse_drag_motions --= mouse_buttons_to_delete
-  }
-  def delAllMouseDrags() {
-    mouse_drag_motions.clear()
-  }
-  def delAllMouseDragsExcept(mouse_buttons_to_save:Int*) {
-    delMouseDrags(mouse_drag_motions.filter(btn => !mouse_buttons_to_save.contains(btn._1)).map(_._1).toSeq:_*)
-  }
-
-  def delMouseWheelUp() {
-    mouse_wheel_ups.clear()
-  }
-  def delMouseWheelDown() {
-    mouse_wheel_downs.clear()
+    deletion_operations += control_id -> (() => mouse_wheel_downs -= onWheelDown)
+    operations_mapping += control_id -> ControlOperations.Control
+    control_id
   }
 
   def checkControls() {

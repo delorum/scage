@@ -4,7 +4,7 @@ import handlers.RendererLib
 import support._
 import support.messages._
 
-trait ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXMLTrait with RendererLib with LWJGLKeyboard with ScageColorTrait {
+trait ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXMLTrait with RendererLib with LWJGLKeyboard with ScageColorTrait with ScageIdTrait {
   def property[A : Manifest](key:String, default:A):A = ScageProperties.property(key, default)
   def property[A : Manifest](key:String, default:A, condition:(A => (Boolean,  String))):A = ScageProperties.property(key, default, condition)
   
@@ -18,6 +18,8 @@ trait ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXML
   def xmlInterfaceStrings(interface_id:String, parameters:Any*):Array[String] = ScageXML.xmlInterfaceStrings(interface_id, parameters:_*)
 
   def stopApp() {Scage.stopApp()}
+
+  def nextId = ScageId.nextId
 }
 
 object ScageLib extends ScageLib
