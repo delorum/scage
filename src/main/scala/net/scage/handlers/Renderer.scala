@@ -339,22 +339,8 @@ trait RendererLib {
     Vec(Display.getDisplayMode.getWidth, Display.getDisplayMode.getHeight)
   }
 
-  def windowWidth = Display.getDisplayMode.getWidth
-  def windowWidth_=(_new_window_width:Int) {
-    changeResolution(new_window_width = _new_window_width)
-  }
-
-  def windowHeight = Display.getDisplayMode.getHeight
-  def windowHeight_=(_new_window_height:Int) {
-    changeResolution(new_window_height = _new_window_height)
-  }
-
-  def windowTitle = Display.getTitle
-  def windowTitle_=(new_title:String = windowTitle) {
-    Display.setTitle(new_title)
-  }
-
-  def changeResolution(new_window_width:Int = windowWidth, new_window_height:Int = windowHeight) {
+  def windowSize_=(new_window_resolution:(Int, Int)) {
+    val (new_window_width, new_window_height) = new_window_resolution
     if(new_window_width != windowWidth && new_window_height != windowHeight) {
       log.debug("changing resolution to "+new_window_width+"x"+new_window_height+"...")
       val backup_background_color = backgroundColor
@@ -366,6 +352,21 @@ trait RendererLib {
       currentColor = backup_current_color
       backgroundColor = backup_background_color
     }
+  }
+
+  def windowWidth = Display.getDisplayMode.getWidth
+  def windowWidth_=(new_window_width:Int) {
+    windowSize = (new_window_width, windowHeight)
+  }
+
+  def windowHeight = Display.getDisplayMode.getHeight
+  def windowHeight_=(new_window_height:Int) {
+    windowSize = (windowWidth, new_window_height)
+  }
+
+  def windowTitle = Display.getTitle
+  def windowTitle_=(new_title:String = windowTitle) {
+    Display.setTitle(new_title)
   }
 
   private[scage] def initgl(window_width:Int = windowWidth, window_height:Int = windowHeight, title:String = windowTitle) {

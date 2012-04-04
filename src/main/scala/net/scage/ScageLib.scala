@@ -11,7 +11,13 @@ trait ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXML
   val max_font_size = ScageMessage.max_font_size
   def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor) {ScageMessage.print(message, x, y, size, color)}
   def print(message:Any, coord:Vec, size:Float, color:ScageColor) {ScageMessage.print(message, coord, size, color)}
-  
+
+  def lang = ScageXML.lang
+  def lang_=(new_lang:String) {ScageXML.lang = new_lang}
+
+  def messagesFile:String = ScageXML.messagesFile
+  def interfacesFile:String = ScageXML.interfacesFile
+
   def xml(message_id:String, parameters:Any*):String = ScageXML.xml(message_id, parameters:_*)
   def xmlOrDefault(message_id:String, parameters:Any*):String = ScageXML.xmlOrDefault(message_id, parameters:_*)
   def xmlInterface(interface_id:String, parameters:Any*):Array[MessageData] = ScageXML.xmlInterface(interface_id, parameters:_*)
