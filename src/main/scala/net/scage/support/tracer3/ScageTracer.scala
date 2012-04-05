@@ -4,16 +4,17 @@ import net.scage.support.Vec
 import net.scage.support.ScageProperties._
 import com.weiglewilczek.slf4s.Logger
 import collection.mutable.{ArrayBuffer, HashMap}
+import net.scage.handlers.RendererLib
 
-class ScageTracer[T <: TraceTrait](val field_from_x:Int        = property("field.from.x", 0),
-                              val field_to_x:Int          = property("field.to.x", property("screen.width", 800)),
-                              val field_from_y:Int        = property("field.from.y", 0),
-                              val field_to_y:Int          = property("field.to.y", property("screen.height", 600)),
-                              init_h_x:Int                = property("field.h_x", 0),
-                              init_h_y:Int                = property("field.h_y", 0),
-                              init_N_x:Int                = if(property("field.h_x", 0) == 0) property("field.N_x", property("screen.width", 800)/50) else 0,
-                              init_N_y:Int                = if(property("field.h_y", 0) == 0) property("field.N_y", property("screen.height", 600)/50) else 0,
-                              val solid_edges:Boolean     = property("field.solid_edges", true)) {
+class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x", 0),
+                              val field_to_x:Int        = property("field.to.x", try {RendererLib.windowWidth} catch {case e:Exception => 800}),
+                              val field_from_y:Int      = property("field.from.y", 0),
+                              val field_to_y:Int        = property("field.to.y", try {RendererLib.windowHeight} catch {case e:Exception => 600}),
+                              init_h_x:Int              = property("field.h_x", 0),
+                              init_h_y:Int              = property("field.h_y", 0),
+                              init_N_x:Int              = if(property("field.h_x", 0) == 0) property("field.N_x", (try {RendererLib.windowWidth} catch {case e:Exception => 800})/50) else 0,
+                              init_N_y:Int              = if(property("field.h_y", 0) == 0) property("field.N_y", (try {RendererLib.windowHeight} catch {case e:Exception => 800})/50) else 0,
+                              val solid_edges:Boolean   = property("field.solid_edges", true)) {
   private val log = Logger(this.getClass.getName)
 
   log.debug("creating tracer "+this.getClass.getName)
@@ -221,13 +222,13 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int        = property("field
 
 object ScageTracer {
   def apply(field_from_x:Int        = property("field.from.x", 0),
-            field_to_x:Int          = property("field.to.x", property("screen.width", 800)),
+            field_to_x:Int          = property("field.to.x", try {RendererLib.windowWidth} catch {case e:Exception => 800}),
             field_from_y:Int        = property("field.from.y", 0),
-            field_to_y:Int          = property("field.to.y", property("screen.height", 600)),
+            field_to_y:Int          = property("field.to.y", try {RendererLib.windowHeight} catch {case e:Exception => 600}),
             init_h_x:Int            = property("field.h_x", 0),
             init_h_y:Int            = property("field.h_y", 0),
-            init_N_x:Int            = if(property("field.h_x", 0) == 0) property("field.N_x", property("screen.width", 800)/50) else 0,
-            init_N_y:Int            = if(property("field.h_y", 0) == 0) property("field.N_y", property("screen.height", 600)/50) else 0,
+            init_N_x:Int            = if(property("field.h_x", 0) == 0) property("field.N_x", (try {RendererLib.windowWidth} catch {case e:Exception => 800})/50) else 0,
+            init_N_y:Int            = if(property("field.h_y", 0) == 0) property("field.N_y", (try {RendererLib.windowHeight} catch {case e:Exception => 600})/50) else 0,
             solid_edges:Boolean     = property("field.solid_edges", true)) = {
     new ScageTracer[Trace](field_from_x,field_to_x,field_from_y,field_to_y,init_h_x,init_h_y,init_N_x,init_N_y,solid_edges) {
       def addTrace(point:Vec):Trace = {addTrace(point, Trace())}
@@ -235,14 +236,14 @@ object ScageTracer {
   }
 
   // maybe some other name for this factory method (like 'newTracer', etc)
-  def create[T <: TraceTrait](field_from_x:Int        = property("field.from.x", 0),
-                         field_to_x:Int          = property("field.to.x", property("screen.width", 800)),
+  def create[T <: TraceTrait](field_from_x:Int   = property("field.from.x", 0),
+                         field_to_x:Int          = property("field.to.x", try {RendererLib.windowWidth} catch {case e:Exception => 800}),
                          field_from_y:Int        = property("field.from.y", 0),
-                         field_to_y:Int          = property("field.to.y", property("screen.height", 600)),
+                         field_to_y:Int          = property("field.to.y", try {RendererLib.windowHeight} catch {case e:Exception => 600}),
                          init_h_x:Int            = property("field.h_x", 0),
                          init_h_y:Int            = property("field.h_y", 0),
-                         init_N_x:Int            = if(property("field.h_x", 0) == 0) property("field.N_x", property("screen.width", 800)/50) else 0,
-                         init_N_y:Int            = if(property("field.h_y", 0) == 0) property("field.N_y", property("screen.height", 600)/50) else 0,
+                         init_N_x:Int            = if(property("field.h_x", 0) == 0) property("field.N_x", (try {RendererLib.windowWidth} catch {case e:Exception => 800})/50) else 0,
+                         init_N_y:Int            = if(property("field.h_y", 0) == 0) property("field.N_y", (try {RendererLib.windowHeight} catch {case e:Exception => 600})/50) else 0,
                          solid_edges:Boolean     = property("field.solid_edges", true)) = {
     new ScageTracer[T](field_from_x,field_to_x,field_from_y,field_to_y,init_h_x,init_h_y,init_N_x,init_N_y,solid_edges)
   }

@@ -5,8 +5,8 @@ import support._
 import support.messages._
 
 trait ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXMLTrait with RendererLib with LWJGLKeyboard with ScageColorTrait with ScageIdTrait {
-  def property[A : Manifest](key:String, default:A):A = ScageProperties.property(key, default)
-  def property[A : Manifest](key:String, default:A, condition:(A => (Boolean,  String))):A = ScageProperties.property(key, default, condition)
+  def property[A : Manifest](key:String, default: => A):A = ScageProperties.property(key, default)
+  def property[A : Manifest](key:String, default: => A, condition:(A => (Boolean,  String))):A = ScageProperties.property(key, default, condition)
   
   val max_font_size = ScageMessage.max_font_size
   def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor) {ScageMessage.print(message, x, y, size, color)}

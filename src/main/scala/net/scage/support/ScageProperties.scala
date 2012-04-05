@@ -6,13 +6,13 @@ import com.weiglewilczek.slf4s.Logger
 import parsers.FormulaParser
 
 trait ScagePropertiesTrait {
-  def property[A : Manifest](key:String, default:A):A
+  def property[A : Manifest](key:String, default: => A):A
   def stringProperty(key:String) = property(key, "")
   def intProperty(key:String) = property(key, 0)
   def floatProperty(key:String) = property(key, 0.0f)
   def booleanProperty(key:String) = property(key, false)
 
-  def property[A : Manifest](key:String, default:A, condition:(A => (Boolean,  String))):A
+  def property[A : Manifest](key:String, default: => A, condition:(A => (Boolean,  String))):A
   def stringProperty(key:String, condition:(String => (Boolean,  String))) = property(key, "", (value:String) => (true, ""))
   def intProperty(key:String, condition:(Int => (Boolean,  String))) = property(key, 0, (value:Int) => (true, ""))
   def floatProperty(key:String, condition:(Float => (Boolean,  String))) = property(key, 0.0f, (value:Float) => (true, ""))
@@ -111,7 +111,7 @@ object ScageProperties extends ScagePropertiesTrait {
       case _ => p.asInstanceOf[A] // assuming A is String here. If not - we throw exception
     }
   }
-  def property[A : Manifest](key:String, default:A):A = {
+  def property[A : Manifest](key:String, default: => A):A = {
     getProperty(key) match {
       case Some(p) =>
         try {parsedProperty(key, p)}
@@ -124,7 +124,7 @@ object ScageProperties extends ScagePropertiesTrait {
     }
   }
 
-  def property[A : Manifest](key:String, default:A, condition:(A => (Boolean,  String))):A = {
+  def property[A : Manifest](key:String, default: => A, condition:(A => (Boolean,  String))):A = {
     getProperty(key) match {
       case Some(p) =>
         try {
