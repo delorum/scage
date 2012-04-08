@@ -20,6 +20,5 @@ class StaticPolygon(restitution:Boolean, val vertices:List[Vec]) extends Physica
   if(restitution) body.setRestitution(1.0f)
   body.setPosition(vertices(0).x, vertices(0).y)
 
-  private val vertices_array = vertices.toArray
-  def points = vertices_array
+  val points = vertices.toArray
 }

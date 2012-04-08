@@ -28,10 +28,9 @@ abstract class Screen(val unit_name:String = "Scage Screen") extends Scage with 
   }
 }
 abstract class ScreenApp(
-  unit_name:String = "Scage App",
+  unit_name:String  = property("app.name", "Scage App"),
   window_width:Int  = property("screen.width", 800),
-  window_height:Int = property("screen.height", 600),
-  title:String = property("app.name", "Scage App")
+  window_height:Int = property("screen.height", 600)
 ) extends Screen(unit_name) with App {
   override def run() {
     preinit()
@@ -51,7 +50,7 @@ abstract class ScreenApp(
 
   override def main(args:Array[String]) {
     scage_log.info("starting main screen "+unit_name+"...")
-    initgl(window_width, window_height, title)
+    initgl(window_width, window_height, unit_name)
     drawWelcomeMessages()
     super.main(args)
     run()
@@ -63,10 +62,9 @@ abstract class ScreenApp(
 
 class ScageScreen(unit_name:String = "Scage Screen") extends Screen(unit_name) with SingleController
 
-class ScageScreenApp(unit_name:String = "Scage App",
+class ScageScreenApp(unit_name:String = property("app.name", "Scage App"),
                      window_width:Int  = property("screen.width", 800),
-                     window_height:Int = property("screen.height", 600),
-                     title:String = property("app.name", "Scage App")) extends ScreenApp(unit_name, window_width, window_height, title) with SingleController
+                     window_height:Int = property("screen.height", 600)) extends ScreenApp(unit_name, window_width, window_height) with SingleController
 
 /*class MultiControlledScreen(unit_name:String = "Scage App", is_main_unit:Boolean = false, properties:String = "")
 extends Screen(unit_name, is_main_unit, properties) with MultiController*/
