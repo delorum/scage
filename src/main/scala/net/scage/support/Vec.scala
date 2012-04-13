@@ -81,7 +81,7 @@ class Vec(val x:Float = 0, val y:Float = 0) {
 
   def copy = new Vec(x, y)
 
-  def toPhys2dVec:ROVector2f = new Vector2f(x, y)
+  def toPhys2dVec = new Vector2f(x, y)
 
   override def toString = "Vec(x="+x+", y="+y+")"
 }

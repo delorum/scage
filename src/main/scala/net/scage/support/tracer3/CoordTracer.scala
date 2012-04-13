@@ -133,7 +133,7 @@ object CoordTracer {
   }
 
   // maybe some other name for this factory method (like 'newTracer', etc)
-  def create[T <: TraceTrait](field_from_x:Int        = property("field.from.x", 0),
+  def create[T <: TraceTrait](field_from_x:Int   = property("field.from.x", 0),
                          field_to_x:Int          = property("field.to.x", try {RendererLib.windowWidth} catch {case e:Exception => 800}),
                          field_from_y:Int        = property("field.from.y", 0),
                          field_to_y:Int          = property("field.to.y", try {RendererLib.windowHeight} catch {case e:Exception => 600}),

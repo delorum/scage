@@ -17,8 +17,6 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x
                               val solid_edges:Boolean   = property("field.solid_edges", true)) {
   private val log = Logger(this.getClass.getName)
 
-  log.debug("creating tracer "+this.getClass.getName)
-
   val field_width = field_to_x - field_from_x
   val field_height = field_to_y - field_from_y
 
@@ -27,6 +25,8 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x
 
   val h_x = if(init_h_x == 0) field_width/init_N_x else init_h_x
   val h_y = if(init_h_y == 0) field_height/init_N_y else init_h_y
+
+  log.debug("creating tracer "+this.getClass.getName+": h_x="+h_x+" h_y="+h_y+" N_x="+N_x+" N_y="+N_y)
 
   // for client classes - children of ScageTracer
   protected def setTraceLocation(trace:T, new_location:Vec) {trace._location = new_location}

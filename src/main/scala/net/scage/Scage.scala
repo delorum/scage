@@ -92,6 +92,7 @@ trait Scage {
     val operation_id = nextId
     preinits += (operation_id, () => preinit_func)
     operations_mapping += operation_id -> ScageOperations.Preinit
+    if(is_running) preinit_func
     operation_id
   }
   // 'preinits' suppose to run only once during unit's first run(). No public method exists to run them inside run-loop
