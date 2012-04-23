@@ -48,7 +48,7 @@ object ScageProperties extends ScagePropertiesTrait {
         if(!property_filename.contains("properties/")) {
           load("properties/" + property_filename)
         } else {
-          log.error("failed to load properties: file "+properties+" not found")
+          log.error("failed to load properties: file "+property_filename+" not found")
           new Properties
         }
     }
