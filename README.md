@@ -47,7 +47,7 @@ Hello World Example
       }
     }
 
-!['rotating "Hello World!" demo'](http://scage.googlecode.com/svn/trunk/ScageMaven/rotating_hello.png)
+!['rotating "Hello World!" demo'](http://dl.dropbox.com/u/11297078/public_pics/rotating_hello.png)
 
 ###Network api example
 
