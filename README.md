@@ -104,73 +104,91 @@ More examples
 
 Simple tetris clone. Controls: arrow keys, spacetab - pause.
 
-[Source Code](http://code.google.com/p/scage/source/browse/trunk/tetris/src/main/scala/su/msk/dunno/tutorials/tetris/Tetris.scala) [Launch Demo](http://fzeulf.netris.ru/bor/tetris/run.jnlp)
+[Source Code](http://code.google.com/p/scage/source/browse/trunk/tetris/src/main/scala/su/msk/dunno/tutorials/tetris/Tetris.scala) 
 
-![Tetris Screenshot](http://scage.googlecode.com/svn/trunk/tetris/tetris.png)
+![Tetris Screenshot](http://dl.dropbox.com/u/11297078/public_pics/tetris.png)
+
+[Launch Demo](http://fzeulf.netris.ru/bor/tetris/run.jnlp)
 
 ###Snake
 
 The Snake clone. Controls: arrow keys.
 
-[Source Code](http://code.google.com/p/scage/source/browse/trunk/snake/src/main/scala/su/msk/dunno/scage/tutorials/snake/Snake.scala) [Launch Demo](http://fzeulf.netris.ru/bor/snake/run.jnlp)
+[Source Code](http://code.google.com/p/scage/source/browse/trunk/snake/src/main/scala/su/msk/dunno/scage/tutorials/snake/Snake.scala)
 
-![Snake Screenshot](http://scage.googlecode.com/svn/trunk/snake/snake.png)
+![Snake Screenshot](http://dl.dropbox.com/u/11297078/public_pics/snake.png)
+
+[Launch Demo](http://fzeulf.netris.ru/bor/snake/run.jnlp)
 
 ###Arcanoid
 
 The physics demo. Bounce ball to blocks to make them disappear and bring you points. Controls: left and right arrow keys.
 
-[Source Code](http://code.google.com/p/scage/source/browse/#svn%2Ftrunk%2FScarcanoid%2Fsrc%2Fmain%2Fscala%2Fsu%2Fmsk%2Fdunno%2Fscar) [Launch Demo](http://fzeulf.netris.ru/bor/scar/run.jnlp)
+[Source Code](http://code.google.com/p/scage/source/browse/#svn%2Ftrunk%2FScarcanoid%2Fsrc%2Fmain%2Fscala%2Fsu%2Fmsk%2Fdunno%2Fscar)
 
-![Arcanoid Screenshot](http://scage.googlecode.com/svn/trunk/Scarcanoid/scaranoid.png)
+![Arcanoid Screenshot](http://dl.dropbox.com/u/11297078/public_pics/scaranoid.png)
+
+[Launch Demo](http://fzeulf.netris.ru/bor/scar/run.jnlp)
 
 ###Life
 
 The "Tracers"-framework example. Conway's Game of Life, the model of "glider gun". Press spacetab to start the process.
 
-[Source Code](http://code.google.com/p/scage/source/browse/trunk/life/src/main/scala/su/msk/dunno/scage/tutorials/life/Life.scala) [Launch Demo](http://fzeulf.netris.ru/bor/life/run.jnlp)
+[Source Code](http://code.google.com/p/scage/source/browse/trunk/life/src/main/scala/su/msk/dunno/scage/tutorials/life/Life.scala)
 
-![Life Screenshot](http://scage.googlecode.com/svn/trunk/life/life.png)
+![Life Screenshot](http://dl.dropbox.com/u/11297078/public_pics/life.png)
+
+[Launch Demo](http://fzeulf.netris.ru/bor/life/run.jnlp)
 
 ###Uke
 
 The physics and texture handling demo. Run and jump avoiding abysses and obstacles. Controls: Z to jump, X to destroy obstacle, down arrow key to fast land after high jump.
 
-[Source Code](http://code.google.com/p/scage/source/browse/trunk/uke/src/main/scala/su/msk/dunno/scage/uke/Uke.scala) [Launch Demo](http://fzeulf.netris.ru/bor/uke/run.jnlp)
+[Source Code](http://code.google.com/p/scage/source/browse/trunk/uke/src/main/scala/su/msk/dunno/scage/uke/Uke.scala)
 
-![Uke Screenshot](http://scage.googlecode.com/svn/trunk/uke/uke.png)
+![Uke Screenshot](http://dl.dropbox.com/u/11297078/public_pics/uke.png)
+
+[Launch Demo](http://fzeulf.netris.ru/bor/uke/run.jnlp)
 
 ###Runnegun
 
 Some kind of a top-down shooter. Shoot down circles and avoid enemy bullets. Controls: WASD to move, left mouse button to shoot.
 
-[Source Code](http://code.google.com/p/scage/source/browse/#svn%2Ftrunk%2Frunnegun%2Fsrc%2Fmain%2Fscala%2Fsu%2Fmsk%2Fdunno%2Frunnegun) [Launch Demo](http://fzeulf.netris.ru/bor/runnegun/run.jnlp)
+[Source Code](http://code.google.com/p/scage/source/browse/#svn%2Ftrunk%2Frunnegun%2Fsrc%2Fmain%2Fscala%2Fsu%2Fmsk%2Fdunno%2Frunnegun)
 
-![Runnegun Screenshot](http://scage.googlecode.com/svn/trunk/runnegun/runnegun.png)
+![Runnegun Screenshot](http://dl.dropbox.com/u/11297078/public_pics/runnegun.png)
+
+[Launch Demo](http://fzeulf.netris.ru/bor/runnegun/run.jnlp)
 
 ###Jet Flight
 
 The texture handling example. Control a plane against very simple AI bot. Fly with left and right arrows, speed-up with up-arrow, shoot with left control.
 
-[Source Code](https://github.com/dunnololda/scage-projects/blob/master/jetflight/src/main/scala/net/scage/tutorial/jetflight/JetFlight.scala) [Launch Demo](http://fzeulf.netris.ru/bor/jetflight/run.jnlp)
+[Source Code](https://github.com/dunnololda/scage-projects/blob/master/jetflight/src/main/scala/net/scage/tutorial/jetflight/JetFlight.scala)
 
 ![JetFlight Screenshot](https://github.com/dunnololda/scage-projects/raw/master/jetflight/jetflight.png)
+
+[Launch Demo](http://fzeulf.netris.ru/bor/jetflight/run.jnlp)
 
 ###Blases
 
 Shoot bubbles to reach the finish point. The game demonstrates i18n, resolution changing, one way to create game interfaces and some other things.
 
-[Source Code](https://github.com/dunnololda/scage-projects/tree/master/blases) [Launch Demo](http://fzeulf.netris.ru/bor/blases/run.jnlp)
+[Source Code](https://github.com/dunnololda/scage-projects/tree/master/blases)
 
 ![Blases Screenshot](https://github.com/dunnololda/scage-projects/raw/master/blases/blases.png)
 
+[Launch Demo](http://fzeulf.netris.ru/bor/blases/run.jnlp)
+
 ###Pong
 
-A very simple clone of Classic Pong (of its realization in Nicol Examples actually, [https://github.com/philcali/Nicol-examples/tree/master/pong](https://github.com/philcali/Nicol-examples/tree/master/pong)). Control paddles with mouse. The ball speed is slightly increased as you bounce it from the paddles.
+A very simple clone of Classic Pong (of its realization in [Nicol Examples](https://github.com/philcali/Nicol-examples/tree/master/pong) actually). Control paddles with mouse. The ball speed is slightly increased as you bounce it from the paddles.
 
-[Source Code](https://github.com/dunnololda/scage-projects/blob/master/pong/src/main/scala/net/scage/projects/pong/Pong.scala) [Launch Demo](http://fzeulf.netris.ru/bor/pong/run.jnlp)
+[Source Code](https://github.com/dunnololda/scage-projects/blob/master/pong/src/main/scala/net/scage/projects/pong/Pong.scala)
 
 ![Pong Screenshot](https://github.com/dunnololda/scage-projects/raw/master/pong/pong.png)
+
+[Launch Demo](http://fzeulf.netris.ru/bor/pong/run.jnlp)
 
 Installation
 ------------
@@ -212,13 +230,13 @@ This project stub has two profiles in its pom.xml for app building. To build a s
     
 Or just:
 
-   $ mvn clean package
+    $ mvn clean package
 
-As "build" is a default profile
+as "build" is a default profile.
 
 To build a webstart app type:
 
-   $ mvn clean package -Pwebstart 
+    $ mvn clean package -Pwebstart 
    
 This command will create "jnlp" folder in "target". Then you can upload this folder to your host.
 
