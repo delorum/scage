@@ -1,3 +1,5 @@
+![Scage Logo](http://dl.dropbox.com/u/11297078/public_pics/scage-logo.png)
+
 Introduction
 ------------
 
