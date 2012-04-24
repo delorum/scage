@@ -194,7 +194,7 @@ class ScageTest extends TestCase("app") {
           }
         }
         render(-10) {
-          def pew(v:Vec) {drawLines(tracer.traceGrid.map(_ + v), DARK_GRAY)}
+          def pew(v:Vec) {drawLines(tracer.trace_grid.map(_ + v), DARK_GRAY)}
           pew(Vec.zero)
           if(globalScale > 1) {
             pew(Vec(0, windowHeight - 40))

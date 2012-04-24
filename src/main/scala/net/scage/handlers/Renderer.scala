@@ -263,10 +263,7 @@ trait RendererLib {
   }
 
   def drawTraceGrid(tracer:ScageTracer[_], color:ScageColor = DEFAULT_COLOR) {
-    import tracer._
-    val x_lines = (field_from_x to field_to_x by h_x).foldLeft(List[Vec]())((lines, x) => Vec(x, field_from_y) :: Vec(x, field_to_y) :: lines)
-    val y_lines = (field_from_y to field_to_y by h_y).foldLeft(List[Vec]())((lines, y) => Vec(field_from_x, y) :: Vec(field_to_x, y) :: lines)
-    drawLines(x_lines ::: y_lines, color)
+    drawLines(tracer.trace_grid, color)
   }
 
   def drawTraceLocations[T <: Trace](tracer:ScageTracer[T], color:ScageColor = DEFAULT_COLOR, radius:Int = 3) {

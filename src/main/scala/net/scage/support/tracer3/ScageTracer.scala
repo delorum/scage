@@ -213,7 +213,7 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x
     return None
   }
 
-  def traceGrid = {
+  lazy val trace_grid = {
     val x_lines = (field_from_x to field_to_x by h_x).foldLeft(List[Vec]())((lines, x) => Vec(x, field_from_y) :: Vec(x, field_to_y) :: lines)
     val y_lines = (field_from_y to field_to_y by h_y).foldLeft(List[Vec]())((lines, y) => Vec(field_from_x, y) :: Vec(field_to_x, y) :: lines)
     x_lines ::: y_lines
