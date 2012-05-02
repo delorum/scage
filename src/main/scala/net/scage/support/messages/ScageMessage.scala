@@ -20,6 +20,14 @@ trait ScageMessageTrait {
   def print(message:Any, coord:Vec, size:Float) {print(message, coord, size, DEFAULT_COLOR)}
   def print(message:Any, coord:Vec) {print(message, coord, max_font_size, DEFAULT_COLOR)}
 
+  def messageBounds(message:Any):Vec
+
+  def printCentered(message:Any, x:Float, y:Float, color:ScageColor) {
+    val bounds = messageBounds(message)
+    print(message, x - bounds.x/2, y - bounds.y/2, max_font_size, color)
+  }
+  def printCentered(message:Any, coord:Vec, color:ScageColor) {printCentered(message:Any, coord.x, coord.y, color:ScageColor)}
+
   def printStrings(messages:TraversableOnce[Any], x:Float, y:Float, x_interval:Float = 0, y_interval:Float = -20, color:ScageColor = DEFAULT_COLOR) {
     var x_pos = x
     var y_pos = y
@@ -85,6 +93,8 @@ class ScageMessage(
     font.drawString(coord.x, coord.y, size, message.toString, print_color)
     GL11.glPopMatrix()
   }
+
+  def messageBounds(message:Any) = Vec(font.getWidth(message.toString), font.getHeight(message.toString))
 }
 
 object ScageMessage extends ScageMessage (
