@@ -10,23 +10,31 @@ import org.lwjgl.opengl.GL11
 
 trait ScageMessageTrait {
   def max_font_size:Float
-  def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor)
+  def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor)    // TODO: maybe replace all of this with one method with default arguments
   def print(message:Any, x:Float, y:Float, size:Float) {print(message, x, y, size, DEFAULT_COLOR)}
   def print(message:Any, x:Float, y:Float, color:ScageColor) {print(message, x, y, max_font_size, color)}
   def print(message:Any, x:Float, y:Float) {print(message, x, y, max_font_size, currentColor)}
-
-  def print(message:Any, coord:Vec, size:Float, color:ScageColor)
+  def print(message:Any, coord:Vec, size:Float, color:ScageColor) {print(message, coord.x, coord.y, size, color)}
   def print(message:Any, coord:Vec, color:ScageColor) {print(message, coord, max_font_size, color)}
   def print(message:Any, coord:Vec, size:Float) {print(message, coord, size, DEFAULT_COLOR)}
   def print(message:Any, coord:Vec) {print(message, coord, max_font_size, DEFAULT_COLOR)}
 
-  def messageBounds(message:Any):Vec
+  def messageBounds(message:Any, size:Float):Vec
 
-  def printCentered(message:Any, x:Float, y:Float, color:ScageColor) {
-    val bounds = messageBounds(message)
-    print(message, x - bounds.x/2, y - bounds.y/2, max_font_size, color)
+  def printCentered(message:Any, x:Float, y:Float, size:Float, color:ScageColor) {
+    val bounds = messageBounds(message, size)
+    val num_lines = message.toString.filter(_ == '\n').length + 1
+    val x_offset = x - bounds.x/2
+    val y_offset = y - bounds.y/2 + (bounds.y - bounds.y/num_lines)
+    print(message, x_offset, y_offset, max_font_size, color)
   }
-  def printCentered(message:Any, coord:Vec, color:ScageColor) {printCentered(message:Any, coord.x, coord.y, color:ScageColor)}
+  def printCentered(message:Any, x:Float, y:Float, size:Float) {printCentered(message:Any, x, y, size, DEFAULT_COLOR)}
+  def printCentered(message:Any, x:Float, y:Float, color:ScageColor) {printCentered(message, x, y, max_font_size, color)}
+  def printCentered(message:Any, x:Float, y:Float) {printCentered(message, x, y, max_font_size, currentColor)}
+  def printCentered(message:Any, coord:Vec, size:Float, color:ScageColor) {printCentered(message, coord.x, coord.y, size, color)}
+  def printCentered(message:Any, coord:Vec, color:ScageColor) {printCentered(message, coord, max_font_size, color)}
+  def printCentered(message:Any, coord:Vec, size:Float) {printCentered(message, coord, size, DEFAULT_COLOR)}
+  def printCentered(message:Any, coord:Vec) {printCentered(message, coord, max_font_size, DEFAULT_COLOR)}
 
   def printStrings(messages:TraversableOnce[Any], x:Float, y:Float, x_interval:Float = 0, y_interval:Float = -20, color:ScageColor = DEFAULT_COLOR) {
     var x_pos = x
@@ -87,14 +95,7 @@ class ScageMessage(
     GL11.glPopMatrix()
   }
 
-  def print(message:Any, coord:Vec, size:Float, color:ScageColor) {
-    val print_color = if(color != DEFAULT_COLOR) color.toSlickColor else currentColor.toSlickColor
-    GL11.glPushMatrix()
-    font.drawString(coord.x, coord.y, size, message.toString, print_color)
-    GL11.glPopMatrix()
-  }
-
-  def messageBounds(message:Any) = Vec(font.getWidth(message.toString), font.getHeight(message.toString))
+  def messageBounds(message:Any, size:Float = max_font_size) = Vec(font.getWidth(message.toString), font.getHeight(message.toString))*(size/max_font_size)
 }
 
 object ScageMessage extends ScageMessage (

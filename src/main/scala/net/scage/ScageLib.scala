@@ -10,8 +10,7 @@ trait ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXML
   
   val max_font_size = ScageMessage.max_font_size
   def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor) {ScageMessage.print(message, x, y, size, color)}
-  def print(message:Any, coord:Vec, size:Float, color:ScageColor) {ScageMessage.print(message, coord, size, color)}
-  def messageBounds(message:Any):Vec = ScageMessage.messageBounds(message)
+  def messageBounds(message:Any, size:Float = max_font_size):Vec = ScageMessage.messageBounds(message, size)
 
   def lang = ScageXML.lang
   def lang_=(new_lang:String) {ScageXML.lang = new_lang}
