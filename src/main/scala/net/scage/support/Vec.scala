@@ -45,13 +45,15 @@ class Vec(val x:Float = 0, val y:Float = 0) {
   def -(v:Vec) = Vec(x-v.x, y-v.y)
 
   def *(v:Vec) = x*v.x + y*v.y
+
+  def *(k:Double) = Vec(x*k, y*k)
   def *(k:Float) = Vec(x*k, y*k)
   def *(k:Int) = Vec(x*k, y*k)
 
   def **(v:Vec) = Vec(x*v.x, y*v.y)
 
-  def /(k:Float) = if(k == 0) Vec(x*1000, y*1000) else Vec(x/k, y/k)
   def /(k:Double):Float = this / k.toFloat
+  def /(k:Float) = if(k == 0) Vec(x*1000, y*1000) else Vec(x/k, y/k)
   def /(k:Int):Float = this / k.toFloat
 
   def norma2:Float = x*x + y*y

@@ -26,6 +26,23 @@ trait ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXML
   def stopApp() {Scage.stopApp()}
 
   def nextId = ScageId.nextId
+
+  // implicits
+
+  implicit def int2vecrich(i:Int) = new {
+    def *(v:Vec) = v*i
+    def /(v:Vec) = v/i
+  }
+
+  implicit def float2vecrich(f:Float) = new {
+    def *(v:Vec) = v*f
+    def /(v:Vec) = v/f
+  }
+
+  implicit def double2vecrich(d:Double) = new {
+    def *(v:Vec) = v*d
+    def /(v:Vec) = v/d
+  }
 }
 
 object ScageLib extends ScageLib

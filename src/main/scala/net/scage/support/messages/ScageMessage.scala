@@ -24,8 +24,8 @@ trait ScageMessageTrait {
   def printCentered(message:Any, x:Float, y:Float, size:Float, color:ScageColor) {
     val bounds = messageBounds(message, size)
     val num_lines = message.toString.filter(_ == '\n').length + 1
-    val x_offset = x - bounds.x/2
-    val y_offset = y - bounds.y/2 + (bounds.y - bounds.y/num_lines)
+    val x_offset = x - bounds.ix/2
+    val y_offset = y - bounds.iy/2 + (bounds.y - bounds.y/num_lines)
     print(message, x_offset, y_offset, max_font_size, color)
   }
   def printCentered(message:Any, x:Float, y:Float, size:Float) {printCentered(message:Any, x, y, size, DEFAULT_COLOR)}
