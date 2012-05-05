@@ -363,16 +363,29 @@ trait Scage {
      but I plan to keep it, because I still have hope that someday I construct such usecase =)
   */
   private val events = HashMap[String, ArrayBuffer[PartialFunction[Any, Unit]]]()
-  def onEvent(event_name:String)(event_action: PartialFunction[Any, Unit]) {
+  def onEventWithArguments(event_name:String)(event_action: PartialFunction[Any, Unit]) {
     events.get(event_name) match {
       case Some(events_for_name) => events_for_name += event_action
       case None => events += (event_name -> ArrayBuffer(event_action))
+    }
+  }
+  def onEvent(event_name:String)(event_action: => Unit) {
+    events.get(event_name) match {
+      case Some(events_for_name) => events_for_name += {case _ => event_action}
+      case None => events += (event_name -> ArrayBuffer({case _ => event_action}))
     }
   }
   def callEvent(event_name:String, arg:Any) {
     events.get(event_name) match {
       case Some(events_for_name) =>
         for(event <- events_for_name) event(arg) // fail-fast if not matched!
+      case None => scage_log.warn("event "+event_name+" not found")
+    }
+  }
+  def callEvent(event_name:String) {
+    events.get(event_name) match {
+      case Some(events_for_name) =>
+        for(event <- events_for_name) event() // fail-fast if not matched!
       case None => scage_log.warn("event "+event_name+" not found")
     }
   }

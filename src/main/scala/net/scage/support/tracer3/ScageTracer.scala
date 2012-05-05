@@ -35,7 +35,8 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x
     def __location_=(new_location:Vec) {trace._location = new_location}
   }
 
-  def isPointOnArea(point:Vec):Boolean = point.x >= 0 && point.x < N_x && point.y >= 0 && point.y < N_y
+  def isPointOnArea(x:Float, y:Float):Boolean = x >= 0 && x < N_x && y >= 0 && y < N_y
+  def isPointOnArea(point:Vec):Boolean = isPointOnArea(point.x, point.y)
   def outsidePoint(point:Vec):Vec = {
     def checkC(c:Float, dist:Int):Float = {
       if(c >= dist) checkC(c - dist, dist)
@@ -77,6 +78,11 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x
     } else log.warn("failed to add trace: point ("+point+") is out of area")
     trace
   }
+  def addTraces(traces_in_locations:(Vec, T)*) = {
+    for {
+      (location, trace) <- traces_in_locations
+    } yield addTrace(location, trace)
+  }
 
   def containsTrace(trace_id:Int) = traces_by_ids.contains(trace_id)
   def containsTrace(trace:T) = traces_by_ids.contains(trace.id)
@@ -102,18 +108,21 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x
   }
   def removeTracesInPoint(point:Vec) {removeTraces(tracesInPoint(point):_*)}
 
-  def tracesInPoint(point:Vec, condition:T => Boolean) = {
-    if(!isPointOnArea(point)) Nil
+  def tracesInPoint(point:Vec, condition:T => Boolean):List[T] = tracesInPoint(point.ix, point.iy, condition)
+  def tracesInPoint(x:Int, y:Int, condition:T => Boolean) = {
+    if(!isPointOnArea(x, y)) Nil
     else {
-      for {
-        trace <- point_matrix(point.ix)(point.iy)
+      (for {
+        trace <- point_matrix(x)(y)
         if condition(trace)
-      } yield trace
+      } yield trace).toList
     }
   }
-  def tracesInPoint(point:Vec) = {
-    if(!isPointOnArea(point)) Nil
-    else (point_matrix(point.ix)(point.iy)).toList
+
+  def tracesInPoint(point:Vec):List[T] = tracesInPoint(point.ix, point.iy)
+  def tracesInPoint(x:Int, y:Int) = {
+    if(!isPointOnArea(x, y)) Nil
+    else (point_matrix(x)(y)).toList
   }
 
   def tracesInPointRange(xrange:Range, yrange:Range, condition:T => Boolean):IndexedSeq[T] = tracesNearPoint(Vec.zero, xrange, yrange, condition)

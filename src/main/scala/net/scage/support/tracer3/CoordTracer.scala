@@ -16,6 +16,7 @@ class CoordTracer[T <: TraceTrait](field_from_x:Int   = property("field.from.x",
                               solid_edges:Boolean = property("field.solid_edges", true))
 extends ScageTracer[T](field_from_x,field_to_x,field_from_y,field_to_y,init_h_x,init_h_y,init_N_x,init_N_y,solid_edges) {
   private val log = Logger(this.getClass.getName);
+
   override def addTrace(coord:Vec, trace:T):T = {
     if(isCoordOnArea(coord)) {
       trace._location = coord

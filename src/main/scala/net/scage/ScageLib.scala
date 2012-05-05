@@ -43,6 +43,11 @@ trait ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXML
     def *(v:Vec) = v*d
     def /(v:Vec) = v/d
   }
+
+  // support
+
+  def msecs = System.currentTimeMillis()
+  def msecsFrom(moment:Long) = System.currentTimeMillis() - moment
 }
 
 object ScageLib extends ScageLib
