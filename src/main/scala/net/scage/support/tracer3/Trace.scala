@@ -19,6 +19,11 @@ trait Trace extends TraceTrait {
   type ChangerType = Trace
 }
 
+trait DefaultTrace extends Trace {
+  def state = State()
+  def changeState(changer:Trace, state:State) {}
+}
+
 object Trace {
   def apply(changeState:(Trace, State) => Unit = (changer, state) => {}, state: => State = State()) = {
     val (_changeState, _state) = (changeState, state)

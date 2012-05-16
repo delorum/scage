@@ -362,31 +362,51 @@ trait Scage {
   /* this 'events'-functionality seems useless as the amount of usecases in real projects is zero
      but I plan to keep it, because I still have hope that someday I construct such usecase =)
   */
-  private val events = HashMap[String, ArrayBuffer[PartialFunction[Any, Unit]]]()
-  def onEventWithArguments(event_name:String)(event_action: PartialFunction[Any, Unit]) {
+  private val events = HashMap[String, HashMap[Int, PartialFunction[Any, Unit]]]()
+  def onEventWithArguments(event_name:String)(event_action: PartialFunction[Any, Unit]) = {
+    val event_id = nextId
     events.get(event_name) match {
-      case Some(events_for_name) => events_for_name += event_action
-      case None => events += (event_name -> ArrayBuffer(event_action))
+      case Some(events_for_name) =>
+        events_for_name += (event_id -> event_action)
+      case None => events += (event_name -> HashMap(event_id -> event_action))
     }
+    (event_name, event_id)
   }
-  def onEvent(event_name:String)(event_action: => Unit) {
+  def onEvent(event_name:String)(event_action: => Unit) = {
+    val event_id = nextId
     events.get(event_name) match {
-      case Some(events_for_name) => events_for_name += {case _ => event_action}
-      case None => events += (event_name -> ArrayBuffer({case _ => event_action}))
+      case Some(events_for_name) => events_for_name += (event_id -> {case _ => event_action})
+      case None => events += (event_name -> HashMap(event_id -> {case _ => event_action}))
     }
+    (event_name, event_id)
   }
   def callEvent(event_name:String, arg:Any) {
     events.get(event_name) match {
       case Some(events_for_name) =>
-        for(event <- events_for_name) event(arg) // fail-fast if not matched!
-      case None => scage_log.warn("event "+event_name+" not found")
+        for(event <- events_for_name.values) event(arg) // fail-fast if not matched!
+      case None => //scage_log.warn("event "+event_name+" not found")
     }
   }
   def callEvent(event_name:String) {
     events.get(event_name) match {
       case Some(events_for_name) =>
-        for(event <- events_for_name) event() // fail-fast if not matched!
-      case None => scage_log.warn("event "+event_name+" not found")
+        for(event <- events_for_name.values) event() // fail-fast if not matched!
+      case None => //scage_log.warn("event "+event_name+" not found")
+    }
+  }
+  def delEvents(event_ids:(String, Int)*) {
+    for((event_name, event_id) <- event_ids) {
+      events.get(event_name) match {
+        case Some(events_for_name) =>
+          if(events_for_name.contains(event_id)) {
+            events_for_name -= event_id
+            scage_log.debug("deleted event for name "+event_name+" with id "+event_id)
+          } else {
+            scage_log.warn("event for name "+event_name+" with id "+event_id+" not found among events so wasn't deleted")
+          }
+        case None =>
+          scage_log.warn("events for name "+event_name+" not found so event with id "+event_id+" wasn't deleted")
+      }
     }
   }
 }

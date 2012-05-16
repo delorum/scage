@@ -3,8 +3,8 @@ package net.scage.support.tracer3
 import net.scage.support.Vec
 import net.scage.support.ScageProperties._
 import com.weiglewilczek.slf4s.Logger
-import collection.mutable.{ArrayBuffer, HashMap}
 import net.scage.handlers.RendererLib
+import collection.mutable.{ArrayBuffer, HashMap}
 
 class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x", 0),
                               val field_to_x:Int        = property("field.to.x", try {RendererLib.windowWidth} catch {case e:Exception => 800}),
@@ -65,7 +65,7 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x
   protected val point_matrix = Array.ofDim[ArrayBuffer[T]](N_x, N_y)
   initMatrix(point_matrix)
   protected val traces_by_ids = HashMap[Int, T]()
-  protected var traces_list:ArrayBuffer[T] = ArrayBuffer[T]()
+  protected var traces_list = ArrayBuffer[T]()
   def tracesList = traces_list.toList
   
   def addTrace(point:Vec, trace:T) = {
