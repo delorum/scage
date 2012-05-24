@@ -210,6 +210,9 @@
           <args>
             <arg>-optimise</arg>
           </args>
+          <jvmArgs>
+              <jvmArg>-Xmx1536m</jvmArg>
+          </jvmArgs>
         </configuration>
       </plugin>
       <plugin>
