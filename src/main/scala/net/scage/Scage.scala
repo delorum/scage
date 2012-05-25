@@ -135,12 +135,23 @@ trait Scage {
     if(is_running) init_func
     operation_id
   }
+
+  private var inits_length   = -1
+  private var actions_length = -1
+  private var clears_length  = -1
   private[scage] def init() {
     scage_log.info(unit_name+": init")
     for((init_id, init_operation) <- inits) {
       current_operation_id = init_id
       init_operation()
     }
+    scage_log.info("inits: "+inits.length+"; actions: "+actions.length+"; clears: "+clears.length)
+    if(inits_length   != -1 && inits.length   > inits_length)   scage_log.warn("inits amount increased since last run! before: "+inits_length+" now: "+inits.length)
+    if(actions_length != -1 && actions.length > actions_length) scage_log.warn("actions amount increased since last run! before: "+actions_length+" now: "+actions.length)
+    if(clears_length  != -1 && clears.length  > clears_length)  scage_log.warn("clears amount increased since last run! before: "+clears_length+" now: "+clears.length)
+    inits_length   = inits.length
+    actions_length = actions.length
+    clears_length  = clears.length
   }
   def delInits(operation_ids:Int*) = {
     operation_ids.foldLeft(true)((overall_result, operation_id) => {
