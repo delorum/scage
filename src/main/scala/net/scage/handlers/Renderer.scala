@@ -574,10 +574,16 @@ trait Renderer extends Scage {
   override private[scage] def executeActions() {  // maybe rename it to not confuse clients
     loops = 0
     while(System.currentTimeMillis() > next_game_tick && loops < MAX_FRAMESKIP) {
-      for((action_id, action_operation) <- actions) {
-        current_operation_id = action_id
-        action_operation()
+      restart_toggled = false
+      def _execute(_actions:Seq[(Int, () => Any)]) {
+        if(_actions.nonEmpty && !restart_toggled) {
+          val (action_id, action_operation) = _actions.head
+          current_operation_id = action_id
+          action_operation()
+          _execute(_actions.tail)
+        }
       }
+      _execute(actions)
       next_game_tick += SKIP_TICKS
       loops += 1
     }

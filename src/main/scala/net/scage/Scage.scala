@@ -136,9 +136,6 @@ trait Scage {
     operation_id
   }
 
-  private var inits_length   = -1
-  private var actions_length = -1
-  private var clears_length  = -1
   private[scage] def init() {
     scage_log.info(unit_name+": init")
     for((init_id, init_operation) <- inits) {
@@ -146,12 +143,6 @@ trait Scage {
       init_operation()
     }
     scage_log.info("inits: "+inits.length+"; actions: "+actions.length+"; clears: "+clears.length)
-    if(inits_length   != -1 && inits.length   > inits_length)   scage_log.warn("inits amount increased since last run! before: "+inits_length+" now: "+inits.length)
-    if(actions_length != -1 && actions.length > actions_length) scage_log.warn("actions amount increased since last run! before: "+actions_length+" now: "+actions.length)
-    if(clears_length  != -1 && clears.length  > clears_length)  scage_log.warn("clears amount increased since last run! before: "+clears_length+" now: "+clears.length)
-    inits_length   = inits.length
-    actions_length = actions.length
-    clears_length  = clears.length
   }
   def delInits(operation_ids:Int*) = {
     operation_ids.foldLeft(true)((overall_result, operation_id) => {
@@ -233,10 +224,16 @@ trait Scage {
   private[this] class ActionWaiterStatic(val period:Long, action_func: => Unit) extends ActionWaiter(action_func)
 
   private[scage] def executeActions() { // assuming to run in cycle, so we leave off any log messages
-    for((action_id, action_operation) <- actions) {
-      current_operation_id = action_id
-      action_operation()
+    restart_toggled = false
+    def _execute(_actions:Seq[(Int, () => Any)]) {
+      if(_actions.nonEmpty && !restart_toggled) {
+        val (action_id, action_operation) = _actions.head
+        current_operation_id = action_id
+        action_operation()
+        _execute(_actions.tail)
+      }
     }
+    _execute(actions)
   }
 
   def delActions(operation_ids:Int*) = {
@@ -364,8 +361,10 @@ trait Scage {
   def stop() {
     is_running = false
   }
-  
+
+  private[scage] var restart_toggled = false
   def restart() {
+    restart_toggled = true
     clear()
     init()
   }
