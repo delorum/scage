@@ -675,7 +675,10 @@ public class UnicodeFont/* implements org.newdawn.slick.Font */{
 			int codePoint = text.codePointAt(charIndex);
 			Rectangle bounds = getGlyphBounds(vector, glyphIndex, codePoint);
 
-			if (startNewLine && codePoint != '\n') extraX = -bounds.x;
+			if (startNewLine && codePoint != '\n') {
+                extraX = -bounds.x;
+                startNewLine = false;
+            }
 
 			if (glyphIndex > 0) extraX += paddingLeft + paddingRight + paddingAdvanceX;
 			width = Math.max(width, bounds.x + extraX + bounds.width);

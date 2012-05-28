@@ -95,7 +95,10 @@ class ScageMessage(
     GL11.glPopMatrix()
   }
 
-  def messageBounds(message:Any, size:Float = max_font_size) = Vec(font.getWidth(message.toString), font.getHeight(message.toString))*(size/max_font_size)
+  def messageBounds(message:Any, size:Float = max_font_size) = {
+    val msg_str = new ColoredString(message.toString, DEFAULT_COLOR).text()
+    Vec(font.getWidth(msg_str), font.getHeight(msg_str))*(size/max_font_size)
+  }
 }
 
 object ScageMessage extends ScageMessage (

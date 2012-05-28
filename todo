@@ -21,6 +21,11 @@
 is_main_unit=true
 
 ----------------
+ColoredString - попробовать сделать принимать Any, геттеры (text, originalText, colorSwitches) записывать без скобок
+
+передавать в drawRect* в качестве ширины и высоты вектор (одно значение вместо двух)
+trace.state("pewpew", 15) вместо trace.state.valueOrDefault("pewpew", 15)
+
 операции: clearOnce, initOnce, actionOnce, delayedAction
 
 Подумать над ускорением удалялок операций - если контейнеры функций переделать из аррайбаферов в хешмапы, как для events,
