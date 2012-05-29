@@ -91,7 +91,7 @@ class ScageMessage(
   def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor) {
     val print_color = if(color != DEFAULT_COLOR) color.toSlickColor else currentColor.toSlickColor
     GL11.glPushMatrix()
-    font.drawString(x, y, size, message.toString, print_color)
+    font.drawString(x.toInt, y.toInt, size, message.toString, print_color)
     GL11.glPopMatrix()
   }
 
