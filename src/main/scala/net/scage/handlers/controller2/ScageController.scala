@@ -100,7 +100,7 @@ trait ScageController extends Scage {
   }
 
   override def delOperation(operation_id:Int) = {
-    operations_mapping.get(operation_id) match {
+    operations_mapping.remove(operation_id) match {
       case Some(operation_type) => {
         operation_type match {
           case ControlOperations.Control => delControls(operation_id)

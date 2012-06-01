@@ -43,7 +43,7 @@ trait Scage {
 
   private[scage] val operations_mapping = HashMap[Int, Any]()
   def delOperation(operation_id:Int) = {
-    operations_mapping.get(operation_id) match {
+    operations_mapping.remove(operation_id) match {
       case Some(operation_type) => {
         operation_type match {
           case ScageOperations.Init => delInits(operation_id)
@@ -62,6 +62,9 @@ trait Scage {
       }
     }
   }
+
+  def operationExists(operation_id:Int) = operations_mapping.contains(operation_id)
+
   def deleteSelf() = delOperation(current_operation_id)
   def delOperations(operation_ids:Int*) = {
     operation_ids.foldLeft(true)((overall_result, operation_id) => {
@@ -169,59 +172,104 @@ trait Scage {
   }
 
   private[scage] var actions = ArrayBuffer[(Int, () => Any)]()
-  private def addAction(operation: => Any, is_pausable:Boolean) = {
+
+  def actionNoPause(operation: => Any):Int = {
     val operation_id = nextId
-    if(is_pausable) actions += (operation_id, () => {if(!on_pause) operation})
-    else actions += (operation_id, () => operation)
+    actions += (operation_id, () => operation)
     operations_mapping += operation_id -> ScageOperations.Action
     operation_id
   }
 
-  // pausable actions
-  def action(action_func: => Any) = {
-    addAction(action_func, true)
-  }
-  def action(action_period:Long)(action_func: => Unit) = {
-    if(action_period > 0) {
-      val action_waiter = new ActionWaiterStatic(action_period, action_func)
-      addAction(action_waiter.doAction(), true)
-    } else addAction(action_func, true)
-  }
-  def actionDynamicPeriod(action_period: => Long)(action_func: => Unit) = {
-    val action_waiter = new ActionWaiterDynamic(action_period, action_func)
-    addAction(action_waiter.doAction(), true)
-  }
-
-  // non-pausable variants
-  def actionNoPause(action_func: => Any) = {
-    addAction(action_func, false)
-  }
-  def actionNoPause(action_period:Long)(action_func: => Unit) = {
-    if(action_period > 0) {
-      val action_waiter = new ActionWaiterStatic(action_period, action_func)
-      addAction(action_waiter.doAction(), false)
-    } else addAction(action_func, false)
-  }
-  def actionDynamicPeriodNoPause(action_period: => Long)(action_func: => Unit) = {
-    val action_waiter = new ActionWaiterDynamic(action_period, action_func)
-    addAction(action_waiter.doAction(), false)
+  def actionNoPause(period:Long)(action_func: => Unit):Int = {
+    if(period > 0) {
+      var last_action_time:Long = 0
+      actionNoPause {
+        if(System.currentTimeMillis - last_action_time > period) {
+          action_func
+          last_action_time = System.currentTimeMillis
+        }
+      }
+    } else actionNoPause {
+        action_func
+    }
   }
 
-  private[this] sealed abstract class ActionWaiter(action_func: => Unit) {
-    private var last_action_time:Long = 0
-    protected def period:Long
-
-    def doAction() {
+  def actionDynamicPeriodNoPause(period: => Long)(action_func: => Unit):Int = {
+    var last_action_time:Long = 0
+    actionNoPause {
       if(System.currentTimeMillis - last_action_time > period) {
         action_func
         last_action_time = System.currentTimeMillis
       }
     }
   }
-  private[this] class ActionWaiterDynamic(action_period: => Long, action_func: => Unit) extends ActionWaiter(action_func) {
-    def period = action_period
+
+  def delayNoPause(period:Long)(after_delay_func: => Unit):Int = {
+    var start_time = System.currentTimeMillis
+    actionNoPause {
+      if(System.currentTimeMillis - start_time > period) {
+        after_delay_func
+        deleteSelf()
+      }
+    }
   }
-  private[this] class ActionWaiterStatic(val period:Long, action_func: => Unit) extends ActionWaiter(action_func)
+
+  def onceNoPause(once_func: => Unit):Int = {
+    actionNoPause {
+      once_func
+      deleteSelf()
+    }
+  }
+
+  // pausable actions
+  def action(action_func: => Any):Int = {
+    actionNoPause {
+      if(!on_pause) action_func
+    }
+  }
+
+  def action(period:Long)(action_func: => Unit):Int = {
+    if(period > 0) {
+      var last_action_time:Long = 0
+      action {
+        if(System.currentTimeMillis - last_action_time > period) {
+          action_func
+          last_action_time = System.currentTimeMillis
+        }
+      }
+
+
+    } else action {
+        action_func
+    }
+  }
+
+  def actionDynamicPeriod(period: => Long)(action_func: => Unit):Int = {
+    var last_action_time:Long = 0
+    action {
+      if(System.currentTimeMillis - last_action_time > period) {
+        action_func
+        last_action_time = System.currentTimeMillis
+      }
+    }
+  }
+
+  def delay(period:Long)(after_delay_func: => Unit):Int = {
+    var start_time = System.currentTimeMillis
+    action {
+      if(System.currentTimeMillis - start_time > period) {
+        after_delay_func
+        deleteSelf()
+      }
+    }
+  }
+
+  def once(once_func: => Unit):Int = {
+    action {
+      once_func
+      deleteSelf()
+    }
+  }
 
   private[scage] def executeActions() { // assuming to run in cycle, so we leave off any log messages
     restart_toggled = false

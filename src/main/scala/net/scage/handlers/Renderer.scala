@@ -621,7 +621,7 @@ trait Renderer extends Scage {
   }
 
   override def delOperation(operation_id:Int) = { // as I understand Scala - other possible 'delOperation's from other Scage's children will be stackable via inheritance
-    operations_mapping.get(operation_id) match {
+    operations_mapping.remove(operation_id) match {
       case Some(operation_type) => {
         operation_type match {
           case RenderOperations.Render => delRenders(operation_id)
