@@ -79,7 +79,7 @@ trait ScageController extends Scage {
         None
     }
   }
-  def delControls(control_ids:Int*):Boolean = {
+  def delControls(control_ids:Int*) {
     control_ids.foreach(delControl(_))
   }
   def delAllControls() {
@@ -87,7 +87,7 @@ trait ScageController extends Scage {
     deletion_operations.delAllOps()
   }
   def delAllControlsExcept(control_ids:Int*) {
-    delControls(deletion_operations.keys.filter(!control_ids.contains(_)).toSeq:_*)
+    delControls(deletion_operations.ops.keys.filter(!control_ids.contains(_)).toSeq:_*)
   }
 }
 

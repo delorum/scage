@@ -86,29 +86,21 @@ trait SingleController extends ScageController {
   }
 
   def mouseWheelUp(onWheelUp: Vec => Any) = {
-    val control_id = nextId
     on_mouse_wheel_up = mouse_coord => if(!on_pause) onWheelUp(mouse_coord)
-    deletion_operations += control_id -> (() => on_mouse_wheel_up = v => {})
-    control_id
+    deletion_operations.addOp(() => on_mouse_wheel_up = v => {})
   }
   def mouseWheelUpNoPause(onWheelUp: Vec => Any) = {
-    val control_id = nextId
     on_mouse_wheel_up = onWheelUp
-    deletion_operations += control_id -> (() => on_mouse_wheel_up = v => {})
-    control_id
+    deletion_operations.addOp(() => on_mouse_wheel_up = v => {})
   }
 
   def mouseWheelDown(onWheelDown: Vec => Any) = {
-    val control_id = nextId
     on_mouse_wheel_down = mouse_coord => if(!on_pause) onWheelDown(mouse_coord)
-    deletion_operations += control_id -> (() => on_mouse_wheel_down = v => {})
-    control_id
+    deletion_operations.addOp(() => on_mouse_wheel_down = v => {})
   }
   def mouseWheelDownNoPause(onWheelDown: Vec => Any) = {
-    val control_id = nextId
     on_mouse_wheel_down = onWheelDown
-    deletion_operations += control_id -> (() => on_mouse_wheel_down = v => {})
-    control_id
+    deletion_operations.addOp(() => on_mouse_wheel_down = v => {})
   }
 
   def checkControls() {

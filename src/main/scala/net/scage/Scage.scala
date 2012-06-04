@@ -7,7 +7,7 @@ import support.ScageId._
 class OperationMapping[A] {
   protected val log = Logger(this.getClass.getName)
 
-  case class Container(name:String, private[OperationMapping] val contents:HashMap[Int, A] = HashMap[Int, A]()) {
+  class Container(name:String, private[OperationMapping] val contents:HashMap[Int, A] = HashMap[Int, A]()) {
     def addOp(op:A) = {addOperation(name, op)}
 
     def delOp(op_id:Int) = {if(contents.contains(op_id)) delOperation(op_id) else None}
@@ -31,11 +31,11 @@ class OperationMapping[A] {
   private val containers = HashMap[String, Container]()
   private val mapping = HashMap[Int, Container]()
 
-  def container(name:String) = containers.getOrElseUpdate(name, Container(name))
+  def container(name:String) = containers.getOrElseUpdate(name, new Container(name))
 
   def addOperation(container_name:String, op:A) = {
     val op_id = nextId
-    val container = containers.getOrElseUpdate(container_name, Container(container_name))
+    val container = containers.getOrElseUpdate(container_name, new Container(container_name))
     container.contents += (op_id -> op)
     mapping += (op_id -> container)
     op_id
@@ -43,8 +43,8 @@ class OperationMapping[A] {
 
   def delOperation(op_id:Int) = {
     mapping.remove(op_id) match {
-      case Some(Container(name, contents)) =>
-        contents.remove(op_id) match {
+      case Some(container) =>
+        container.contents.remove(op_id) match {
           case some_op @ Some(_) =>
             log.debug("deleted operation with id "+op_id+" from the container "+name)
             some_op
@@ -105,6 +105,7 @@ trait Scage {
 
   // don't know exactly if I need this preinits, but I keep them for symmetry (because I already have disposes and I do need them - to stop NetServer/NetClient for example)
   private[scage] var preinits = operations_mapping.container("preinits")
+
   def preinit(preinit_func: => Any) = {
     if(is_running) preinit_func
     preinits.addOp(() => preinit_func)

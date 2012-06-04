@@ -18,46 +18,36 @@ trait MultiController extends ScageController {
   private var mouse_wheel_downs = ArrayBuffer[Vec => Any]()
 
   def key(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) = {
-    val control_id = nextId
     val event = MultiKeyEvent(false, 0, () => repeat_time, () => if(!on_pause) onKeyDown, () => if(!on_pause) onKeyUp)
     if(keyboard_keys.contains(key_code)) keyboard_keys(key_code) += event
     else keyboard_keys(key_code) = ArrayBuffer(event)
-    deletion_operations += control_id -> (() => keyboard_keys(key_code) -= event)
-    control_id
+    deletion_operations.addOp(() => keyboard_keys(key_code) -= event)
   }
   def keyNoPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) = {
-    val control_id = nextId
     val event = MultiKeyEvent(false, 0, () => repeat_time, () => onKeyDown, () => onKeyUp)
     if(keyboard_keys.contains(key_code)) keyboard_keys(key_code) += event
     else keyboard_keys(key_code) = ArrayBuffer(event)
-    deletion_operations += control_id -> (() => keyboard_keys(key_code) -= event)
-    control_id
+    deletion_operations.addOp(() => keyboard_keys(key_code) -= event)
   }
 
   def anykey(onKeyDown: => Any) = {
-    val control_id = nextId
     val event = () => if(!on_pause) onKeyDown
     anykeys += event
-    deletion_operations += control_id -> (() => anykeys -= event)
-    control_id
+    deletion_operations.addOp(() => anykeys -= event)
   }
   def anykeyNoPause(onKeyDown: => Any) = {
-    val control_id = nextId
     val event = () => onKeyDown
     anykeys += event
-    deletion_operations += control_id -> (() => anykeys -= event)
-    control_id
+    deletion_operations.addOp(() => anykeys -= event)
   }
 
   def mouseCoord = Vec(Mouse.getX, Mouse.getY)
   def isMouseMoved = Mouse.getDX != 0 || Mouse.getDY != 0
   private def mouseButton(button_code:Int, repeat_time: => Long = 0, onButtonDown: Vec => Any, onButtonUp: Vec => Any = Vec => {}) = {
-    val control_id = nextId
     val event = MultiMouseButtonEvent(false, 0, () => repeat_time, onButtonDown, onButtonUp)
     if(mouse_buttons.contains(button_code)) mouse_buttons(button_code) += event
     else mouse_buttons(button_code) = ArrayBuffer(event)
-    deletion_operations += control_id -> (() => mouse_buttons(button_code) -= event)
-    control_id
+    deletion_operations.addOp(() => mouse_buttons(button_code) -= event)
   }
 
   def leftMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
@@ -75,25 +65,19 @@ trait MultiController extends ScageController {
   }
 
   def mouseMotion(onMotion: Vec => Any) = {
-    val control_id = nextId
     val event = {mouse_coord:Vec => if(!on_pause) onMotion(mouse_coord)}
     mouse_motions += event
-    deletion_operations += control_id -> (() => mouse_motions -= event)
-    control_id
+    deletion_operations.addOp(() => mouse_motions -= event)
   }
   def mouseMotionNoPause(onMotion: Vec => Any) = {
-    val control_id = nextId
     mouse_motions += onMotion
-    deletion_operations += control_id -> (() => mouse_motions -= onMotion)
-    control_id
+    deletion_operations.addOp(() => mouse_motions -= onMotion)
   }
 
   private def mouseDrag(button_code:Int, onDrag: Vec => Any) = {
-    val control_id = nextId
     if(mouse_drag_motions.contains(button_code)) mouse_drag_motions(button_code) += onDrag
     else mouse_drag_motions(button_code) = ArrayBuffer(onDrag)
-    deletion_operations += control_id -> (() => mouse_drag_motions(button_code) -= onDrag)
-    control_id
+    deletion_operations.addOp(() => mouse_drag_motions(button_code) -= onDrag)
   }
 
   def leftMouseDrag(onDrag: Vec => Any) = {
@@ -111,31 +95,23 @@ trait MultiController extends ScageController {
   }
 
   def mouseWheelUp(onWheelUp: Vec => Any) = {
-    val control_id = nextId
     val event = {mouse_coord:Vec => if(!on_pause) onWheelUp(mouse_coord)}
     mouse_wheel_ups += event
-    deletion_operations += control_id -> (() => mouse_wheel_ups -= event)
-    control_id
+    deletion_operations.addOp(() => mouse_wheel_ups -= event)
   }
   def mouseWheelUpNoPause(onWheelUp: Vec => Any) = {
-    val control_id = nextId
     mouse_wheel_ups += onWheelUp
-    deletion_operations += control_id -> (() => mouse_wheel_ups -= onWheelUp)
-    control_id
+    deletion_operations.addOp(() => mouse_wheel_ups -= onWheelUp)
   }
 
   def mouseWheelDown(onWheelDown: Vec => Any) = {
-    val control_id = nextId
     val event = {mouse_coord:Vec => if(!on_pause) onWheelDown(mouse_coord)}
     mouse_wheel_downs += event
-    deletion_operations += control_id -> (() => mouse_wheel_downs -= event)
-    control_id
+    deletion_operations.addOp(() => mouse_wheel_downs -= event)
   }
   def mouseWheelDownNoPause(onWheelDown: Vec => Any) = {
-    val control_id = nextId
     mouse_wheel_downs += onWheelDown
-    deletion_operations += control_id -> (() => mouse_wheel_downs -= onWheelDown)
-    control_id
+    deletion_operations.addOp(() => mouse_wheel_downs -= onWheelDown)
   }
 
   def checkControls() {
