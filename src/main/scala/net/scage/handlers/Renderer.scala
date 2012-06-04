@@ -15,10 +15,10 @@ import org.newdawn.slick.util.ResourceLoader
 import net.scage.support.{SortedBuffer, ScageColor, Vec}
 import collection.mutable.ArrayBuffer
 import com.weiglewilczek.slf4s.Logger
-import net.scage.Scage
 import net.scage.support.messages.{ScageXML, ScageMessage}
 import net.scage.support.tracer3.{Trace, ScageTracer}
 import java.awt.GraphicsEnvironment
+import net.scage.Scage
 
 object DisplayListsHolder {
   private val log = Logger(this.getClass.getName)
@@ -486,78 +486,35 @@ trait Renderer extends Scage {
     else (coord / globalScale) + (center - windowCenter/globalScale)
   }
 
-  case class RenderElement(operation_id:Int, render_func:() => Any, position:Int = 0) extends Ordered[RenderElement] {
-    def compare(that:RenderElement) = this.position - that.position
-  }
-  private val renders = SortedBuffer[RenderElement]()
+  private val renders = operations_mapping.container("renders")
   private def addRender(render_func: => Any, position:Int = 0) = {
-    val operation_id = /*nextOperationId*/nextId
-    renders +=  RenderElement(operation_id, () => render_func, position)
-    operations_mapping += operation_id -> RenderOperations.Render
-    operation_id
+    renders.addOp(() => render_func)
   }
 
   def render(render_func: => Any) = addRender(render_func)
   def render(position:Int = 0)(render_func: => Any) = addRender(render_func, position)
-  def delRenders(render_ids:Int*) = {
-    render_ids.foldLeft(true)((overall_result, render_id) => {
-      val deletion_result = renders.find(_.operation_id == render_id) match {
-        case Some(r) => {
-          renders -= r
-          log.debug("deleted render with id "+render_id)
-          true
-        }
-        case None => {
-          log.warn("render with id "+render_id+" not found among renders so wasn't deleted")
-          false
-        }
-      }
-      overall_result && deletion_result
-    })
-  }
-  def delAllRenders() {
-    renders.clear()
-    log.info("deleted all render operations")
-  }
-  def delAllRendersExcept(operation_ids:Int*) = {
-    delRenders(renders.filter(render => !operation_ids.contains(render.operation_id)).map(_.operation_id).toSeq:_*)
+
+  def delRender(operation_id:Int) = {renders.delOp(operation_id)}
+  def delRenders(operation_ids:Int*) {renders.delOps(operation_ids:_*)}
+  def delAllRenders() {renders.delAllOps()}
+  def delAllRendersExcept(except_operation_ids:Int*) {renders.delAllOpsExcept(except_operation_ids:_*)}
+
+  private[scage] val interfaces = operations_mapping.container("interfaces")
+
+  def interface(interface_func: => Any):Int = {
+    interfaces.addOp(() => interface_func)
   }
 
-  private val interfaces = ArrayBuffer[(Int, () => Any)]()
-  def interface(interface_func: => Any):Int = {
-    val operation_id = /*nextOperationId*/nextId
-    interfaces += (operation_id, () => interface_func)
-    operations_mapping += operation_id -> RenderOperations.Interface
-    operation_id
-  }
   def interfaceFromXml(interface_id:String, parameters: => Array[Any] = Array[Any]()):Int = {
     interface {
       ScageMessage.printInterface(ScageXML.xmlInterface(interface_id, parameters:_*))
     }
   }
-  def delInterfaces(interface_ids:Int*) = {
-    interface_ids.foldLeft(true)((overall_result, interface_id) => {
-      val deletion_result = interfaces.find(_._1 == interface_id) match {
-        case Some(i) => {
-          interfaces -= i
-          log.debug("deleted interface with id "+interface_id)
-          true
-        }
-        case None => {
-          log.warn("interface with id "+interface_id+" not found among interfaces so wasn't deleted")
-          false
-        }
-      }
-      overall_result && deletion_result
-    })
-  }
-  def delAllInterfaces() {
-    interfaces.clear()
-    log.info("deleted all interface operations")
-  }
-  def delAllInterfacesExcept(operation_ids:Int*) = {
-    delInterfaces(interfaces.filter(interface => !operation_ids.contains(interface._1)).map(_._1):_*)
-  }
+
+  def delInterface(operation_id:Int) = {interfaces.delOp(operation_id)}
+  def delInterfaces(operation_ids:Int*) {interfaces.delOps(operation_ids:_*)}
+  def delAllInterfaces() {interfaces.delAllOps()}
+  def delAllInterfacesExcept(except_operation_ids:Int*) {interfaces.delAllOpsExcept(except_operation_ids:_*)}
 
   val TICKS_PER_SECOND = 60
   val SKIP_TICKS = 1000 / TICKS_PER_SECOND
@@ -575,7 +532,7 @@ trait Renderer extends Scage {
     loops = 0
     while(System.currentTimeMillis() > next_game_tick && loops < MAX_FRAMESKIP) {
       restart_toggled = false
-      def _execute(_actions:Seq[(Int, () => Any)]) {
+      def _execute(_actions:Traversable[(Int, () => Any)]) {
         if(_actions.nonEmpty && !restart_toggled) {
           val (action_id, action_operation) = _actions.head
           current_operation_id = action_id
@@ -583,7 +540,7 @@ trait Renderer extends Scage {
           _execute(_actions.tail)
         }
       }
-      _execute(actions)
+      _execute(actions.ops)
       next_game_tick += SKIP_TICKS
       loops += 1
     }
@@ -598,7 +555,7 @@ trait Renderer extends Scage {
         val coord = window_center() - central_coord()*_global_scale
         GL11.glTranslatef(coord.x , coord.y, 0.0f)
         GL11.glScalef(_global_scale, _global_scale, 1)
-        for(RenderElement(render_id, render_operation, _) <- renders) {
+        for((render_id, render_operation) <- renders.ops) {
           current_operation_id = render_id
           GL11.glPushMatrix()
           render_operation()
@@ -606,7 +563,7 @@ trait Renderer extends Scage {
         }
       GL11.glPopMatrix()
 
-      for((interface_id, interface_operation) <- interfaces) {
+      for((interface_id, interface_operation) <- interfaces.ops) {
         current_operation_id = interface_id
         interface_operation()
       }
@@ -614,34 +571,5 @@ trait Renderer extends Scage {
       Display.update()
       countFPS()
     }
-  }
-
-  object RenderOperations extends Enumeration {
-    val Render, Interface = Value
-  }
-
-  override def delOperation(operation_id:Int) = { // as I understand Scala - other possible 'delOperation's from other Scage's children will be stackable via inheritance
-    operations_mapping.remove(operation_id) match {
-      case Some(operation_type) => {
-        operation_type match {
-          case RenderOperations.Render => delRenders(operation_id)
-          case RenderOperations.Interface => delInterfaces(operation_id)
-          case _ => super.delOperation(operation_id)
-        }
-      }
-      case None =>  super.delOperation(operation_id)
-    }
-  }
-
-  // I believe such method is of no use in real project
-  override def delAllOperations() {
-    delAllRenders()
-    delAllInterfaces()
-    super.delAllOperations()
-  }
-  override def delAllOperationsExcept(operation_ids:Int*) {
-    delAllRendersExcept(operation_ids:_*)
-    delAllInterfacesExcept(operation_ids:_*)
-    super.delAllOperationsExcept(operation_ids:_*)
   }
 }

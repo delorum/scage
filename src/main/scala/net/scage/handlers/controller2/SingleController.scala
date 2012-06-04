@@ -19,43 +19,28 @@ trait SingleController extends ScageController {
   private var on_mouse_wheel_down: Vec => Any = v => {}
 
   def key(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) = {
-    val control_id = nextId
     keyboard_keys(key_code) = SingleKeyEvent(key_code, () => repeat_time, () => if(!on_pause) onKeyDown, () => if(!on_pause) onKeyUp)
-    deletion_operations += control_id -> (() => keyboard_keys -= key_code)
-    operations_mapping += control_id -> ControlOperations.Control
-    control_id
+    deletion_operations.addOp(() => keyboard_keys -= key_code)
   }
    def keyNoPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) = {
-    val control_id = nextId
     keyboard_keys(key_code) = SingleKeyEvent(key_code, () => repeat_time, () => onKeyDown, () => onKeyUp)
-    deletion_operations += control_id -> (() => keyboard_keys -= key_code)
-    operations_mapping += control_id -> ControlOperations.Control
-    control_id
+    deletion_operations.addOp(() => keyboard_keys -= key_code)
   }
 
   def anykey(onKeyDown: => Any) = {
-    val control_id = nextId
     anykey = () => if(!on_pause) onKeyDown
-    deletion_operations += control_id -> (() => anykey = () => {})
-    operations_mapping += control_id -> ControlOperations.Control
-    control_id
+    deletion_operations.addOp(() => anykey = () => {})
   }
   def anykeyNoPause(onKeyDown: => Any) = {
-    val control_id = nextId
     anykey = () => onKeyDown
-    deletion_operations += control_id -> (() => anykey = () => {})
-    operations_mapping += control_id -> ControlOperations.Control
-    control_id
+    deletion_operations.addOp(() => anykey = () => {})
   }
 
   def mouseCoord = Vec(Mouse.getX, Mouse.getY)
   def isMouseMoved = Mouse.getDX != 0 || Mouse.getDY != 0
   private def mouseButton(button_code:Int, repeat_time: => Long = 0, onButtonDown: Vec => Any, onButtonUp: Vec => Any = Vec => {}) = {
-    val control_id = nextId
     mouse_buttons(button_code) = SingleMouseButtonEvent(button_code, () => repeat_time, onButtonDown, onButtonUp)
-    deletion_operations += control_id -> (() => mouse_buttons -= button_code)
-    operations_mapping += control_id -> ControlOperations.Control
-    control_id
+    deletion_operations.addOp(() => mouse_buttons -= button_code)
   }
 
   def leftMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
@@ -73,26 +58,17 @@ trait SingleController extends ScageController {
   }
   
   def mouseMotion(onMotion: Vec => Any) = {
-    val control_id = nextId
     on_mouse_motion = mouse_coord => if(!on_pause) onMotion(mouse_coord)
-    deletion_operations += control_id -> (() => on_mouse_motion = v => {})
-    operations_mapping += control_id -> ControlOperations.Control
-    control_id
+    deletion_operations.addOp(() => on_mouse_motion = v => {})
   }
   def mouseMotionNoPause(onMotion: Vec => Any) = {
-    val control_id = nextId
     on_mouse_motion = onMotion
-    deletion_operations += control_id -> (() => on_mouse_motion = v => {})
-    operations_mapping += control_id -> ControlOperations.Control
-    control_id
+    deletion_operations.addOp(() => on_mouse_motion = v => {})
   }
 
   private def mouseDrag(button_code:Int, onDrag: Vec => Any) = {
-    val control_id = nextId
     on_mouse_drag_motion(button_code) = onDrag
-    deletion_operations += control_id -> (() => on_mouse_drag_motion -= button_code)
-    operations_mapping += control_id -> ControlOperations.Control
-    control_id
+    deletion_operations.addOp(() => on_mouse_drag_motion -= button_code)
   }
 
   def leftMouseDrag(onDrag: Vec => Any) = {
@@ -113,14 +89,12 @@ trait SingleController extends ScageController {
     val control_id = nextId
     on_mouse_wheel_up = mouse_coord => if(!on_pause) onWheelUp(mouse_coord)
     deletion_operations += control_id -> (() => on_mouse_wheel_up = v => {})
-    operations_mapping += control_id -> ControlOperations.Control
     control_id
   }
   def mouseWheelUpNoPause(onWheelUp: Vec => Any) = {
     val control_id = nextId
     on_mouse_wheel_up = onWheelUp
     deletion_operations += control_id -> (() => on_mouse_wheel_up = v => {})
-    operations_mapping += control_id -> ControlOperations.Control
     control_id
   }
 
@@ -128,14 +102,12 @@ trait SingleController extends ScageController {
     val control_id = nextId
     on_mouse_wheel_down = mouse_coord => if(!on_pause) onWheelDown(mouse_coord)
     deletion_operations += control_id -> (() => on_mouse_wheel_down = v => {})
-    operations_mapping += control_id -> ControlOperations.Control
     control_id
   }
   def mouseWheelDownNoPause(onWheelDown: Vec => Any) = {
     val control_id = nextId
     on_mouse_wheel_down = onWheelDown
     deletion_operations += control_id -> (() => on_mouse_wheel_down = v => {})
-    operations_mapping += control_id -> ControlOperations.Control
     control_id
   }
 

@@ -10,7 +10,7 @@ class OperationMapping[A] {
   case class Container(name:String, private[OperationMapping] val contents:HashMap[Int, A] = HashMap[Int, A]()) {
     def addOp(op:A) = {addOperation(name, op)}
 
-    def delOp(op_id:Int) {if(contents.contains(op_id)) delOperation(op_id)}
+    def delOp(op_id:Int) = {if(contents.contains(op_id)) delOperation(op_id) else None}
     def delOps(op_ids:Int*) {delOperations(op_ids.filter(contents.contains(_)))}
 
     def delAllOps() {
@@ -41,17 +41,20 @@ class OperationMapping[A] {
     op_id
   }
 
-  def delOperation(op_id:Int) {
+  def delOperation(op_id:Int) = {
     mapping.remove(op_id) match {
       case Some(Container(name, contents)) =>
         contents.remove(op_id) match {
-          case Some(op) =>
+          case some_op @ Some(_) =>
             log.debug("deleted operation with id "+op_id+" from the container "+name)
+            some_op
           case None =>
             log.warn("operation with id "+op_id+" not found in the container "+name)
+            None
         }
       case None =>
         log.warn("operation with id "+op_id+" not found among all containers")
+        None
     }
   }
 
@@ -81,13 +84,13 @@ trait Scage {
   def currentOperation = current_operation_id
 
   private[scage] val operations_mapping = new OperationMapping[() => Any]()
-  def delOperation(operation_id:Int) {
+  def delOperation(operation_id:Int) = {
     operations_mapping.delOperation(operation_id)
   }
 
   def operationExists(operation_id:Int) = operations_mapping.operationExists(operation_id)
 
-  def deleteSelf() {delOperation(current_operation_id)}
+  def deleteSelf() = {delOperation(current_operation_id)}
   def delOperations(operation_ids:Int*) {
     operations_mapping.delOperations(operation_ids:_*)
   }
@@ -115,7 +118,7 @@ trait Scage {
     }
   }
 
-  def delPreinit(operation_id:Int) {preinits.delOp(operation_id)}
+  def delPreinit(operation_id:Int) = {preinits.delOp(operation_id)}
   def delPreinits(operation_ids:Int*) {preinits.delOps(operation_ids:_*)}
   def delAllPreinits() {preinits.delAllOps()}
   def delAllPreinitsExcept(except_operation_ids:Int*) {preinits.delAllOpsExcept(except_operation_ids:_*)}
@@ -136,7 +139,7 @@ trait Scage {
     scage_log.info("inits: "+inits.length+"; actions: "+actions.length+"; clears: "+clears.length)
   }
 
-  def delInit(operation_id:Int) {inits.delOp(operation_id)}
+  def delInit(operation_id:Int) = {inits.delOp(operation_id)}
   def delInits(operation_ids:Int*) {inits.delOps(operation_ids:_*)}
   def delAllInits() {inits.delAllOps()}
   def delAllInitsExcept(except_operation_ids:Int*) {inits.delAllOpsExcept(except_operation_ids:_*)}
@@ -215,7 +218,7 @@ trait Scage {
     _execute(actions.ops)
   }
 
-  def delAction(operation_id:Int) {actions.delOp(operation_id)}
+  def delAction(operation_id:Int) = {actions.delOp(operation_id)}
   def delActions(operation_ids:Int*) {actions.delOps(operation_ids:_*)}
   def delAllActions() {actions.delAllOps()}
   def delAllActionsExcept(except_operation_ids:Int*) {actions.delAllOpsExcept(except_operation_ids:_*)}
@@ -232,7 +235,7 @@ trait Scage {
     }
   }
 
-  def delClear(operation_id:Int) {clears.delOp(operation_id)}
+  def delClear(operation_id:Int) = {clears.delOp(operation_id)}
   def delClears(operation_ids:Int*) {clears.delOps(operation_ids:_*)}
   def delAllClears() {clears.delAllOps()}
   def delAllClearsExcept(except_operation_ids:Int*) {clears.delAllOpsExcept(except_operation_ids:_*)}
@@ -250,7 +253,7 @@ trait Scage {
     }
   }
 
-  def delDispose(operation_id:Int) {disposes.delOp(operation_id)}
+  def delDispose(operation_id:Int) = {disposes.delOp(operation_id)}
   def delDisposes(operation_ids:Int*) {disposes.delOps(operation_ids:_*)}
   def delAllDisposes() {disposes.delAllOps()}
   def delAllDisposesExcept(except_operation_ids:Int*) {disposes.delAllOpsExcept(except_operation_ids:_*)}

@@ -68,56 +68,26 @@ trait ScageController extends Scage {
 
   def checkControls()
   
-  private[controller2] val deletion_operations = HashMap[Int, () => Any]()
+  private[controller2] val deletion_operations = operations_mapping.container("control_deleters")
 
+  def delControl(control_id:Int) = {
+    deletion_operations.delOp(control_id) match {
+      case some_op @ Some(op) =>
+        op()
+        some_op
+      case None =>
+        None
+    }
+  }
   def delControls(control_ids:Int*):Boolean = {
-    val result = control_ids.foldLeft(true)((overall_result, control_id) => {
-      val deletion_result = deletion_operations.get(control_id) match {
-        case Some(op) =>
-          op()
-          log.debug("deleted control with id "+control_id)
-          true
-        case None =>
-          log.warn("control with id "+control_id+" not found so wasn't deleted")
-          false
-      }
-      overall_result && deletion_result
-    })
-    deletion_operations --= control_ids
-    result
+    control_ids.foreach(delControl(_))
   }
   def delAllControls() {
-    for(op <- deletion_operations.values) op()
-    deletion_operations.clear()
-    log.info("deleted all control operations")
+    for(op <- deletion_operations.ops.values) op()
+    deletion_operations.delAllOps()
   }
   def delAllControlsExcept(control_ids:Int*) {
     delControls(deletion_operations.keys.filter(!control_ids.contains(_)).toSeq:_*)
-  }
-
-  object ControlOperations extends Enumeration {
-    val Control = Value
-  }
-
-  override def delOperation(operation_id:Int) = {
-    operations_mapping.remove(operation_id) match {
-      case Some(operation_type) => {
-        operation_type match {
-          case ControlOperations.Control => delControls(operation_id)
-          case _ => super.delOperation(operation_id)
-        }
-      }
-      case None =>  super.delOperation(operation_id)
-    }
-  }
-  
-  override def delAllOperations() {
-    delAllControls()
-    super.delAllOperations()
-  }
-  override def delAllOperationsExcept(operation_ids:Int*) {
-    delAllControlsExcept(operation_ids:_*)
-    super.delAllOperationsExcept(operation_ids:_*)
   }
 }
 

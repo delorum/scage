@@ -12,8 +12,8 @@ abstract class Screen(val unit_name:String = "Scage Screen") extends Scage with 
 
   override def run() {
     log.info("starting screen "+unit_name+"...")
-    preinit()
-    init()
+    executePreinits()
+    executeInits()
     is_running = true
     prepareRendering()
     log.info(unit_name+": run")
@@ -22,8 +22,8 @@ abstract class Screen(val unit_name:String = "Scage Screen") extends Scage with 
       executeActions()
       performRendering()
     }
-    clear()
-    dispose()
+    executeClears()
+    executeDisposes()
     scage_log.info(unit_name+" was stopped")
   }
 }
@@ -33,8 +33,8 @@ abstract class ScreenApp(
   window_height:Int = property("screen.height", 600)
 ) extends Screen(unit_name) with App {
   override def run() {
-    preinit()
-    init()
+    executePreinits()
+    executeInits()
     is_running = true
     prepareRendering()
     scage_log.info(unit_name+": run")
@@ -44,8 +44,8 @@ abstract class ScreenApp(
       performRendering()
     }
     renderExitMessage()
-    clear()
-    dispose()
+    executeClears()
+    executeDisposes()
   }
 
   override def main(args:Array[String]) {

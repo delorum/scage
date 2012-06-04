@@ -23,7 +23,6 @@ trait MultiController extends ScageController {
     if(keyboard_keys.contains(key_code)) keyboard_keys(key_code) += event
     else keyboard_keys(key_code) = ArrayBuffer(event)
     deletion_operations += control_id -> (() => keyboard_keys(key_code) -= event)
-    operations_mapping += control_id -> ControlOperations.Control
     control_id
   }
   def keyNoPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) = {
@@ -32,7 +31,6 @@ trait MultiController extends ScageController {
     if(keyboard_keys.contains(key_code)) keyboard_keys(key_code) += event
     else keyboard_keys(key_code) = ArrayBuffer(event)
     deletion_operations += control_id -> (() => keyboard_keys(key_code) -= event)
-    operations_mapping += control_id -> ControlOperations.Control
     control_id
   }
 
@@ -41,7 +39,6 @@ trait MultiController extends ScageController {
     val event = () => if(!on_pause) onKeyDown
     anykeys += event
     deletion_operations += control_id -> (() => anykeys -= event)
-    operations_mapping += control_id -> ControlOperations.Control
     control_id
   }
   def anykeyNoPause(onKeyDown: => Any) = {
@@ -49,7 +46,6 @@ trait MultiController extends ScageController {
     val event = () => onKeyDown
     anykeys += event
     deletion_operations += control_id -> (() => anykeys -= event)
-    operations_mapping += control_id -> ControlOperations.Control
     control_id
   }
 
@@ -61,7 +57,6 @@ trait MultiController extends ScageController {
     if(mouse_buttons.contains(button_code)) mouse_buttons(button_code) += event
     else mouse_buttons(button_code) = ArrayBuffer(event)
     deletion_operations += control_id -> (() => mouse_buttons(button_code) -= event)
-    operations_mapping += control_id -> ControlOperations.Control
     control_id
   }
 
@@ -84,14 +79,12 @@ trait MultiController extends ScageController {
     val event = {mouse_coord:Vec => if(!on_pause) onMotion(mouse_coord)}
     mouse_motions += event
     deletion_operations += control_id -> (() => mouse_motions -= event)
-    operations_mapping += control_id -> ControlOperations.Control
     control_id
   }
   def mouseMotionNoPause(onMotion: Vec => Any) = {
     val control_id = nextId
     mouse_motions += onMotion
     deletion_operations += control_id -> (() => mouse_motions -= onMotion)
-    operations_mapping += control_id -> ControlOperations.Control
     control_id
   }
 
@@ -100,7 +93,6 @@ trait MultiController extends ScageController {
     if(mouse_drag_motions.contains(button_code)) mouse_drag_motions(button_code) += onDrag
     else mouse_drag_motions(button_code) = ArrayBuffer(onDrag)
     deletion_operations += control_id -> (() => mouse_drag_motions(button_code) -= onDrag)
-    operations_mapping += control_id -> ControlOperations.Control
     control_id
   }
 
@@ -123,14 +115,12 @@ trait MultiController extends ScageController {
     val event = {mouse_coord:Vec => if(!on_pause) onWheelUp(mouse_coord)}
     mouse_wheel_ups += event
     deletion_operations += control_id -> (() => mouse_wheel_ups -= event)
-    operations_mapping += control_id -> ControlOperations.Control
     control_id
   }
   def mouseWheelUpNoPause(onWheelUp: Vec => Any) = {
     val control_id = nextId
     mouse_wheel_ups += onWheelUp
     deletion_operations += control_id -> (() => mouse_wheel_ups -= onWheelUp)
-    operations_mapping += control_id -> ControlOperations.Control
     control_id
   }
 
@@ -139,14 +129,12 @@ trait MultiController extends ScageController {
     val event = {mouse_coord:Vec => if(!on_pause) onWheelDown(mouse_coord)}
     mouse_wheel_downs += event
     deletion_operations += control_id -> (() => mouse_wheel_downs -= event)
-    operations_mapping += control_id -> ControlOperations.Control
     control_id
   }
   def mouseWheelDownNoPause(onWheelDown: Vec => Any) = {
     val control_id = nextId
     mouse_wheel_downs += onWheelDown
     deletion_operations += control_id -> (() => mouse_wheel_downs -= onWheelDown)
-    operations_mapping += control_id -> ControlOperations.Control
     control_id
   }
 
