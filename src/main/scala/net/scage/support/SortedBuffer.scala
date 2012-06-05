@@ -3,10 +3,12 @@ package net.scage.support
 import collection.mutable.ArrayBuffer
 import collection.generic.{Shrinkable, Growable}
 
-class SortedBuffer[A <: Ordered[A]](init_arr:ArrayBuffer[A]) extends Traversable[A] with Growable[A] with Shrinkable[A] {
+class SortedBuffer[A <: Ordered[A]](init_arr:ArrayBuffer[A]) extends Seq[A] with Growable[A] with Shrinkable[A] {
   def this(elems:A*) {this(ArrayBuffer(elems:_*))}
 
   private val arr = init_arr.sortWith(_ < _)
+
+  def remove(idx:Int) = arr.remove(idx)
 
   def clear() {arr.clear()}
 
@@ -22,9 +24,9 @@ class SortedBuffer[A <: Ordered[A]](init_arr:ArrayBuffer[A]) extends Traversable
     this
   }
 
-  def foreach[U](f: A => U) {
-    arr.foreach(f)
-  }
+  def apply(idx: Int) = arr.apply(idx)
+  def length: Int = arr.length
+  def iterator: Iterator[A] = arr.iterator
 }
 
 object SortedBuffer {

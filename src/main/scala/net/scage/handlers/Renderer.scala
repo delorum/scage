@@ -1,6 +1,5 @@
 package net.scage.handlers
 
-import _root_.net.scage.ScageScreen._
 import java.io.InputStream
 import org.newdawn.slick.opengl.{TextureLoader, Texture}
 import org.lwjgl.opengl.{DisplayMode, GL11, Display}
@@ -12,13 +11,13 @@ import _root_.net.scage.support.messages.ScageXML._
 import org.lwjgl.BufferUtils
 import net.scage.support.ScageId._
 import org.newdawn.slick.util.ResourceLoader
-import net.scage.support.{SortedBuffer, ScageColor, Vec}
-import collection.mutable.ArrayBuffer
 import com.weiglewilczek.slf4s.Logger
 import net.scage.support.messages.{ScageXML, ScageMessage}
 import net.scage.support.tracer3.{Trace, ScageTracer}
 import java.awt.GraphicsEnvironment
-import net.scage.Scage
+import net.scage.{ScageOperation, Scage}
+import collection.mutable.ArrayBuffer
+import net.scage.support.{SortedBuffer, ScageColor, Vec}
 
 object DisplayListsHolder {
   private val log = Logger(this.getClass.getName)
@@ -32,9 +31,9 @@ object DisplayListsHolder {
     for {
       (list_code, func) <- lists
     } {
-      GL11.glNewList(list_code, GL11.GL_COMPILE);
+      GL11.glNewList(list_code, GL11.GL_COMPILE)
       func()
-      GL11.glEndList();
+      GL11.glEndList()
     }
   }
 }
@@ -486,20 +485,41 @@ trait Renderer extends Scage {
     else (coord / globalScale) + (center - windowCenter/globalScale)
   }
 
-  private val renders = operations_mapping.container("renders")
-  private def addRender(render_func: => Any, position:Int = 0) = {
-    renders.addOp(() => render_func)
+  case class RenderOperation(render_id:Int, render_func:() => Any, position:Int) extends ScageOperation(render_id, render_func) with Ordered[RenderOperation] {
+    def compare(other_render:RenderOperation) = position - other_render.position
   }
 
-  def render(render_func: => Any) = addRender(render_func)
-  def render(position:Int = 0)(render_func: => Any) = addRender(render_func, position)
+  private val renders = new OperationContainer[RenderOperation] {
+    private val _render_operations = SortedBuffer[RenderOperation]()
 
-  def delRender(operation_id:Int) = {renders.delOp(operation_id)}
-  def delRenders(operation_ids:Int*) {renders.delOps(operation_ids:_*)}
-  def delAllRenders() {renders.delAllOps()}
-  def delAllRendersExcept(except_operation_ids:Int*) {renders.delAllOpsExcept(except_operation_ids:_*)}
+    def name:String = "renders"
 
-  private[scage] val interfaces = operations_mapping.container("interfaces")
+    protected def addOperation(operation:RenderOperation) {_render_operations += operation}
+    protected def removeOperation(op_id:Int):Option[RenderOperation] = _render_operations.indexWhere(_.render_id == op_id) match {
+      case index if index != -1 => Some(_render_operations.remove(index))
+      case _ => None
+    }
+
+    protected def containsId(op_id:Int) = _render_operations.exists(_.render_id == op_id)
+
+    def operations:Iterable[RenderOperation] = _render_operations
+    def length:Int = _render_operations.length
+
+    def addOp(op:() => Any, position:Int = 0) = {
+      val op_id = nextId
+      addOperationWithMapping(RenderOperation(op_id, op, position))
+    }
+  }
+
+  def render(render_func: => Any) = renders.addOp(() => render_func)
+  def render(position:Int = 0)(render_func: => Any) = renders.addOp(() => render_func, position)
+
+  def delRender(operation_id:Int) = {renders.delOperation(operation_id)}
+  def delRenders(operation_ids:Int*) {renders.delOperations(operation_ids:_*)}
+  def delAllRenders() {renders.delAllOperations()}
+  def delAllRendersExcept(except_operation_ids:Int*) {renders.delAllOperationsExcept(except_operation_ids:_*)}
+
+  private[scage] val interfaces = defaultContainer("interfaces")
 
   def interface(interface_func: => Any):Int = {
     interfaces.addOp(() => interface_func)
@@ -511,10 +531,10 @@ trait Renderer extends Scage {
     }
   }
 
-  def delInterface(operation_id:Int) = {interfaces.delOp(operation_id)}
-  def delInterfaces(operation_ids:Int*) {interfaces.delOps(operation_ids:_*)}
-  def delAllInterfaces() {interfaces.delAllOps()}
-  def delAllInterfacesExcept(except_operation_ids:Int*) {interfaces.delAllOpsExcept(except_operation_ids:_*)}
+  def delInterface(operation_id:Int) = {interfaces.delOperation(operation_id)}
+  def delInterfaces(operation_ids:Int*) {interfaces.delOperations(operation_ids:_*)}
+  def delAllInterfaces() {interfaces.delAllOperations()}
+  def delAllInterfacesExcept(except_operation_ids:Int*) {interfaces.delAllOperationsExcept(except_operation_ids:_*)}
 
   val TICKS_PER_SECOND = 60
   val SKIP_TICKS = 1000 / TICKS_PER_SECOND
@@ -532,15 +552,15 @@ trait Renderer extends Scage {
     loops = 0
     while(System.currentTimeMillis() > next_game_tick && loops < MAX_FRAMESKIP) {
       restart_toggled = false
-      def _execute(_actions:Traversable[(Int, () => Any)]) {
+      def _execute(_actions:Traversable[ScageOperation]) {
         if(_actions.nonEmpty && !restart_toggled) {
-          val (action_id, action_operation) = _actions.head
+          val ScageOperation(action_id, action_operation) = _actions.head
           current_operation_id = action_id
           action_operation()
           _execute(_actions.tail)
         }
       }
-      _execute(actions.ops)
+      _execute(actions.operations)
       next_game_tick += SKIP_TICKS
       loops += 1
     }
@@ -555,7 +575,7 @@ trait Renderer extends Scage {
         val coord = window_center() - central_coord()*_global_scale
         GL11.glTranslatef(coord.x , coord.y, 0.0f)
         GL11.glScalef(_global_scale, _global_scale, 1)
-        for((render_id, render_operation) <- renders.ops) {
+        for(RenderOperation(render_id, render_operation, _) <- renders.operations) {
           current_operation_id = render_id
           GL11.glPushMatrix()
           render_operation()
@@ -563,7 +583,7 @@ trait Renderer extends Scage {
         }
       GL11.glPopMatrix()
 
-      for((interface_id, interface_operation) <- interfaces.ops) {
+      for(ScageOperation(interface_id, interface_operation) <- interfaces.operations) {
         current_operation_id = interface_id
         interface_operation()
       }

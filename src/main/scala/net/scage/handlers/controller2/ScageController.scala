@@ -1,9 +1,9 @@
 package net.scage.handlers.controller2
 
 import net.scage.support.Vec
-import net.scage.Scage
 import collection.mutable.HashMap
 import com.weiglewilczek.slf4s.Logger
+import net.scage.{ScageOperation, Scage}
 
 case class KeyPress(key_code:Int, var was_pressed:Boolean, var last_pressed_time:Long)
 case class MouseButtonPress(button_code:Int, var was_pressed:Boolean, var last_pressed_time:Long)
@@ -67,27 +67,27 @@ trait ScageController extends Scage {
   def mouseWheelDownNoPause(onWheelDown: Vec => Any):Int
 
   def checkControls()
-  
-  private[controller2] val deletion_operations = operations_mapping.container("control_deleters")
 
-  def delControl(control_id:Int) = {
-    deletion_operations.delOp(control_id) match {
-      case some_op @ Some(op) =>
-        op()
-        some_op
-      case None =>
-        None
+  class ControlDeletionsContainer(name:String) extends DefaultOperationContainer(name) {
+    override def delOperation(op_id:Int) = {
+      removeOperation(op_id) match {
+        case some_operation @ Some(ScageOperation(_, op)) =>
+          log.debug("deleted operation with id "+op_id+" from the container "+name)
+          operation_mapping -= op_id
+          op()
+          some_operation
+        case None =>
+          log.warn("operation with id "+op_id+" not found in the container "+name)
+          None
+      }
     }
   }
-  def delControls(control_ids:Int*) {
-    control_ids.foreach(delControl(_))
-  }
-  def delAllControls() {
-    for(op <- deletion_operations.ops.values) op()
-    deletion_operations.delAllOps()
-  }
-  def delAllControlsExcept(control_ids:Int*) {
-    delControls(deletion_operations.ops.keys.filter(!control_ids.contains(_)).toSeq:_*)
-  }
+
+  private[controller2] val deletion_operations = new ControlDeletionsContainer("control_deleters")
+
+  def delControl(control_id:Int) = {deletion_operations.delOperation(control_id)}
+  def delControls(control_ids:Int*) {deletion_operations.delOperations(control_ids:_*)}
+  def delAllControls() {deletion_operations.delAllOperations()}
+  def delAllControlsExcept(except_control_ids:Int*) {deletion_operations.delAllOperationsExcept(except_control_ids:_*)}
 }
 
