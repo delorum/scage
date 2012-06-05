@@ -1,8 +1,8 @@
 package net.scage
 
 import com.weiglewilczek.slf4s.Logger
-import collection.mutable.HashMap
 import support.ScageId._
+import collection.mutable.{ArrayBuffer, HashMap}
 
 case class ScageOperation(op_id:Int, op:() => Any)
 
@@ -16,9 +16,7 @@ trait OperationMapping {
     protected def removeOperation(op_id:Int):Option[A]
     private[OperationMapping] def _removeOperation(op_id:Int):Option[A] = removeOperation(op_id)
 
-    protected def containsId(id:Int):Boolean
-
-    def operations:Iterable[A]
+    def operations:Seq[A]
     def length:Int
 
     protected val operation_mapping = mapping
@@ -42,27 +40,29 @@ trait OperationMapping {
     }
 
     def delOperations(op_ids:Int*) {op_ids.foreach(delOperation(_))}
+    def delOperations(op_ids:Traversable[Int]) {op_ids.foreach(delOperation(_))}
 
     def delAllOperations() {
-      delOperations(operations.map(_.op_id):_*)
+      delOperations(operations.map(_.op_id))
       log.info("deleted all operations from the container "+name)
     }
 
     def delAllOperationsExcept(except_op_ids:Int*) {
-      delOperations(operations.view.map(_.op_id).filter(!except_op_ids.contains(_)):_*)
+      delOperations(operations.view.map(_.op_id).filter(!except_op_ids.contains(_)))
     }
   }
 
   class DefaultOperationContainer(val name:String) extends OperationContainer[ScageOperation] {
-    private val _operations = HashMap[Int, ScageOperation]()
+    private val _operations = ArrayBuffer[ScageOperation]()  // maybe replace this with ArrayBuffer, because I don't like values method from HashMap
 
-    protected def addOperation(operation:ScageOperation) {_operations += (operation.op_id -> operation)}
-    protected def removeOperation(op_id:Int):Option[ScageOperation] = _operations.remove(op_id)
+    protected def addOperation(operation:ScageOperation) {_operations += operation}
+    protected def removeOperation(op_id:Int):Option[ScageOperation] = _operations.indexWhere(_.op_id == op_id) match {
+      case index if index != -1 => Some(_operations.remove(index))
+      case _ => None
+    }
 
-    protected def containsId(op_id:Int) = _operations.contains(op_id)
-
-    def operations:Iterable[ScageOperation] = _operations.values
-    def length:Int = _operations.size
+    def operations:Seq[ScageOperation] = _operations
+    def length:Int = _operations.length
 
     def addOp(op:() => Any) = {
       val op_id = nextId
@@ -92,17 +92,14 @@ trait OperationMapping {
   }
 
   def delOperations(op_ids:Int*) {op_ids.foreach(delOperation(_))}
-  def delOperations(op_ids:Iterable[Int]) {op_ids.foreach(delOperation(_))}
+  def delOperations(op_ids:Traversable[Int]) {op_ids.foreach(delOperation(_))}
 
   def delAllOperations() {
     delOperations(mapping.keys)
     log.info("deleted all operations")
   }
 
-  def delAllOperationsExcept(except_op_ids:Int*) {
-    val op_ids = mapping.keys.filter(!except_op_ids.contains(_))
-    delOperations(op_ids)
-  }
+  def delAllOperationsExcept(except_op_ids:Int*) {delOperations(mapping.keys.filter(!except_op_ids.contains(_)))}
 
   def operationExists(op_id:Int) = mapping.contains(op_id)
 }

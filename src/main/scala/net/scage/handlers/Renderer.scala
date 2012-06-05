@@ -500,9 +500,7 @@ trait Renderer extends Scage {
       case _ => None
     }
 
-    protected def containsId(op_id:Int) = _render_operations.exists(_.render_id == op_id)
-
-    def operations:Iterable[RenderOperation] = _render_operations
+    def operations:Seq[RenderOperation] = _render_operations
     def length:Int = _render_operations.length
 
     def addOp(op:() => Any, position:Int = 0) = {
