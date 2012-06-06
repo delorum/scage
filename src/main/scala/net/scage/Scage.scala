@@ -53,7 +53,7 @@ trait OperationMapping {
   }
 
   class DefaultOperationContainer(val name:String) extends OperationContainer[ScageOperation] {
-    private val _operations = ArrayBuffer[ScageOperation]()  // maybe replace this with ArrayBuffer, because I don't like values method from HashMap
+    private val _operations = ArrayBuffer[ScageOperation]()
 
     protected def addOperation(operation:ScageOperation) {_operations += operation}
     protected def removeOperation(op_id:Int):Option[ScageOperation] = _operations.indexWhere(_.op_id == op_id) match {
