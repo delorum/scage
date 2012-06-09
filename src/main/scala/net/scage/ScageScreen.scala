@@ -32,6 +32,9 @@ abstract class ScreenApp(
   window_width:Int  = property("screen.width", 800),
   window_height:Int = property("screen.height", 600)
 ) extends Screen(unit_name) with App {
+  val app_start_moment = System.currentTimeMillis()
+  def msecsFromAppStart = System.currentTimeMillis() - app_start_moment
+
   override def run() {
     executePreinits()
     executeInits()

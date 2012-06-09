@@ -49,8 +49,8 @@ trait RendererLib {
   def backgroundColor_=(c:ScageColor) {if(c != DEFAULT_COLOR) GL11.glClearColor(c.red, c.green, c.blue, 0)}
 
   def clearScreen() {
-    GL11.glClear(GL11.GL_COLOR_BUFFER_BIT/* | GL11.GL_DEPTH_BUFFER_BIT*/);
-    GL11.glLoadIdentity();
+    GL11.glClear(GL11.GL_COLOR_BUFFER_BIT/* | GL11.GL_DEPTH_BUFFER_BIT*/)
+    GL11.glLoadIdentity()
   }
   
   def currentColor = {
@@ -62,9 +62,9 @@ trait RendererLib {
 
   def displayList(func: => Unit) = {
     val list_code = /*nextDisplayListKey*/nextId
-    GL11.glNewList(list_code, GL11.GL_COMPILE);
+    GL11.glNewList(list_code, GL11.GL_COMPILE)
     func
-    GL11.glEndList();
+    GL11.glEndList()
     DisplayListsHolder.addDisplayList(list_code, func)
     list_code
   }
@@ -85,147 +85,154 @@ trait RendererLib {
   def openglScale(scale_factor:Float) {GL11.glScalef(scale_factor, scale_factor, 1)}
 
   private lazy val FILLED_CIRCLE = displayList {
-    GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+    GL11.glBegin(GL11.GL_TRIANGLE_FAN)
     for(i <- 0 until 100) {
-      val cosine = math.cos(i*2*math.Pi/100).toFloat;
-      val sine = math.sin(i*2*math.Pi/100).toFloat;
-      GL11.glVertex2f(cosine, sine);
+      val cosine = math.cos(i*2*math.Pi/100).toFloat
+      val sine = math.sin(i*2*math.Pi/100).toFloat
+      GL11.glVertex2f(cosine, sine)
     }
-    GL11.glEnd();
+    GL11.glEnd()
   }
 
   private lazy val CIRCLE = displayList {
-    GL11.glBegin(GL11.GL_LINE_LOOP);
+    GL11.glBegin(GL11.GL_LINE_LOOP)
       for(i <- 0 until 100) {
-        val cosine = math.cos(i*2*math.Pi/100).toFloat;
-        val sine = math.sin(i*2*math.Pi/100).toFloat;
-        GL11.glVertex2f(cosine, sine);
+        val cosine = math.cos(i*2*math.Pi/100).toFloat
+        val sine = math.sin(i*2*math.Pi/100).toFloat
+        GL11.glVertex2f(cosine, sine)
       }
-    GL11.glEnd();
+    GL11.glEnd()
   }
   def drawCircle(coord:Vec, radius:Float, color:ScageColor = DEFAULT_COLOR) {
     if(color != DEFAULT_COLOR) currentColor = color
-    GL11.glDisable(GL11.GL_TEXTURE_2D);
-      GL11.glPushMatrix();
-      GL11.glTranslatef(coord.x, coord.y, 0.0f);
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+      GL11.glPushMatrix()
+      GL11.glTranslatef(coord.x, coord.y, 0.0f)
       GL11.glScalef(radius,radius,1)
-     	  GL11.glCallList(CIRCLE);
+     	  GL11.glCallList(CIRCLE)
       GL11.glPopMatrix()
-    GL11.glEnable(GL11.GL_TEXTURE_2D);
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
   def drawFilledCircle(coord:Vec, radius:Float, color:ScageColor = DEFAULT_COLOR) {
     if(color != DEFAULT_COLOR) currentColor = color
-    GL11.glDisable(GL11.GL_TEXTURE_2D);
-      GL11.glPushMatrix();
-      GL11.glTranslatef(coord.x, coord.y, 0.0f);
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+      GL11.glPushMatrix()
+      GL11.glTranslatef(coord.x, coord.y, 0.0f)
       GL11.glScalef(radius,radius,1)
-     	  GL11.glCallList(FILLED_CIRCLE);
+     	  GL11.glCallList(FILLED_CIRCLE)
       GL11.glPopMatrix()
-    GL11.glEnable(GL11.GL_TEXTURE_2D);
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
   def drawLine(v1:Vec, v2:Vec, color:ScageColor = DEFAULT_COLOR) {
     if(color != DEFAULT_COLOR) currentColor = color
-    GL11.glDisable(GL11.GL_TEXTURE_2D);
-    	GL11.glBegin(GL11.GL_LINES);
-    		GL11.glVertex2f(v1.x, v1.y);
-    		GL11.glVertex2f(v2.x, v2.y);
-    	GL11.glEnd();
-    GL11.glEnable(GL11.GL_TEXTURE_2D);
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+    	GL11.glBegin(GL11.GL_LINES)
+    		GL11.glVertex2f(v1.x, v1.y)
+    		GL11.glVertex2f(v2.x, v2.y)
+    	GL11.glEnd()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
+
   def drawLines(edges:Vec*) {
-    GL11.glDisable(GL11.GL_TEXTURE_2D);
-    	GL11.glBegin(GL11.GL_LINES);
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+    	GL11.glBegin(GL11.GL_LINES)
     		edges.foreach(edge => GL11.glVertex2f(edge.x, edge.y))
-    	GL11.glEnd();
-    GL11.glEnable(GL11.GL_TEXTURE_2D);
+    	GL11.glEnd()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
-  def drawLines(edges:Array[Vec], color:ScageColor = DEFAULT_COLOR) {
+
+  def drawLines(edges:Traversable[Vec], color:ScageColor = DEFAULT_COLOR) {
     if(color != DEFAULT_COLOR) currentColor = color
-    drawLines(edges:_*)
-  }
-  def drawLines(edges:List[Vec], color:ScageColor) {
-    if(color != DEFAULT_COLOR) currentColor = color
-    drawLines(edges:_*)
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+    GL11.glBegin(GL11.GL_LINES)
+    edges.foreach(edge => GL11.glVertex2f(edge.x, edge.y))
+    GL11.glEnd()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
   def drawRect(coord:Vec, width:Float, height:Float, color:ScageColor = DEFAULT_COLOR) {
     if(color != DEFAULT_COLOR) currentColor = color
-    GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glBegin(GL11.GL_LINE_LOOP);
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+        GL11.glBegin(GL11.GL_LINE_LOOP)
           GL11.glVertex2f(coord.x, coord.y)
           GL11.glVertex2f(coord.x + width, coord.y)
           GL11.glVertex2f(coord.x + width, coord.y - height)
           GL11.glVertex2f(coord.x, coord.y - height)
-        GL11.glEnd();
-    GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glEnd()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
   def drawFilledRect(coord:Vec, width:Float, height:Float, color:ScageColor = DEFAULT_COLOR) {
     if(color != DEFAULT_COLOR) currentColor = color
-    GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glBegin(GL11.GL_QUADS);
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+        GL11.glBegin(GL11.GL_QUADS)
         GL11.glVertex2f(coord.x, coord.y)
         GL11.glVertex2f(coord.x + width, coord.y)
         GL11.glVertex2f(coord.x + width, coord.y - height)
         GL11.glVertex2f(coord.x, coord.y - height)
-      GL11.glEnd();
-    GL11.glEnable(GL11.GL_TEXTURE_2D);
+      GL11.glEnd()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
   def drawRectCentered(coord:Vec, width:Float, height:Float, color:ScageColor = DEFAULT_COLOR) {
     if(color != DEFAULT_COLOR) currentColor = color
-    GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glBegin(GL11.GL_LINE_LOOP);
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+        GL11.glBegin(GL11.GL_LINE_LOOP)
           GL11.glVertex2f(coord.x - width/2, coord.y - height/2)
           GL11.glVertex2f(coord.x - width/2, coord.y + height/2)
           GL11.glVertex2f(coord.x + width/2, coord.y + height/2)
           GL11.glVertex2f(coord.x + width/2, coord.y - height/2)
-        GL11.glEnd();
-    GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glEnd()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
   def drawFilledRectCentered(coord:Vec, width:Float, height:Float, color:ScageColor = DEFAULT_COLOR) {
     if(color != DEFAULT_COLOR) currentColor = color
-    GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glBegin(GL11.GL_QUADS);
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+        GL11.glBegin(GL11.GL_QUADS)
         GL11.glVertex2f(coord.x - width/2, coord.y - height/2)
         GL11.glVertex2f(coord.x - width/2, coord.y + height/2)
         GL11.glVertex2f(coord.x + width/2, coord.y + height/2)
         GL11.glVertex2f(coord.x + width/2, coord.y - height/2)
-      GL11.glEnd();
-    GL11.glEnable(GL11.GL_TEXTURE_2D);
+      GL11.glEnd()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
   def drawPolygon(coords:Vec*) {
-    GL11.glDisable(GL11.GL_TEXTURE_2D);
-      GL11.glBegin(GL11.GL_LINE_LOOP);
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+      GL11.glBegin(GL11.GL_LINE_LOOP)
         for(coord <- coords) GL11.glVertex2f(coord.x, coord.y)
-      GL11.glEnd();
-    GL11.glEnable(GL11.GL_TEXTURE_2D);
+      GL11.glEnd()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
-  def drawPolygon(coords:Array[Vec], color:ScageColor = DEFAULT_COLOR) {
+
+  def drawPolygon(coords:Traversable[Vec], color:ScageColor = DEFAULT_COLOR) {
     if(color != DEFAULT_COLOR) currentColor = color
-    drawPolygon(coords:_*)
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+    GL11.glBegin(GL11.GL_LINE_LOOP)
+    for(coord <- coords) GL11.glVertex2f(coord.x, coord.y)
+    GL11.glEnd()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
-  def drawPolygon(coords:List[Vec], color:ScageColor) {
-    if(color != DEFAULT_COLOR) currentColor = color
-    drawPolygon(coords:_*)
-  }
+
   def drawFilledPolygon(coords:Vec*) {
-    GL11.glDisable(GL11.GL_TEXTURE_2D);
-      /*GL11.glPolygonMode(GL11.GL_FRONT, GL11.GL_FILL);
-      GL11.glPolygonMode(GL11.GL_BACK, GL11.GL_LINE);*/
-      GL11.glBegin(GL11.GL_POLYGON);
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+      /*GL11.glPolygonMode(GL11.GL_FRONT, GL11.GL_FILL)
+      GL11.glPolygonMode(GL11.GL_BACK, GL11.GL_LINE)*/
+      GL11.glBegin(GL11.GL_POLYGON)
         for(coord <- coords) GL11.glVertex2f(coord.x, coord.y)
-      GL11.glEnd();
-    GL11.glEnable(GL11.GL_TEXTURE_2D);
+      GL11.glEnd()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
-  def drawFilledPolygon(coords:Array[Vec], color:ScageColor = DEFAULT_COLOR) {
+
+  def drawFilledPolygon(coords:Traversable[Vec], color:ScageColor = DEFAULT_COLOR) {
     if(color != DEFAULT_COLOR) currentColor = color
-    drawFilledPolygon(coords:_*)
-  }
-  def drawFilledPolygon(coords:List[Vec], color:ScageColor) {
-    if(color != DEFAULT_COLOR) currentColor = color
-    drawFilledPolygon(coords:_*)
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+    /*GL11.glPolygonMode(GL11.GL_FRONT, GL11.GL_FILL)
+   GL11.glPolygonMode(GL11.GL_BACK, GL11.GL_LINE)*/
+    GL11.glBegin(GL11.GL_POLYGON)
+    for(coord <- coords) GL11.glVertex2f(coord.x, coord.y)
+    GL11.glEnd()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
   def drawPoint(coord:Vec, color:ScageColor = DEFAULT_COLOR) {
@@ -236,6 +243,7 @@ trait RendererLib {
       GL11.glEnd()
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
+
   def drawPoints(coords:Vec*) {
     GL11.glDisable(GL11.GL_TEXTURE_2D)
       GL11.glBegin(GL11.GL_POINTS)
@@ -243,20 +251,21 @@ trait RendererLib {
       GL11.glEnd()
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
-  def drawPoints(coords:Array[Vec], color:ScageColor = DEFAULT_COLOR) {
+
+  def drawPoints(coords:Traversable[Vec], color:ScageColor = DEFAULT_COLOR) {
     if(color != DEFAULT_COLOR) currentColor = color
-    drawPoints(coords:_*)
-  }
-  def drawPoints(coords:List[Vec], color:ScageColor) {
-    if(color != DEFAULT_COLOR) currentColor = color
-    drawPoints(coords:_*)
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+    GL11.glBegin(GL11.GL_POINTS)
+    coords.foreach(coord => GL11.glVertex2f(coord.x, coord.y))
+    GL11.glEnd()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
   // white color by default for display lists to draw in natural colors
   def drawDisplayList(list_code:Int, coord:Vec = Vec.zero, color:ScageColor = WHITE) {
     if(color != DEFAULT_COLOR) currentColor = color
-    GL11.glPushMatrix();
-	  GL11.glTranslatef(coord.x, coord.y, 0.0f);
+    GL11.glPushMatrix()
+	  GL11.glTranslatef(coord.x, coord.y, 0.0f)
 	  GL11.glCallList(list_code)
 	  GL11.glPopMatrix()
   }
@@ -281,23 +290,23 @@ trait RendererLib {
 		val t_width:Float = texture.getTextureWidth
 		val t_height:Float = texture.getTextureHeight
 
-		GL11.glNewList(list_name, GL11.GL_COMPILE);
+		GL11.glNewList(list_name, GL11.GL_COMPILE)
 		//texture.bind
 	  	GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getTextureID)
-		GL11.glBegin(GL11.GL_QUADS);
-			GL11.glTexCoord2f(start_x/t_width, start_y/t_height);
-	    GL11.glVertex2f(-game_width/2, game_height/2);
+		GL11.glBegin(GL11.GL_QUADS)
+			GL11.glTexCoord2f(start_x/t_width, start_y/t_height)
+	    GL11.glVertex2f(-game_width/2, game_height/2)
 
-			GL11.glTexCoord2f((start_x+real_width)/t_width, start_y/t_height);
-			GL11.glVertex2f(game_width/2, game_height/2);
+			GL11.glTexCoord2f((start_x+real_width)/t_width, start_y/t_height)
+			GL11.glVertex2f(game_width/2, game_height/2)
 
-			GL11.glTexCoord2f((start_x+real_width)/t_width, (start_y+real_height)/t_height);
-			GL11.glVertex2f(game_width/2, -game_height/2);
+			GL11.glTexCoord2f((start_x+real_width)/t_width, (start_y+real_height)/t_height)
+			GL11.glVertex2f(game_width/2, -game_height/2)
 
-	    GL11.glTexCoord2f(start_x/t_width, (start_y+real_height)/t_height);
-			GL11.glVertex2f(-game_width/2, -game_height/2);
-		GL11.glEnd();
-		GL11.glEndList();
+	    GL11.glTexCoord2f(start_x/t_width, (start_y+real_height)/t_height)
+			GL11.glVertex2f(-game_width/2, -game_height/2)
+		GL11.glEnd()
+		GL11.glEndList()
 
 		list_name
 	}
@@ -366,31 +375,31 @@ trait RendererLib {
   }
 
   private[scage] def initgl(window_width:Int = windowWidth, window_height:Int = windowHeight, title:String = windowTitle) {
-    Display.setDisplayMode(new DisplayMode(window_width, window_height));
-    //Display.setVSyncEnabled(true);
-    Display.setTitle(title);
-    Display.create();
+    Display.setDisplayMode(new DisplayMode(window_width, window_height))
+    Display.setVSyncEnabled(property("render.vsync", false))
+    Display.setTitle(title)
+    Display.create()
 
     val center_point = GraphicsEnvironment.getLocalGraphicsEnvironment.getCenterPoint
     Display.setLocation(center_point.getX.toInt - window_width/2, center_point.getY.toInt - window_height/2)
 
-    GL11.glEnable(GL11.GL_TEXTURE_2D);
-    GL11.glClearColor(0,0,0,0);
-    GL11.glDisable(GL11.GL_DEPTH_TEST);
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
+    GL11.glClearColor(0,0,0,0)
+    GL11.glDisable(GL11.GL_DEPTH_TEST)
 
-    GL11.glEnable(GL11.GL_BLEND);
-    GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+    GL11.glEnable(GL11.GL_BLEND)
+    GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA)
 
-    GL11.glMatrixMode(GL11.GL_PROJECTION); // Select The Projection Matrix
-    GL11.glLoadIdentity(); // Reset The Projection Matrix
-    GLU.gluOrtho2D(0, window_width, 0, window_height);
-    //GL11.glOrtho(0, width, height, 0, 1, -1);
+    GL11.glMatrixMode(GL11.GL_PROJECTION) // Select The Projection Matrix
+    GL11.glLoadIdentity() // Reset The Projection Matrix
+    GLU.gluOrtho2D(0, window_width, 0, window_height)
+    //GL11.glOrtho(0, width, height, 0, 1, -1)
 
-    GL11.glMatrixMode(GL11.GL_MODELVIEW);
-    GL11.glLoadIdentity();
+    GL11.glMatrixMode(GL11.GL_MODELVIEW)
+    GL11.glLoadIdentity()
 
     // printing "Loading..." message. It is also necessary to properly initialize our main font (I guess)
-    GL11.glClear(GL11.GL_COLOR_BUFFER_BIT/* | GL11.GL_DEPTH_BUFFER_BIT*/);
+    GL11.glClear(GL11.GL_COLOR_BUFFER_BIT/* | GL11.GL_DEPTH_BUFFER_BIT*/)
 
     log.info("initialized opengl system")
   }
@@ -402,7 +411,7 @@ trait RendererLib {
 
     // drawing scage logo
     if(property("screen.scagelogo", true)) {  // TODO: replace this with two different builds (under different maven profiles): with and without scagelogo
-      GL11.glClear(GL11.GL_COLOR_BUFFER_BIT/* | GL11.GL_DEPTH_BUFFER_BIT*/);
+      GL11.glClear(GL11.GL_COLOR_BUFFER_BIT/* | GL11.GL_DEPTH_BUFFER_BIT*/)
       val logo_texture = getTexture("resources/images/scage-logo.png")
       drawDisplayList(image(logo_texture, windowWidth, windowHeight, 0, 0, logo_texture.getImageWidth, logo_texture.getImageHeight), Vec(windowWidth/2, windowHeight/2))
       Display.update()
@@ -413,7 +422,7 @@ trait RendererLib {
     stringProperty("screen.splash") match { // TODO: change this to custom init sequence (any graphical routines here, default is the one splash screen with logo)
       case screen_splash_path if "" != screen_splash_path =>
         try {
-          GL11.glClear(GL11.GL_COLOR_BUFFER_BIT/* | GL11.GL_DEPTH_BUFFER_BIT*/);
+          GL11.glClear(GL11.GL_COLOR_BUFFER_BIT/* | GL11.GL_DEPTH_BUFFER_BIT*/)
           val splash_texture = getTexture(screen_splash_path)
           drawDisplayList(image(splash_texture, windowWidth, windowHeight, 0, 0, splash_texture.getImageWidth, splash_texture.getImageHeight), Vec(windowWidth/2, windowHeight/2))
           Display.update()
@@ -424,7 +433,7 @@ trait RendererLib {
         }
       case _ => xmlOrDefault("app.welcome", "") match {
         case welcome_message if "" != welcome_message => {
-          GL11.glClear(GL11.GL_COLOR_BUFFER_BIT/* | GL11.GL_DEPTH_BUFFER_BIT*/);
+          GL11.glClear(GL11.GL_COLOR_BUFFER_BIT/* | GL11.GL_DEPTH_BUFFER_BIT*/)
           print(welcome_message, 20, windowHeight-25, GREEN) // TODO: custom color and position
           Display.update()
           Thread.sleep(1000)  // TODO: custom pause
@@ -534,9 +543,9 @@ trait Renderer extends Scage {
   def delAllInterfaces() {interfaces.delAllOperations()}
   def delAllInterfacesExcept(except_operation_ids:Int*) {interfaces.delAllOperationsExcept(except_operation_ids:_*)}
 
-  val TICKS_PER_SECOND = 60
+  val TICKS_PER_SECOND = property("render.ticks", 60)
   val SKIP_TICKS = 1000 / TICKS_PER_SECOND
-  val MAX_FRAMESKIP = 5
+  val MAX_FRAMESKIP = property("render.frameskip", 5)
   private var loops = 0
 
   private var next_game_tick = System.currentTimeMillis()
@@ -546,6 +555,10 @@ trait Renderer extends Scage {
 
   private var _interpolation:Float = 0
   def interpolation = _interpolation
+
+  /*private var actions_run_count = 0
+  private var actions_run_moment = System.currentTimeMillis()*/
+
   override private[scage] def executeActions() {  // maybe rename it to not confuse clients
     loops = 0
     while(System.currentTimeMillis() > next_game_tick && loops < MAX_FRAMESKIP) {
@@ -561,10 +574,18 @@ trait Renderer extends Scage {
       _execute(actions.operations)
       next_game_tick += SKIP_TICKS
       loops += 1
+
+      /*actions_run_count += 1
+      if(System.currentTimeMillis() - actions_run_moment >= 1000) {
+        println(actions_run_count)
+        actions_run_count = 0
+        actions_run_moment = System.currentTimeMillis()
+      }*/
     }
     _interpolation = (System.currentTimeMillis() + SKIP_TICKS - next_game_tick).toFloat/SKIP_TICKS
   }
 
+  val framerate = property("render.framerate", 0)
   def performRendering() {
     if(Display.isCloseRequested) Scage.stopApp()
     else {
@@ -586,6 +607,7 @@ trait Renderer extends Scage {
         interface_operation()
       }
 
+      if(framerate != 0) Display.sync(framerate)
       Display.update()
       countFPS()
     }

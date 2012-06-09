@@ -257,14 +257,9 @@ class ScageTest extends TestCase("app") {
           NetClient.stopClient()
         }
 
-        private var ang = 0f
-        action(100) {
-          ang += 5
-        }
-
         render {
           openglMove(windowCenter)
-          openglRotate(ang)
+          openglRotate((msecsFromInit % 3600).toFloat/10)
           drawFilledPolygon(Array(Vec(-20, -5), Vec(20, -5), Vec(0, 20)), GREEN)
         }
       }.main(Array[String]())
