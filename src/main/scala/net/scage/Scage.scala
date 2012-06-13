@@ -53,7 +53,7 @@ trait OperationMapping {
   }
 
   class DefaultOperationContainer(val name:String) extends OperationContainer[ScageOperation] {
-    private val _operations = ArrayBuffer[ScageOperation]()  // maybe replace this with ArrayBuffer, because I don't like values method from HashMap
+    private val _operations = ArrayBuffer[ScageOperation]()
 
     protected def addOperation(operation:ScageOperation) {_operations += operation}
     protected def removeOperation(op_id:Int):Option[ScageOperation] = _operations.indexWhere(_.op_id == op_id) match {
@@ -121,6 +121,11 @@ trait Scage extends OperationMapping {
     if(is_running) preinit_func
     preinits.addOp(() => preinit_func)
   }
+
+  private var preinit_moment = System.currentTimeMillis()
+  def preinitMoment = preinit_moment
+  def msecsFromPreinit = System.currentTimeMillis() - preinit_moment
+
   // 'preinits' suppose to run only once during unit's first run(). No public method exists to run them inside run-loop
   private[scage] def executePreinits() {
     scage_log.info(unit_name+": preinit")
@@ -128,6 +133,7 @@ trait Scage extends OperationMapping {
       current_operation_id = preinit_id
       preinit_operation()
     }
+    preinit_moment = System.currentTimeMillis()
   }
 
   def delPreinit(operation_id:Int) = {preinits.delOperation(operation_id)}
@@ -142,12 +148,17 @@ trait Scage extends OperationMapping {
     inits.addOp(() => init_func)
   }
 
+  private var init_moment = System.currentTimeMillis()
+  def initMoment = init_moment
+  def msecsFromInit = System.currentTimeMillis() - init_moment
+
   private[scage] def executeInits() {
     scage_log.info(unit_name+": init")
     for(ScageOperation(init_id, init_operation) <- inits.operations) {
       current_operation_id = init_id
       init_operation()
     }
+    init_moment = System.currentTimeMillis()
     scage_log.info("inits: "+inits.length+"; actions: "+actions.length+"; clears: "+clears.length)
   }
 

@@ -23,3 +23,5 @@ physics.dt = 1
 physics.gravity = [-1, -1]
 
 rect.color = green
+
+#render.framerate = 15
