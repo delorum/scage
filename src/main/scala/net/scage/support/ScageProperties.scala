@@ -30,7 +30,7 @@ object ScageProperties extends ScagePropertiesTrait {
     else system_property.split(",").map(_.trim()).toList
   }
 
-  private lazy val props:List[Properties] = loadChain(properties ::: "maven.properties" :: Nil)
+  private lazy val props:List[Properties] = loadChain(properties ::: "maven.properties" :: Nil) ::: System.getProperties :: Nil
   private def loadChain(property_filenames:List[String]):List[Properties] = {
     property_filenames.toList match {
       case property_filename :: tail => load(property_filename) :: loadChain(tail)
