@@ -2,7 +2,7 @@ package net.scage
 
 import com.weiglewilczek.slf4s.Logger
 import support.ScageId._
-import collection.mutable.{ArrayBuffer, HashMap}
+import collection.mutable.{SynchronizedBuffer, ArrayBuffer, HashMap}
 
 case class ScageOperation(op_id:Int, op:() => Any)
 
@@ -125,7 +125,7 @@ trait Scage extends OperationMapping {
   def deleteSelf() {delOperation(current_operation_id)}
 
   // don't know exactly if I need this preinits, but I keep them for symmetry (because I already have disposes and I do need them - to stop NetServer/NetClient for example)
-  private[scage] var preinits = defaultContainer("preinits")
+  private[scage] val preinits = defaultContainer("preinits")
 
   def preinit(preinit_func: => Any) = {
     if(is_running) preinit_func
@@ -177,7 +177,7 @@ trait Scage extends OperationMapping {
   def delAllInits() {inits.delAllOperations()}
   def delAllInitsExcept(except_operation_ids:Int*) {inits.delAllOperationsExcept(except_operation_ids:_*)}
 
-  private[scage] var actions = defaultContainer("actions")
+  private[scage] val actions = defaultContainer("actions")
 
   def actionNoPause(action_func: => Any):Int = {actions.addOp(() => action_func)}
 
@@ -254,7 +254,7 @@ trait Scage extends OperationMapping {
   def delAllActions() {actions.delAllOperations()}
   def delAllActionsExcept(except_operation_ids:Int*) {actions.delAllOperationsExcept(except_operation_ids:_*)}
 
-  private[scage] var clears = defaultContainer("clears")
+  private[scage] val clears = defaultContainer("clears")
 
   def clear(clear_func: => Any) = {clears.addOp(() => clear_func)}
 
@@ -271,7 +271,7 @@ trait Scage extends OperationMapping {
   def delAllClears() {clears.delAllOperations()}
   def delAllClearsExcept(except_operation_ids:Int*) {clears.delAllOperationsExcept(except_operation_ids:_*)}
 
-  private[scage] var disposes = defaultContainer("disposes")
+  private[scage] val disposes = defaultContainer("disposes")
 
   def dispose(dispose_func: => Any) = {disposes.addOp(() => dispose_func)}
 
@@ -370,6 +370,26 @@ trait Scage extends OperationMapping {
       }
     }
   }
+}
+
+trait SynchronizedScage extends Scage {
+  override def currentOperation = synchronized[Int] {super.currentOperation}
+  override def deleteSelf() {synchronized {super.deleteSelf()}}
+
+  override def preinit(preinit_func: => Any) = synchronized[Int] {super.preinit(preinit_func)}
+
+  override def preinitMoment = synchronized[Long] {super.preinitMoment}
+  override def msecsFromPreinit = synchronized[Long] {super.msecsFromPreinit}
+
+  override def delPreinit(operation_id:Int) = synchronized[Option[ScageOperation]] {super.delPreinit(operation_id)}
+  override def delPreinits(operation_ids:Int*) {synchronized {super.delPreinits(operation_ids:_*)}}
+  override def delAllPreinits() {synchronized {super.delAllPreinits()}}
+  override def delAllPreinitsExcept(except_operation_ids:Int*) {synchronized {super.delAllPreinitsExcept(except_operation_ids:_*)}}
+
+  override def init(init_func: => Any) = synchronized[Int] {super.init(init_func)}
+
+  override def initMoment = synchronized[Long] {super.initMoment}
+  override def msecsFromInit = synchronized[Long] {super.msecsFromInit}
 }
 
 object Scage {
