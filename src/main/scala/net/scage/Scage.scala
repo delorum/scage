@@ -95,8 +95,17 @@ trait OperationMapping {
     }
   }
 
+<<<<<<< HEAD
   def delOperation(op_id:Int) = {_delOperation(op_id, true)}
   def delOperationNoWarn(op_id:Int) = {_delOperation(op_id, false)}
+=======
+  def delOperation(op_id:Int) = {
+    _delOperation(op_id, true)
+  }
+  def delOperationNoWarn(op_id:Int) = {
+    _delOperation(op_id, false)
+  }
+>>>>>>> 1442adac54fa3e2f2a55077e2352763b2aab72c5
 
   def delOperations(op_ids:Int*) {op_ids.foreach(_delOperation(_, true))}
   def delOperationsNoWarn(op_ids:Int*)  {op_ids.foreach(_delOperation(_, false))}
