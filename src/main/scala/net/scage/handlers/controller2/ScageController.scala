@@ -69,7 +69,7 @@ trait ScageController extends Scage {
   def checkControls()
 
   class ControlDeletionsContainer(name:String) extends DefaultOperationContainer(name) {
-    override def delOperation(op_id:Int) = {
+    override protected def _delOperation(op_id:Int, show_warnings:Boolean) = {
       removeOperation(op_id) match {
         case some_operation @ Some(ScageOperation(_, op)) =>
           log.debug("deleted operation with id "+op_id+" from the container "+name)
@@ -77,7 +77,7 @@ trait ScageController extends Scage {
           op()
           some_operation
         case None =>
-          log.warn("operation with id "+op_id+" not found in the container "+name)
+          if(show_warnings) log.warn("operation with id "+op_id+" not found in the container "+name)
           None
       }
     }

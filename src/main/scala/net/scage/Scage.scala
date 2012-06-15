@@ -27,29 +27,33 @@ trait OperationMapping {
       operation.op_id
     }
 
-    def delOperation(op_id:Int) = {
+    protected def _delOperation(op_id:Int, show_warnings:Boolean) = {
       removeOperation(op_id) match {
         case some_operation @ Some(operation) =>
           log.debug("deleted operation with id "+op_id+" from the container "+name)
           mapping -= op_id
           some_operation
         case None =>
-          log.warn("operation with id "+op_id+" not found in the container "+name)
+          if(show_warnings) log.warn("operation with id "+op_id+" not found in the container "+name)
           None
       }
     }
 
-    def delOperations(op_ids:Int*) {op_ids.foreach(delOperation(_))}
-    def delOperations(op_ids:Traversable[Int]) {op_ids.foreach(delOperation(_))}
+    def delOperation(op_id:Int) = {_delOperation(op_id, true)}
+    def delOperationNoWarn(op_id:Int) = {_delOperation(op_id, false)}
+
+    def delOperations(op_ids:Int*) {op_ids.foreach(_delOperation(_, true))}
+    def delOperationsNoWarn(op_ids:Int*) {op_ids.foreach(_delOperation(_, false))}
+    def delOperations(op_ids:Traversable[Int]) {op_ids.foreach(_delOperation(_, true))}
+    def delOperationsNoWarn(op_ids:Traversable[Int]) {op_ids.foreach(_delOperation(_, false))}
 
     def delAllOperations() {
       delOperations(operations.map(_.op_id))
       log.info("deleted all operations from the container "+name)
     }
 
-    def delAllOperationsExcept(except_op_ids:Int*) {
-      delOperations(operations.view.map(_.op_id).filter(!except_op_ids.contains(_)))
-    }
+    def delAllOperationsExcept(except_op_ids:Int*) {operations.view.map(_.op_id).filter(!except_op_ids.contains(_)).foreach(_delOperation(_, true))}
+    def delAllOperationsExceptNoWarn(except_op_ids:Int*) {operations.view.map(_.op_id).filter(!except_op_ids.contains(_)).foreach(_delOperation(_, false))}
   }
 
   class DefaultOperationContainer(val name:String) extends OperationContainer[ScageOperation] {
@@ -74,7 +78,7 @@ trait OperationMapping {
 
   private val mapping = HashMap[Int, OperationContainer[_ <: ScageOperation]]()   // maybe make this protected
 
-  def delOperation(op_id:Int) = {
+  private def _delOperation(op_id:Int, show_warnings:Boolean) = {
     mapping.remove(op_id) match {
       case Some(container) =>
         container._removeOperation(op_id) match {
@@ -82,24 +86,30 @@ trait OperationMapping {
             log.debug("deleted operation with id "+op_id+" from the container "+container.name)
             some_op
           case None =>
-            log.warn("operation with id "+op_id+" not found in the container "+container.name)
+            if(show_warnings) log.warn("operation with id "+op_id+" not found in the container "+container.name)
             None
         }
       case None =>
-        log.warn("operation with id "+op_id+" not found among all containers")
+        if(show_warnings) log.warn("operation with id "+op_id+" not found among all containers")
         None
     }
   }
 
-  def delOperations(op_ids:Int*) {op_ids.foreach(delOperation(_))}
-  def delOperations(op_ids:Traversable[Int]) {op_ids.foreach(delOperation(_))}
+  def delOperation(op_id:Int) = {_delOperation(op_id, true)}
+  def delOperationNoWarn(op_id:Int) = {_delOperation(op_id, false)}
+
+  def delOperations(op_ids:Int*) {op_ids.foreach(_delOperation(_, true))}
+  def delOperationsNoWarn(op_ids:Int*)  {op_ids.foreach(_delOperation(_, false))}
+  def delOperations(op_ids:Traversable[Int]) {op_ids.foreach(_delOperation(_, true))}
+  def delOperationsNoWarn(op_ids:Traversable[Int]) {op_ids.foreach(_delOperation(_, false))}
 
   def delAllOperations() {
     delOperations(mapping.keys)
     log.info("deleted all operations")
   }
 
-  def delAllOperationsExcept(except_op_ids:Int*) {delOperations(mapping.keys.filter(!except_op_ids.contains(_)))}
+  def delAllOperationsExcept(except_op_ids:Int*) {mapping.keys.filter(!except_op_ids.contains(_)).foreach(_delOperation(_, true))}
+  def delAllOperationsExceptNoWarn(except_op_ids:Int*) {mapping.keys.filter(!except_op_ids.contains(_)).foreach(_delOperation(_, false))}
 
   def operationExists(op_id:Int) = mapping.contains(op_id)
 }
@@ -211,8 +221,6 @@ trait Scage extends OperationMapping {
           last_action_time = System.currentTimeMillis
         }
       }
-
-
     } else action {
         action_func
     }

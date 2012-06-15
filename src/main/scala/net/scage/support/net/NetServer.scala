@@ -129,6 +129,11 @@ class NetServer {
     }
   }
 
+  def clientsAmount = clients_actor !? "length" match {
+    case len:Int => len
+    case _ => 0
+  }
+
   def sendToAll(data:State) {
     clients_actor ! ("send_to_all", data)
   }

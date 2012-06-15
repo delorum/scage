@@ -21,7 +21,11 @@
 is_main_unit=true
 
 ----------------
+<<<<<<< HEAD
 надо бы вернуть возможность менять framerate
+=======
+сделать ScageProperties уметь воспринимать проперти, переданные в командной строке по -D
+>>>>>>> 1442adac54fa3e2f2a55077e2352763b2aab72c5
 
 delOperationIfExists, delOperationsIfExist, delOperationsIfExistExcept
 
@@ -52,7 +56,7 @@ trace.state("pewpew", 15) вместо trace.state.valueOrDefault("pewpew", 15)
 
 пути дальнейшего развития:
 * порт для андроида
-* 3D
+* 3D (поботвить подробнее opengl)
 
 нужны методы printCentered, по аналогии с drawRectCentered итд. Нужно вычислять прямоугольник, в который вписана строка,
 которую хотим нарисовать и при ее рисовании соответствующим образом смещать точку ее рисования так чтобы переданная в

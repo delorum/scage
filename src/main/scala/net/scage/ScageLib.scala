@@ -8,7 +8,7 @@ trait ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXML
   def property[A : Manifest](key:String, default: => A):A = ScageProperties.property(key, default)
   def property[A : Manifest](key:String, default: => A, condition:(A => (Boolean,  String))):A = ScageProperties.property(key, default, condition)
   
-  val max_font_size = ScageMessage.max_font_size
+  lazy val max_font_size = ScageMessage.max_font_size
   def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor) {ScageMessage.print(message, x, y, size, color)}
   def messageBounds(message:Any, size:Float = max_font_size):Vec = ScageMessage.messageBounds(message, size)
 

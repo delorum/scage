@@ -146,9 +146,9 @@ trait RendererLib {
   def drawLines(edges:Traversable[Vec], color:ScageColor = DEFAULT_COLOR) {
     if(color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
-    GL11.glBegin(GL11.GL_LINES)
-    edges.foreach(edge => GL11.glVertex2f(edge.x, edge.y))
-    GL11.glEnd()
+      GL11.glBegin(GL11.GL_LINES)
+        edges.foreach(edge => GL11.glVertex2f(edge.x, edge.y))
+      GL11.glEnd()
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
@@ -208,9 +208,9 @@ trait RendererLib {
   def drawPolygon(coords:Traversable[Vec], color:ScageColor = DEFAULT_COLOR) {
     if(color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
-    GL11.glBegin(GL11.GL_LINE_LOOP)
-    for(coord <- coords) GL11.glVertex2f(coord.x, coord.y)
-    GL11.glEnd()
+      GL11.glBegin(GL11.GL_LINE_LOOP)
+        for(coord <- coords) GL11.glVertex2f(coord.x, coord.y)
+      GL11.glEnd()
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
@@ -228,10 +228,10 @@ trait RendererLib {
     if(color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     /*GL11.glPolygonMode(GL11.GL_FRONT, GL11.GL_FILL)
-   GL11.glPolygonMode(GL11.GL_BACK, GL11.GL_LINE)*/
-    GL11.glBegin(GL11.GL_POLYGON)
-    for(coord <- coords) GL11.glVertex2f(coord.x, coord.y)
-    GL11.glEnd()
+    GL11.glPolygonMode(GL11.GL_BACK, GL11.GL_LINE)*/
+      GL11.glBegin(GL11.GL_POLYGON)
+        for(coord <- coords) GL11.glVertex2f(coord.x, coord.y)
+      GL11.glEnd()
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
@@ -255,9 +255,9 @@ trait RendererLib {
   def drawPoints(coords:Traversable[Vec], color:ScageColor = DEFAULT_COLOR) {
     if(color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
-    GL11.glBegin(GL11.GL_POINTS)
-    coords.foreach(coord => GL11.glVertex2f(coord.x, coord.y))
-    GL11.glEnd()
+      GL11.glBegin(GL11.GL_POINTS)
+        coords.foreach(coord => GL11.glVertex2f(coord.x, coord.y))
+      GL11.glEnd()
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
@@ -346,7 +346,7 @@ trait RendererLib {
 
   def windowSize_=(new_window_resolution:(Int, Int)) {
     val (new_window_width, new_window_height) = new_window_resolution
-    if(new_window_width != windowWidth && new_window_height != windowHeight) {
+    if(new_window_width != windowWidth || new_window_height != windowHeight) {
       log.debug("changing resolution to "+new_window_width+"x"+new_window_height+"...")
       val backup_background_color = backgroundColor
       val backup_current_color = currentColor
