@@ -5,6 +5,9 @@ import com.weiglewilczek.slf4s.Logger
 import handlers.Renderer
 import support.ScageProperties._
 import handlers.RendererLib._
+import java.applet.Applet
+import java.awt.{BorderLayout, Canvas}
+import org.lwjgl.opengl.Display
 
 // abstract classes instead of traits to make it easy to use with MultiController
 abstract class Screen(val unit_name:String = "Scage Screen") extends Scage with Renderer with ScageController {
@@ -69,5 +72,109 @@ class ScageScreenApp(unit_name:String = property("app.name", "Scage App"),
                      window_width:Int  = property("screen.width", 800),
                      window_height:Int = property("screen.height", 600)) extends ScreenApp(unit_name, window_width, window_height) with SingleController
 
-/*class MultiControlledScreen(unit_name:String = "Scage App", is_main_unit:Boolean = false, properties:String = "")
-extends Screen(unit_name, is_main_unit, properties) with MultiController*/
+class ScageApplet extends Applet with Scage with Renderer with SingleController {
+  val unit_name = "Scage Applet"
+
+  val applet_start_moment = System.currentTimeMillis()
+  def msecsFromAppletStart = System.currentTimeMillis() - applet_start_moment
+
+  override def run() {
+    executePreinits()
+    executeInits()
+    is_running = true
+    prepareRendering()
+    scage_log.info(unit_name+": run")
+    while(is_running && Scage.isAppRunning) {
+      checkControls()
+      executeActions()
+      performRendering()
+    }
+    renderExitMessage()
+    executeClears()
+    executeDisposes()
+  }
+
+  /** The Canvas where the LWJGL Display is added */
+  var display_parent:Canvas = null
+
+  /** Thread which runs the main game loop */
+  var gameThread:Thread = null
+
+  /**
+	 * Once the Canvas is created its add notify method will call this method to
+	 * start the LWJGL Display and game loop in another thread.
+	 */
+	def startScage() {
+    def screenRun() {run()}
+    gameThread = new Thread {
+      override def run() {
+        scage_log.info("starting applet "+unit_name+"...")
+        Display.setParent(display_parent)
+        initgl(getWidth, getHeight)
+        drawWelcomeMessages()
+        screenRun()
+        destroygl()
+        scage_log.info(unit_name+" was stopped")
+      }
+    }
+    gameThread.start()
+  }
+
+  /**
+   * Tell game loop to stop running, after which the LWJGL Display will be destoryed.
+   * The main thread will wait for the Display.destroy() to complete
+   */
+  def stopScage() {
+    stop()
+    try {
+			gameThread.join()
+		} catch {
+      case e:InterruptedException =>
+			  e.printStackTrace()
+		}
+  }
+
+  override def stop() {
+    is_running = false
+  }
+
+  /**
+   * Applet Destroy method will remove the canvas, before canvas is destroyed it will notify
+   * stopLWJGL() to stop main game loop and to destroy the Display
+   */
+  override def destroy() {
+    remove(display_parent)
+    super.destroy()
+  }
+
+  /**
+	 * initialise applet by adding a canvas to it, this canvas will start the LWJGL Display and game loop
+	 * in another thread. It will also stop the game loop and destroy the display on canvas removal when
+	 * applet is destroyed.
+	 */
+	override def init() {
+    setLayout(new BorderLayout())
+    try {
+      display_parent = new Canvas() {
+        override def addNotify() {
+          super.addNotify()
+          startScage()
+        }
+        override def removeNotify() {
+          stopScage()
+          super.removeNotify()
+        }
+      }
+      display_parent.setSize(getWidth, getHeight)
+      add(display_parent)
+      display_parent.setFocusable(true)
+      display_parent.requestFocus()
+      display_parent.setIgnoreRepaint(true)
+      setVisible(true)
+    } catch {
+      case e:Exception =>
+        System.err.println(e)
+        throw new RuntimeException("Unable to create display")
+    }
+  }
+}

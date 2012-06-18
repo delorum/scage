@@ -13,7 +13,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <scala.version>2.9.1</scala.version>
-    <lwjgl.version>2.7.1</lwjgl.version>
+    <lwjgl.version>2.8.2</lwjgl.version>
   </properties>
 
   <repositories>

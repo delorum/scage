@@ -21,6 +21,12 @@
 is_main_unit=true
 
 ----------------
+что необходимо доделать:
+* поддержка апплетов
+* работа из нескольких потоков
+* андроид
+* 3D
+
 net api: sendToAllExcept, sendToAllExceptSync
 
 надо бы вернуть возможность менять framerate

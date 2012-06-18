@@ -372,26 +372,6 @@ trait Scage extends OperationMapping {
   }
 }
 
-trait SynchronizedScage extends Scage {
-  override def currentOperation = synchronized[Int] {super.currentOperation}
-  override def deleteSelf() {synchronized {super.deleteSelf()}}
-
-  override def preinit(preinit_func: => Any) = synchronized[Int] {super.preinit(preinit_func)}
-
-  override def preinitMoment = synchronized[Long] {super.preinitMoment}
-  override def msecsFromPreinit = synchronized[Long] {super.msecsFromPreinit}
-
-  override def delPreinit(operation_id:Int) = synchronized[Option[ScageOperation]] {super.delPreinit(operation_id)}
-  override def delPreinits(operation_ids:Int*) {synchronized {super.delPreinits(operation_ids:_*)}}
-  override def delAllPreinits() {synchronized {super.delAllPreinits()}}
-  override def delAllPreinitsExcept(except_operation_ids:Int*) {synchronized {super.delAllPreinitsExcept(except_operation_ids:_*)}}
-
-  override def init(init_func: => Any) = synchronized[Int] {super.init(init_func)}
-
-  override def initMoment = synchronized[Long] {super.initMoment}
-  override def msecsFromInit = synchronized[Long] {super.msecsFromInit}
-}
-
 object Scage {
   private var is_all_units_stop = false
   def isAppRunning = !is_all_units_stop
