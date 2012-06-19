@@ -5,9 +5,11 @@ import com.weiglewilczek.slf4s.Logger
 import handlers.Renderer
 import support.ScageProperties._
 import handlers.RendererLib._
-import java.applet.Applet
+
 import java.awt.{BorderLayout, Canvas}
-import org.lwjgl.opengl.Display
+import org.lwjgl.opengl.{GL11, Display}
+import java.applet.Applet
+
 
 // abstract classes instead of traits to make it easy to use with MultiController
 abstract class Screen(val unit_name:String = "Scage Screen") extends Scage with Renderer with ScageController {
@@ -72,27 +74,8 @@ class ScageScreenApp(unit_name:String = property("app.name", "Scage App"),
                      window_width:Int  = property("screen.width", 800),
                      window_height:Int = property("screen.height", 600)) extends ScreenApp(unit_name, window_width, window_height) with SingleController
 
-class ScageApplet extends Applet with Scage with Renderer with SingleController {
-  val unit_name = "Scage Applet"
-
-  val applet_start_moment = System.currentTimeMillis()
-  def msecsFromAppletStart = System.currentTimeMillis() - applet_start_moment
-
-  override def run() {
-    executePreinits()
-    executeInits()
-    is_running = true
-    prepareRendering()
-    scage_log.info(unit_name+": run")
-    while(is_running && Scage.isAppRunning) {
-      checkControls()
-      executeActions()
-      performRendering()
-    }
-    renderExitMessage()
-    executeClears()
-    executeDisposes()
-  }
+abstract class ScageApplet extends Applet {
+  def screen:ScageScreenApp
 
   /** The Canvas where the LWJGL Display is added */
   var display_parent:Canvas = null
@@ -105,16 +88,10 @@ class ScageApplet extends Applet with Scage with Renderer with SingleController 
 	 * start the LWJGL Display and game loop in another thread.
 	 */
 	def startScage() {
-    def screenRun() {run()}
     gameThread = new Thread {
       override def run() {
-        scage_log.info("starting applet "+unit_name+"...")
         Display.setParent(display_parent)
-        initgl(getWidth, getHeight)
-        drawWelcomeMessages()
-        screenRun()
-        destroygl()
-        scage_log.info(unit_name+" was stopped")
+        screen.main(Array[String]())
       }
     }
     gameThread.start()
@@ -125,17 +102,13 @@ class ScageApplet extends Applet with Scage with Renderer with SingleController 
    * The main thread will wait for the Display.destroy() to complete
    */
   def stopScage() {
-    stop()
+    screen.stop()
     try {
 			gameThread.join()
 		} catch {
       case e:InterruptedException =>
 			  e.printStackTrace()
 		}
-  }
-
-  override def stop() {
-    is_running = false
   }
 
   /**

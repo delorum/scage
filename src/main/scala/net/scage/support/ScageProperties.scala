@@ -4,6 +4,7 @@ import java.util.Properties
 import org.newdawn.slick.util.ResourceLoader
 import com.weiglewilczek.slf4s.Logger
 import parsers.FormulaParser
+import java.applet.Applet
 
 trait ScagePropertiesTrait {
   def property[A : Manifest](key:String, default: => A):A
@@ -25,9 +26,12 @@ object ScageProperties extends ScagePropertiesTrait {
   private val log = Logger(this.getClass.getName)
 
   val properties:List[String] = {
-    val system_property = System.getProperty("scage.properties")
-    if(system_property == null || "" == system_property) List("scage.properties")
-    else system_property.split(",").map(_.trim()).toList
+    def _pew(name:String) = {
+      val system_property = System.getProperty(name)
+      if(system_property == null || "" == system_property) List()
+      else system_property.split(",").map(_.trim()).toList
+    }
+    _pew("scage.properties") ::: _pew("jnlp.scage.properties") ::: _pew("scageproperties") ::: _pew("jnlp.scageproperties")
   }
 
   private lazy val props:List[Properties] = loadChain(properties ::: "maven.properties" :: Nil) ::: System.getProperties :: Nil
