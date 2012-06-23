@@ -1,9 +1,10 @@
 package net.scage.handlers.controller2
 
 import net.scage.support.Vec
-import collection.mutable.HashMap
+import collection.mutable.{ArrayBuffer, HashMap}
 import com.weiglewilczek.slf4s.Logger
 import net.scage.{ScageOperation, Scage}
+import collection.mutable
 
 case class KeyPress(key_code:Int, var was_pressed:Boolean, var last_pressed_time:Long)
 case class MouseButtonPress(button_code:Int, var was_pressed:Boolean, var last_pressed_time:Long)
@@ -68,7 +69,7 @@ trait ScageController extends Scage {
 
   def checkControls()
 
-  class ControlDeletionsContainer(name:String) extends DefaultOperationContainer(name) {
+  class ControlDeletionsContainer extends DefaultOperationContainer("control_deleters") {
     override protected def _delOperation(op_id:Int, show_warnings:Boolean) = {
       removeOperation(op_id) match {
         case some_operation @ Some(ScageOperation(_, op)) =>
@@ -82,12 +83,20 @@ trait ScageController extends Scage {
       }
     }
   }
+  def controlDeletersContainer:ControlDeletionsContainer = new ControlDeletionsContainer
 
-  private[controller2] val deletion_operations = new ControlDeletionsContainer("control_deleters")
+  private[scage] val deletion_operations = controlDeletersContainer
 
   def delControl(control_id:Int) = {deletion_operations.delOperation(control_id)}
   def delControls(control_ids:Int*) {deletion_operations.delOperations(control_ids:_*)}
   def delAllControls() {deletion_operations.delAllOperations()}
   def delAllControlsExcept(except_control_ids:Int*) {deletion_operations.delAllOperationsExcept(except_control_ids:_*)}
+}
+
+trait SynchronizedScageController extends ScageController {
+  class SynchronizedControlDeletionsContainer extends ControlDeletionsContainer {
+    override protected val _operations = new ArrayBuffer[ScageOperation] with mutable.SynchronizedBuffer[ScageOperation]
+  }
+  override def controlDeletersContainer:ControlDeletionsContainer = new SynchronizedControlDeletionsContainer
 }
 

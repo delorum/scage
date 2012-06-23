@@ -29,6 +29,26 @@ class SortedBuffer[A <: Ordered[A]](init_arr:ArrayBuffer[A]) extends Seq[A] with
   def iterator: Iterator[A] = arr.iterator
 }
 
+class SynchronizedSortedBuffer[A <: Ordered[A]](init_arr:ArrayBuffer[A]) extends SortedBuffer[A](init_arr) {
+  override def remove(idx:Int) = synchronized {super.remove(idx)}
+
+  override def clear() {synchronized {super.clear()}}
+
+  override def +=(elem:A) = synchronized[this.type] {
+    super.+=(elem)
+    this
+  }
+
+  override def -=(elem:A) = synchronized[this.type] {
+    super.-=(elem)
+    this
+  }
+
+  override def apply(idx: Int) = synchronized {super.apply(idx)}
+  override def length: Int = synchronized {super.length}
+  override def iterator: Iterator[A] = synchronized {super.iterator}
+}
+
 object SortedBuffer {
   def apply[A <: Ordered[A]](init_arr:ArrayBuffer[A]) = new SortedBuffer(init_arr)
   def apply[A <: Ordered[A]](elems:A*) = new SortedBuffer(elems:_*)

@@ -17,7 +17,8 @@ import net.scage.support.tracer3.{Trace, ScageTracer}
 import java.awt.GraphicsEnvironment
 import net.scage.{ScageOperation, Scage}
 import collection.mutable.ArrayBuffer
-import net.scage.support.{SortedBuffer, ScageColor, Vec}
+import net.scage.support.{SynchronizedSortedBuffer, SortedBuffer, ScageColor, Vec}
+import collection.mutable
 
 object DisplayListsHolder {
   private val log = Logger(this.getClass.getName)
@@ -498,8 +499,8 @@ trait Renderer extends Scage {
     def compare(other_render:RenderOperation) = position - other_render.position
   }
 
-  private val renders = new OperationContainer[RenderOperation] {
-    private val _render_operations = SortedBuffer[RenderOperation]()
+  class RenderOperationsContainer extends OperationContainer[RenderOperation] {
+    protected val _render_operations = SortedBuffer[RenderOperation]()
 
     def name:String = "renders"
 
@@ -517,6 +518,9 @@ trait Renderer extends Scage {
       addOperationWithMapping(RenderOperation(op_id, op, position))
     }
   }
+  protected def rendersContainer = new RenderOperationsContainer
+
+  private[scage] val renders = rendersContainer
 
   def render(render_func: => Any) = renders.addOp(() => render_func)
   def render(position:Int = 0)(render_func: => Any) = renders.addOp(() => render_func, position)
@@ -562,11 +566,11 @@ trait Renderer extends Scage {
   override private[scage] def executeActions() {  // maybe rename it to not confuse clients
     loops = 0
     while(System.currentTimeMillis() > next_game_tick && loops < MAX_FRAMESKIP) {
-      restart_toggled = false
+      restartToggled = false
       def _execute(_actions:Traversable[ScageOperation]) {
-        if(_actions.nonEmpty && !restart_toggled) {
+        if(_actions.nonEmpty && !restartToggled) {
           val ScageOperation(action_id, action_operation) = _actions.head
-          current_operation_id = action_id
+          currentOperation = action_id
           action_operation()
           _execute(_actions.tail)
         }
@@ -595,7 +599,7 @@ trait Renderer extends Scage {
         GL11.glTranslatef(coord.x , coord.y, 0.0f)
         GL11.glScalef(_global_scale, _global_scale, 1)
         for(RenderOperation(render_id, render_operation, _) <- renders.operations) {
-          current_operation_id = render_id
+          currentOperation = render_id
           GL11.glPushMatrix()
           render_operation()
           GL11.glPopMatrix()
@@ -603,7 +607,7 @@ trait Renderer extends Scage {
       GL11.glPopMatrix()
 
       for(ScageOperation(interface_id, interface_operation) <- interfaces.operations) {
-        current_operation_id = interface_id
+        currentOperation = interface_id
         interface_operation()
       }
 
@@ -612,4 +616,11 @@ trait Renderer extends Scage {
       countFPS()
     }
   }
+}
+
+trait SynchronizedRenderer extends Renderer {
+  class SynchronizedRenderOperationsContainer extends RenderOperationsContainer {
+    override protected val _render_operations = new SynchronizedSortedBuffer[RenderOperation]()
+  }
+  override def rendersContainer = new SynchronizedRenderOperationsContainer
 }

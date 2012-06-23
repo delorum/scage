@@ -1,5 +1,5 @@
 app.name=ScageTest
-app.version = v1.0
+#app.version = v1.0
 
 xml.lang = ru
 

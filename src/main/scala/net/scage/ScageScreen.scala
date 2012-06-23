@@ -1,8 +1,8 @@
 package net.scage
 
-import handlers.controller2.{ScageController, SingleController}
+import handlers.controller2.{SynchronizedScageController, ScageController, SingleController}
 import com.weiglewilczek.slf4s.Logger
-import handlers.Renderer
+import handlers.{SynchronizedRenderer, Renderer}
 import support.ScageProperties._
 import handlers.RendererLib._
 
@@ -19,10 +19,10 @@ abstract class Screen(val unit_name:String = "Scage Screen") extends Scage with 
     log.info("starting screen "+unit_name+"...")
     executePreinits()
     executeInits()
-    is_running = true
+    isRunning = true
     prepareRendering()
     log.info(unit_name+": run")
-    while(is_running && Scage.isAppRunning) {
+    while(isRunning && Scage.isAppRunning) {
       checkControls()
       executeActions()
       performRendering()
@@ -32,6 +32,9 @@ abstract class Screen(val unit_name:String = "Scage Screen") extends Scage with 
     scage_log.info(unit_name+" was stopped")
   }
 }
+
+trait SynchronizedScreen extends SynchronizedScage with SynchronizedRenderer with SynchronizedScageController
+
 abstract class ScreenApp(
   unit_name:String  = property("app.name", "Scage App"),
   window_width:Int  = property("screen.width", 800),
@@ -43,10 +46,10 @@ abstract class ScreenApp(
   override def run() {
     executePreinits()
     executeInits()
-    is_running = true
+    isRunning = true
     prepareRendering()
     scage_log.info(unit_name+": run")
-    while(is_running && Scage.isAppRunning) {
+    while(isRunning && Scage.isAppRunning) {
       checkControls()
       executeActions()
       performRendering()
@@ -64,7 +67,7 @@ abstract class ScreenApp(
     run()
     destroygl()
     scage_log.info(unit_name+" was stopped")
-    System.exit(0)
+    System.exit(0)  // need explicit exit for the app's utilizing NetServer/NetClient as they have actors
   }
 }
 
@@ -78,16 +81,16 @@ abstract class ScageApplet extends Applet {
   def screen:ScageScreenApp
 
   /** The Canvas where the LWJGL Display is added */
-  var display_parent:Canvas = null
+  private var display_parent:Canvas = null
 
   /** Thread which runs the main game loop */
-  var gameThread:Thread = null
+  private var gameThread:Thread = null
 
   /**
 	 * Once the Canvas is created its add notify method will call this method to
 	 * start the LWJGL Display and game loop in another thread.
 	 */
-	def startScage() {
+	private def startScage() {
     gameThread = new Thread {
       override def run() {
         Display.setParent(display_parent)
@@ -101,7 +104,7 @@ abstract class ScageApplet extends Applet {
    * Tell game loop to stop running, after which the LWJGL Display will be destoryed.
    * The main thread will wait for the Display.destroy() to complete
    */
-  def stopScage() {
+  private def stopScage() {
     screen.stop()
     try {
 			gameThread.join()

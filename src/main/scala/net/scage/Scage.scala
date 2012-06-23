@@ -3,10 +3,17 @@ package net.scage
 import com.weiglewilczek.slf4s.Logger
 import support.ScageId._
 import collection.mutable.{SynchronizedBuffer, ArrayBuffer, HashMap}
+import collection.mutable
 
 case class ScageOperation(op_id:Int, op:() => Any)
 
-trait OperationMapping {
+trait HaveCurrentOperation {
+  private var current_operation_id = 0
+  def currentOperation = current_operation_id
+  private[scage] def currentOperation_=(new_current_operation_id:Int) {current_operation_id = new_current_operation_id}
+}
+
+trait OperationMapping extends HaveCurrentOperation {
   private val log = Logger(this.getClass.getName)
 
   trait OperationContainer[A <: ScageOperation] {
@@ -39,6 +46,8 @@ trait OperationMapping {
       }
     }
 
+    def deleteSelf() {delOperation(currentOperation)}
+
     def delOperation(op_id:Int) = {_delOperation(op_id, true)}
     def delOperationNoWarn(op_id:Int) = {_delOperation(op_id, false)}
 
@@ -57,7 +66,7 @@ trait OperationMapping {
   }
 
   class DefaultOperationContainer(val name:String) extends OperationContainer[ScageOperation] {
-    private val _operations = ArrayBuffer[ScageOperation]()
+    protected val _operations = ArrayBuffer[ScageOperation]()
 
     protected def addOperation(operation:ScageOperation) {_operations += operation}
     protected def removeOperation(op_id:Int):Option[ScageOperation] = _operations.indexWhere(_.op_id == op_id) match {
@@ -76,7 +85,7 @@ trait OperationMapping {
 
   protected def defaultContainer(container_name:String) = new DefaultOperationContainer(container_name)
 
-  private val mapping = HashMap[Int, OperationContainer[_ <: ScageOperation]]()   // maybe make this protected
+  private[scage] val mapping = HashMap[Int, OperationContainer[_ <: ScageOperation]]()   // maybe make this protected
 
   private def _delOperation(op_id:Int, show_warnings:Boolean) = {
     mapping.remove(op_id) match {
@@ -114,21 +123,35 @@ trait OperationMapping {
   def operationExists(op_id:Int) = mapping.contains(op_id)
 }
 
-trait Scage extends OperationMapping {
+trait Pausable {
+  this:Scage =>
+  private var on_pause = false    // maybe make it private[scage]
+  def onPause = on_pause
+  def switchPause() {on_pause = !on_pause; scage_log.info("pause = " + on_pause)}
+  def pause()       {on_pause = true;      scage_log.info("pause = " + on_pause)}
+  def pauseOff()    {on_pause = false;     scage_log.info("pause = " + on_pause)}
+}
+
+trait Runnable {
+  private var is_running = false
+  def isRunning = is_running
+  private[scage] def isRunning_=(new_is_running:Boolean) {is_running = new_is_running}
+
+  private var restart_toggled = false
+  private[scage] def restartToggled = restart_toggled
+  private[scage] def restartToggled_=(new_restart_toggled:Boolean) {restart_toggled = new_restart_toggled}
+}
+
+trait Scage extends OperationMapping with Pausable with Runnable {
   def unit_name:String
 
   protected val scage_log = Logger(this.getClass.getName)
-
-  private[scage] var current_operation_id = 0
-  def currentOperation = current_operation_id
-
-  def deleteSelf() {delOperation(current_operation_id)}
 
   // don't know exactly if I need this preinits, but I keep them for symmetry (because I already have disposes and I do need them - to stop NetServer/NetClient for example)
   private[scage] val preinits = defaultContainer("preinits")
 
   def preinit(preinit_func: => Any) = {
-    if(is_running) preinit_func
+    if(isRunning) preinit_func
     preinits.addOp(() => preinit_func)
   }
 
@@ -140,7 +163,7 @@ trait Scage extends OperationMapping {
   private[scage] def executePreinits() {
     scage_log.info(unit_name+": preinit")
     for(ScageOperation(preinit_id, preinit_operation) <- preinits.operations) {
-      current_operation_id = preinit_id
+      currentOperation = preinit_id
       preinit_operation()
     }
     preinit_moment = System.currentTimeMillis()
@@ -154,7 +177,7 @@ trait Scage extends OperationMapping {
   private[scage] val inits = defaultContainer("inits")
 
   def init(init_func: => Any) = {
-    if(is_running) init_func
+    if(isRunning) init_func
     inits.addOp(() => init_func)
   }
 
@@ -165,7 +188,7 @@ trait Scage extends OperationMapping {
   private[scage] def executeInits() {
     scage_log.info(unit_name+": init")
     for(ScageOperation(init_id, init_operation) <- inits.operations) {
-      current_operation_id = init_id
+      currentOperation = init_id
       init_operation()
     }
     init_moment = System.currentTimeMillis()
@@ -208,7 +231,7 @@ trait Scage extends OperationMapping {
   // pausable actions
   def action(action_func: => Any):Int = {
     actionNoPause {
-      if(!on_pause) action_func
+      if(!onPause) action_func
     }
   }
 
@@ -237,11 +260,11 @@ trait Scage extends OperationMapping {
   }
 
   private[scage] def executeActions() { // assuming to run in cycle, so we leave off any log messages
-    restart_toggled = false
+    restartToggled = false
     def _execute(_actions:Traversable[ScageOperation]) {
-      if(_actions.nonEmpty && !restart_toggled) {
+      if(_actions.nonEmpty && !restartToggled) {
         val ScageOperation(action_id, action_operation) = _actions.head
-        current_operation_id = action_id
+        currentOperation = action_id
         action_operation()
         _execute(_actions.tail)
       }
@@ -261,7 +284,7 @@ trait Scage extends OperationMapping {
   private[scage] def executeClears() {
     scage_log.info(unit_name+": clear")
     for(ScageOperation(clear_id, clear_operation) <- clears.operations) {
-      current_operation_id = clear_id
+      currentOperation = clear_id
       clear_operation()
     }
   }
@@ -279,7 +302,7 @@ trait Scage extends OperationMapping {
   private[scage] def executeDisposes() {
     scage_log.info(unit_name+": dispose")
     for(ScageOperation(dispose_id, dispose_operation) <- disposes.operations) {
-      current_operation_id = dispose_id
+      currentOperation = dispose_id
       dispose_operation()
     }
   }
@@ -289,33 +312,22 @@ trait Scage extends OperationMapping {
   def delAllDisposes() {disposes.delAllOperations()}
   def delAllDisposesExcept(except_operation_ids:Int*) {disposes.delAllOperationsExcept(except_operation_ids:_*)}
 
-  protected var on_pause = false
-  def onPause = on_pause
-  def switchPause() {on_pause = !on_pause; scage_log.info("pause = " + on_pause)}
-  def pause()       {on_pause = true;      scage_log.info("pause = " + on_pause)}
-  def pauseOff()    {on_pause = false;     scage_log.info("pause = " + on_pause)}
-
-  protected var is_running = false
-  def isRunning = is_running
   def run() {
     executePreinits()
     executeInits()
-    is_running = true
+    isRunning = true
     scage_log.info(unit_name+": run")
-    while(is_running && Scage.isAppRunning) {
+    while(isRunning && Scage.isAppRunning) {
       executeActions()
     }
     executeClears()
     executeDisposes()
   }
 
-  def stop() {
-    is_running = false
-  }
+  def stop() {isRunning = false}
 
-  private[scage] var restart_toggled = false
   def restart() {
-    restart_toggled = true
+    restartToggled = true
     executeClears()
     executeInits()
   }
@@ -372,10 +384,33 @@ trait Scage extends OperationMapping {
   }
 }
 
+trait SynchronizedScage extends Scage {
+  override def isRunning = synchronized {super.isRunning}
+  override private[scage] def isRunning_=(new_is_running:Boolean) {synchronized {super.isRunning = new_is_running}}
+
+  override private[scage] def restartToggled = synchronized {super.restartToggled}
+  override private[scage] def restartToggled_=(new_restart_toggled:Boolean) {synchronized {super.restartToggled = new_restart_toggled}}
+
+  override def onPause = synchronized {super.onPause}
+  override def switchPause() {synchronized {super.switchPause()}}
+  override def pause()       {synchronized {super.pause()}}
+  override def pauseOff()    {synchronized {super.pauseOff()}}
+
+  override def currentOperation = synchronized {super.currentOperation}
+  override private[scage] def currentOperation_=(new_current_operation_id:Int) {synchronized {super.currentOperation = new_current_operation_id}}
+
+  override private[scage] val mapping = new mutable.HashMap[Int, OperationContainer[_ <: ScageOperation]] with mutable.SynchronizedMap[Int, OperationContainer[_ <: ScageOperation]]
+
+  class SynchronizedOperationContainer(name:String) extends DefaultOperationContainer(name) {
+    override protected val _operations = new ArrayBuffer[ScageOperation] with mutable.SynchronizedBuffer[ScageOperation]
+  }
+  override protected def defaultContainer(container_name:String) = new SynchronizedOperationContainer(container_name)
+}
+
 object Scage {
   private var is_all_units_stop = false
-  def isAppRunning = !is_all_units_stop
-  def stopApp() {is_all_units_stop = true}
+  def isAppRunning = synchronized {!is_all_units_stop}
+  def stopApp() {synchronized {is_all_units_stop = true}}
 }
 
 class ScageApp(val unit_name:String = "Scage App") extends Scage /*with ScageMain */with App {
