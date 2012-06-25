@@ -248,7 +248,7 @@ class ScageTest extends TestCase("app") {
                 }
               }
             )
-            deleteSelf()
+            delOperation(1)
           }
         }
 
