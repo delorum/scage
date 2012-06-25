@@ -18,12 +18,12 @@ import net.scage.support.net.{NetClient, NetServer}
 
 object ScageTest {
     def suite: Test = {
-        val suite = new TestSuite(classOf[ScageTest]);
+        val suite = new TestSuite(classOf[ScageTest])
         suite
     }
 
     def main(args : Array[String]) {
-        junit.textui.TestRunner.run(suite);
+        junit.textui.TestRunner.run(suite)
     }
 }
 
@@ -37,6 +37,7 @@ class ScageTest extends TestCase("app") {
      */
     def testOK() {
       new ScreenApp("Hello World") with MultiController {
+        windowTitle += " - "+app_version
         /*scage_log.info("starting main unit "+unit_name+"...")
         ScageProperties.properties = properties*/
 
@@ -264,7 +265,7 @@ class ScageTest extends TestCase("app") {
         }
       }.main(Array[String]())
       assertTrue(true)
-    };
+    }
 }
 
 /*test*/
