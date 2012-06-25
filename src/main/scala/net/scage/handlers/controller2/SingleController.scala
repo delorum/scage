@@ -22,8 +22,12 @@ trait SingleController extends ScageController {
     keyboard_keys(key_code) = SingleKeyEvent(key_code, () => repeat_time, () => if(!onPause) onKeyDown, () => if(!onPause) onKeyUp)
     deletion_operations.addOp(() => keyboard_keys -= key_code)
   }
-   def keyNoPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) = {
+  def keyNoPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) = {
     keyboard_keys(key_code) = SingleKeyEvent(key_code, () => repeat_time, () => onKeyDown, () => onKeyUp)
+    deletion_operations.addOp(() => keyboard_keys -= key_code)
+  }
+  def keyPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}):Int = {
+    keyboard_keys(key_code) = SingleKeyEvent(key_code, () => repeat_time, () => if(onPause) onKeyDown, () => if(onPause) onKeyUp)
     deletion_operations.addOp(() => keyboard_keys -= key_code)
   }
 

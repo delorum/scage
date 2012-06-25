@@ -29,6 +29,12 @@ trait MultiController extends ScageController {
     else keyboard_keys(key_code) = ArrayBuffer(event)
     deletion_operations.addOp(() => keyboard_keys(key_code) -= event)
   }
+  def keyPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) = {
+    val event = MultiKeyEvent(false, 0, () => repeat_time, () => if(onPause) onKeyDown, () => if(onPause) onKeyUp)
+    if(keyboard_keys.contains(key_code)) keyboard_keys(key_code) += event
+    else keyboard_keys(key_code) = ArrayBuffer(event)
+    deletion_operations.addOp(() => keyboard_keys(key_code) -= event)
+  }
 
   def anykey(onKeyDown: => Any) = {
     val event = () => if(!onPause) onKeyDown

@@ -2,7 +2,7 @@ package net.scage
 
 import com.weiglewilczek.slf4s.Logger
 import support.ScageId._
-import collection.mutable.{SynchronizedBuffer, ArrayBuffer, HashMap}
+import collection.mutable.ArrayBuffer
 import collection.mutable
 
 case class ScageOperation(op_id:Int, op:() => Any)
@@ -46,21 +46,21 @@ trait OperationMapping extends HaveCurrentOperation {
       }
     }
 
-    def delOperation(op_id:Int) = {_delOperation(op_id, true)}
-    def delOperationNoWarn(op_id:Int) = {_delOperation(op_id, false)}
+    def delOperation(op_id:Int) = {_delOperation(op_id, show_warnings = true)}
+    def delOperationNoWarn(op_id:Int) = {_delOperation(op_id, show_warnings = false)}
 
-    def delOperations(op_ids:Int*) {op_ids.foreach(_delOperation(_, true))}
-    def delOperationsNoWarn(op_ids:Int*) {op_ids.foreach(_delOperation(_, false))}
-    def delOperations(op_ids:Traversable[Int]) {op_ids.foreach(_delOperation(_, true))}
-    def delOperationsNoWarn(op_ids:Traversable[Int]) {op_ids.foreach(_delOperation(_, false))}
+    def delOperations(op_ids:Int*) {op_ids.foreach(_delOperation(_, show_warnings = true))}
+    def delOperationsNoWarn(op_ids:Int*) {op_ids.foreach(_delOperation(_, show_warnings = false))}
+    def delOperations(op_ids:Traversable[Int]) {op_ids.foreach(_delOperation(_, show_warnings = true))}
+    def delOperationsNoWarn(op_ids:Traversable[Int]) {op_ids.foreach(_delOperation(_, show_warnings = false))}
 
     def delAllOperations() {
       delOperations(operations.map(_.op_id))
       log.info("deleted all operations from the container "+name)
     }
 
-    def delAllOperationsExcept(except_op_ids:Int*) {operations.view.map(_.op_id).filter(!except_op_ids.contains(_)).foreach(_delOperation(_, true))}
-    def delAllOperationsExceptNoWarn(except_op_ids:Int*) {operations.view.map(_.op_id).filter(!except_op_ids.contains(_)).foreach(_delOperation(_, false))}
+    def delAllOperationsExcept(except_op_ids:Int*) {operations.view.map(_.op_id).filter(!except_op_ids.contains(_)).foreach(_delOperation(_, show_warnings = true))}
+    def delAllOperationsExceptNoWarn(except_op_ids:Int*) {operations.view.map(_.op_id).filter(!except_op_ids.contains(_)).foreach(_delOperation(_, show_warnings = false))}
   }
 
   class DefaultOperationContainer(val name:String) extends OperationContainer[ScageOperation] {
@@ -83,7 +83,7 @@ trait OperationMapping extends HaveCurrentOperation {
 
   protected def defaultContainer(container_name:String) = new DefaultOperationContainer(container_name)
 
-  private[scage] val mapping = HashMap[Int, OperationContainer[_ <: ScageOperation]]()   // maybe make this protected
+  private[scage] val mapping = mutable.HashMap[Int, OperationContainer[_ <: ScageOperation]]()   // maybe make this protected
 
   private def _delOperation(op_id:Int, show_warnings:Boolean) = {
     mapping.remove(op_id) match {
@@ -102,23 +102,23 @@ trait OperationMapping extends HaveCurrentOperation {
     }
   }
 
-  def delOperation(op_id:Int) = {_delOperation(op_id, true)}
-  def delOperationNoWarn(op_id:Int) = {_delOperation(op_id, false)}
+  def delOperation(op_id:Int) = {_delOperation(op_id, show_warnings = true)}
+  def delOperationNoWarn(op_id:Int) = {_delOperation(op_id, show_warnings = false)}
 
   def deleteSelf() {delOperation(currentOperation)}
 
-  def delOperations(op_ids:Int*) {op_ids.foreach(_delOperation(_, true))}
-  def delOperationsNoWarn(op_ids:Int*)  {op_ids.foreach(_delOperation(_, false))}
-  def delOperations(op_ids:Traversable[Int]) {op_ids.foreach(_delOperation(_, true))}
-  def delOperationsNoWarn(op_ids:Traversable[Int]) {op_ids.foreach(_delOperation(_, false))}
+  def delOperations(op_ids:Int*) {op_ids.foreach(_delOperation(_, show_warnings = true))}
+  def delOperationsNoWarn(op_ids:Int*)  {op_ids.foreach(_delOperation(_, show_warnings = false))}
+  def delOperations(op_ids:Traversable[Int]) {op_ids.foreach(_delOperation(_, show_warnings = true))}
+  def delOperationsNoWarn(op_ids:Traversable[Int]) {op_ids.foreach(_delOperation(_, show_warnings = false))}
 
   def delAllOperations() {
     delOperations(mapping.keys)
     log.info("deleted all operations")
   }
 
-  def delAllOperationsExcept(except_op_ids:Int*) {mapping.keys.filter(!except_op_ids.contains(_)).foreach(_delOperation(_, true))}
-  def delAllOperationsExceptNoWarn(except_op_ids:Int*) {mapping.keys.filter(!except_op_ids.contains(_)).foreach(_delOperation(_, false))}
+  def delAllOperationsExcept(except_op_ids:Int*) {mapping.keys.filter(!except_op_ids.contains(_)).foreach(_delOperation(_, show_warnings = true))}
+  def delAllOperationsExceptNoWarn(except_op_ids:Int*) {mapping.keys.filter(!except_op_ids.contains(_)).foreach(_delOperation(_, show_warnings = false))}
 
   def operationExists(op_id:Int) = mapping.contains(op_id)
 }
@@ -335,13 +335,13 @@ trait Scage extends OperationMapping with Pausable with Runnable {
   /* this 'events'-functionality seems useless as the amount of usecases in real projects is zero
      but I plan to keep it, because I still have hope that someday I construct such usecase =)
   */
-  private val events = HashMap[String, HashMap[Int, PartialFunction[Any, Unit]]]()
+  private val events = mutable.HashMap[String, mutable.HashMap[Int, PartialFunction[Any, Unit]]]()
   def onEventWithArguments(event_name:String)(event_action: PartialFunction[Any, Unit]) = {
     val event_id = nextId
     events.get(event_name) match {
       case Some(events_for_name) =>
         events_for_name += (event_id -> event_action)
-      case None => events += (event_name -> HashMap(event_id -> event_action))
+      case None => events += (event_name -> mutable.HashMap(event_id -> event_action))
     }
     (event_name, event_id)
   }
@@ -349,7 +349,7 @@ trait Scage extends OperationMapping with Pausable with Runnable {
     val event_id = nextId
     events.get(event_name) match {
       case Some(events_for_name) => events_for_name += (event_id -> {case _ => event_action})
-      case None => events += (event_name -> HashMap(event_id -> {case _ => event_action}))
+      case None => events += (event_name -> mutable.HashMap(event_id -> {case _ => event_action}))
     }
     (event_name, event_id)
   }

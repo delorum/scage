@@ -39,6 +39,7 @@ trait ScageController extends Scage {
   
   def key(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}):Int
   def keyNoPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}):Int
+  def keyPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}):Int
 
   def anykey(onKeyDown: => Any):Int
   def anykeyNoPause(onKeyDown: => Any):Int
