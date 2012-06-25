@@ -46,8 +46,6 @@ trait OperationMapping extends HaveCurrentOperation {
       }
     }
 
-    def deleteSelf() {delOperation(currentOperation)}
-
     def delOperation(op_id:Int) = {_delOperation(op_id, true)}
     def delOperationNoWarn(op_id:Int) = {_delOperation(op_id, false)}
 
@@ -106,6 +104,8 @@ trait OperationMapping extends HaveCurrentOperation {
 
   def delOperation(op_id:Int) = {_delOperation(op_id, true)}
   def delOperationNoWarn(op_id:Int) = {_delOperation(op_id, false)}
+
+  def deleteSelf() {delOperation(currentOperation)}
 
   def delOperations(op_ids:Int*) {op_ids.foreach(_delOperation(_, true))}
   def delOperationsNoWarn(op_ids:Int*)  {op_ids.foreach(_delOperation(_, false))}
