@@ -5,6 +5,7 @@ import net.scage.support.ScageProperties._
 import com.weiglewilczek.slf4s.Logger
 import net.scage.handlers.RendererLib
 import collection.mutable.{ArrayBuffer, HashMap}
+import collection.mutable
 
 class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x", 0),
                               val field_to_x:Int        = property("field.to.x", try {RendererLib.windowWidth} catch {case e:Exception => 800}),
@@ -64,7 +65,7 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x
   // but for convenience I keep them protected, so client classes - children of ScageTracer can read them
   protected val point_matrix = Array.ofDim[ArrayBuffer[T]](N_x, N_y)
   initMatrix(point_matrix)
-  protected val traces_by_ids = HashMap[Int, T]()
+  protected val traces_by_ids = mutable.HashMap[Int, T]()
   protected var traces_list = ArrayBuffer[T]()
   def tracesList = traces_list.toList
   
@@ -87,8 +88,10 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x
   def containsTrace(trace_id:Int) = traces_by_ids.contains(trace_id)
   def containsTrace(trace:T) = traces_by_ids.contains(trace.id)
 
+  // WARNING: its very important not to directly pass contents of point_matrix(trace.location.ix)(trace.location.iy),
+  // traces_by_ids or traces_list as it cannot remove from itself properly, causing NullPointerException!
   def removeTraces(traces_to_remove:T*) {  // maybe return result (true/false)
-    traces_to_remove.foreach(trace => {
+    traces_to_remove.foreach(trace => {   // maybe call toList before foreach to copy the list
       if(traces_by_ids.contains(trace.id)) {
         point_matrix(trace.location.ix)(trace.location.iy) -= trace
         traces_by_ids -= trace.id
@@ -107,6 +110,7 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x
     log.info("deleted all traces")
   }
   def removeTracesInPoint(point:Vec) {removeTraces(tracesInPoint(point):_*)}
+  def removeTracesInPoint(x:Int, y:Int) {removeTraces(tracesInPoint(x, y):_*)}
 
   def tracesInPoint(point:Vec, condition:T => Boolean):List[T] = tracesInPoint(point.ix, point.iy, condition)
   def tracesInPoint(x:Int, y:Int, condition:T => Boolean) = {
