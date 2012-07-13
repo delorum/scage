@@ -9,6 +9,7 @@ import actors.Actor
 import net.scage.support.{ScageId, State}
 import java.net.{DatagramSocket, ServerSocket, Socket}
 import concurrent.ops._
+import concurrent.SyncVar
 
 /**
  * Network server implementation, using text json messages.
@@ -96,6 +97,11 @@ class NetServer {
         case ("send_to_clients_sync", data:State, client_ids:List[Int]) =>
           client_handlers.filter(c => client_ids.contains(c.id)).foreach(c => c.sendSync(data))
           reply("finished sending")
+        case ("send_to_all_except", data:State, client_ids:List[Int]) =>
+          client_handlers.filterNot(c => client_ids.contains(c.id)).foreach(c => c.send(data))
+        case ("send_to_all_except_sync", data:State, client_ids:List[Int]) =>
+          client_handlers.filterNot(c => client_ids.contains(c.id)).foreach(c => c.sendSync(data))
+          reply("finished sending")
         case "ping" =>
           client_handlers.foreach(_.send(State("ping")))
           if(_ping_timeout > 0) {
@@ -153,6 +159,16 @@ class NetServer {
      clients_actor !? (("send_to_clients_sync", data, client_ids.toList))
   }
   def sendToClientsSync(data:String, client_ids:Int*) {sendToClientsSync(State("raw" -> data), client_ids:_*)}
+
+  def sendToAllExcept(data:State, client_ids:Int*) {
+    clients_actor ! ("send_to_all_except", data, client_ids.toList)
+  }
+  def sendToAllExcept(data:String, client_ids:Int*) {sendToAllExcept(State("raw" -> data), client_ids:_*)}
+
+  def sendToAllExceptSync(data:State, client_ids:Int*) {
+    clients_actor !? (("send_to_all_except_sync", data, client_ids.toList))
+  }
+  def sendToAllExceptSync(data:String, client_ids:Int*) {sendToAllExceptSync(State("raw" -> data), client_ids:_*)}
   
   def disconnectClient(client:ClientHandler) {clients_actor ! ("disconnect_client", client)}
 
@@ -164,6 +180,7 @@ class NetServer {
     onNewConnection:ClientHandler => (Boolean, String) = client => (true, ""),
     onClientAccepted:ClientHandler => Any = client => {},
     onClientDataReceived:(ClientHandler, State) => Any = (client:ClientHandler, data:State) => {},
+    onClientQuestion:(ClientHandler, State) => State = (client:ClientHandler, data:State) => {State()},
     onClientDisconnected:ClientHandler => Any = client => {}
   ) {
     synchronized {
@@ -186,7 +203,7 @@ class NetServer {
               log.info("listening port "+connection_port+", "+clients_length+"/"+(if(_max_clients > 0) _max_clients else "unlimited")+" client(s) are connected")
               val socket = server_socket.accept
               log.info("incoming connection from "+socket.getInetAddress.getHostAddress)
-              val client = new ClientHandler(socket, onClientDataReceived, onClientDisconnected)
+              val client = new ClientHandler(socket, onClientDataReceived, onClientQuestion, onClientDisconnected)
               val (is_client_accepted, reason) = if(_max_clients != 0 && clients_length >= _max_clients) (false, "server is full")
                                                  else onNewConnection(client)
               if(is_client_accepted) {
@@ -221,6 +238,7 @@ class NetServer {
 
 private[net] class ClientHandler(socket:Socket,
                                  onClientDataReceived:(ClientHandler, State) => Any = (client:ClientHandler, data:State) => {},
+                                 onClientQuestion:(ClientHandler, State) => State = (client:ClientHandler, data:State) => {State()},
                                  onClientDisconnected:ClientHandler => Any = client => {}) {
   private val log = Logger(this.getClass.getName)
 
@@ -254,7 +272,21 @@ private[net] class ClientHandler(socket:Socket,
               log.debug("incoming message from client #"+id+":\n"+message)
               val received_data = State.fromJsonStringOrDefault(message, State(("raw" -> message)))
               if(received_data.contains("ping")) log.debug("received ping from client #"+id)
-              else {
+              else if(received_data.contains("question")) {
+                log.debug("received question from client #"+id+":\n"+received_data)
+                actor {
+                  val question_state = received_data.value[State]("question")
+                  val answer_state = State("answer" -> onClientQuestion(this, question_state))
+                  log.debug("sending the answer:\n"+answer_state)
+                  send(answer_state)
+                }
+              } else if(received_data.contains("answer")) {
+                log.debug("received answer from client #"+id+":\n"+received_data)
+                actor {
+                  val answer_state = received_data.value[State]("answer")
+                  client_answer.put(answer_state)
+                }
+              } else {
                 log.debug("received data from client #"+id+":\n"+received_data)
                 actor {
                   onClientDataReceived(this, received_data)
@@ -291,6 +323,12 @@ private[net] class ClientHandler(socket:Socket,
     io_actor !? (("sendSync", data))
   }
   def sendSync(data:String) {sendSync(State(("raw" -> data)))}
+
+  private val client_answer = new SyncVar[State]
+  def askClient(question:State):State = {
+    send(State("question" -> question))
+    client_answer.take()
+  }
 
   private[net] def disconnect() {
     io_actor !? "disconnect"

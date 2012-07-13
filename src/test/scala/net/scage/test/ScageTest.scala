@@ -227,6 +227,13 @@ class ScageTest extends TestCase("app") {
                 client.send(State(("n" -> vec.n)))
               }
             }
+          },
+          onClientQuestion = {(client, question) =>
+            val answer = State()
+            question.neededKeys {
+              case ("Are u ready?", true) => answer.add("yes")
+            }
+            answer
           }
         )
 
@@ -244,8 +251,12 @@ class ScageTest extends TestCase("app") {
                     println("received n: "+n)
                     println("waiting 5 sec...")
                     Thread.sleep(5000)
-                    val random_vec = Vec((math.random*100).toInt, (math.random*100).toInt)
-                    NetClient.send(State(("vec" -> random_vec)))
+                    println("asking if the server is ready to receive another vec")
+                    val answer = NetClient.askServer(State("Are u ready?"))
+                    if(answer.contains("yes")) {
+                      val random_vec = Vec((math.random*100).toInt, (math.random*100).toInt)
+                      NetClient.send(State(("vec" -> random_vec)))
+                    }
                 }
               }
             )

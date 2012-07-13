@@ -3,12 +3,13 @@ package net.scage.support
 import collection.mutable.HashMap
 import parsers.JSONParser
 import com.weiglewilczek.slf4s.Logger
+import collection.mutable
 
 /**
  * Represents JSON Object
  */
 // TODO: add example usages and tell about alphabetical order for keys in patterns!
-class State(args:Any*) extends HashMap[String, Any] {
+class State(args:Any*) extends mutable.HashMap[String, Any] {
   private val log = Logger(this.getClass.getName)
   
   add(args:_*)
