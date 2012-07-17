@@ -10,23 +10,31 @@ import org.lwjgl.opengl.GL11
 
 trait ScageMessageTrait {
   def max_font_size:Float
-  def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor)    // TODO: maybe replace all of this with one method with default arguments
-  def print(message:Any, x:Float, y:Float, size:Float) {print(message, x, y, size, DEFAULT_COLOR)}
-  def print(message:Any, x:Float, y:Float, color:ScageColor) {print(message, x, y, max_font_size, color)}
-  def print(message:Any, x:Float, y:Float) {print(message, x, y, max_font_size, currentColor)}
-  def print(message:Any, coord:Vec, size:Float, color:ScageColor) {print(message, coord.x, coord.y, size, color)}
-  def print(message:Any, coord:Vec, color:ScageColor) {print(message, coord, max_font_size, color)}
-  def print(message:Any, coord:Vec, size:Float) {print(message, coord, size, DEFAULT_COLOR)}
-  def print(message:Any, coord:Vec) {print(message, coord, max_font_size, DEFAULT_COLOR)}
+
+  // cannot replace it with method with default arguments as its way more inconvinient for a client apps,
+  // also I have an error: two overloaded methods define default arguments (x:Float, y:Float and coord:Vec)
+  def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor, align:String)
+
+  def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor) {print(message, x, y, size, color, "none")}
+  def print(message:Any, x:Float, y:Float, size:Float, align:String) {print(message, x, y, size, DEFAULT_COLOR, align)}
+  def print(message:Any, x:Float, y:Float, color:ScageColor, align:String) {print(message, x, y, max_font_size, color, align)}
+  def print(message:Any, x:Float, y:Float, align:String) {print(message, x, y, max_font_size, DEFAULT_COLOR, align)}
+  def print(message:Any, x:Float, y:Float, size:Float) {print(message, x, y, size, DEFAULT_COLOR, "none")}
+  def print(message:Any, x:Float, y:Float, color:ScageColor) {print(message, x, y, max_font_size, color, "none")}
+  def print(message:Any, x:Float, y:Float) {print(message, x, y, max_font_size, currentColor, "none")}
+
+  def print(message:Any, coord:Vec, size:Float, color:ScageColor) {print(message, coord.x, coord.y, size, color, "none")}
+  def print(message:Any, coord:Vec, size:Float, align:String) {print(message, coord.x, coord.y, size, DEFAULT_COLOR, align)}
+  def print(message:Any, coord:Vec, color:ScageColor, align:String) {print(message, coord.x, coord.y, max_font_size, color, align)}
+  def print(message:Any, coord:Vec, align:String) {print(message, coord.x, coord.y, max_font_size, DEFAULT_COLOR, align)}
+  def print(message:Any, coord:Vec, size:Float) {print(message, coord.x, coord.y, size, DEFAULT_COLOR, "none")}
+  def print(message:Any, coord:Vec, color:ScageColor) {print(message, coord.x, coord.y, max_font_size, color, "none")}
+  def print(message:Any, coord:Vec) {print(message, coord.x, coord.y, max_font_size, DEFAULT_COLOR, "none")}
 
   def messageBounds(message:Any, size:Float):Vec
 
   def printCentered(message:Any, x:Float, y:Float, size:Float, color:ScageColor) {
-    val bounds = messageBounds(message, size)
-    val num_lines = message.toString.filter(_ == '\n').length + 1
-    val x_offset = x - bounds.ix/2
-    val y_offset = y - bounds.iy/2 + (bounds.y - bounds.y/num_lines)
-    print(message, x_offset, y_offset, size, color)
+    print(message, x, y, size, color, align = "center")
   }
   def printCentered(message:Any, x:Float, y:Float, size:Float) {printCentered(message:Any, x, y, size, DEFAULT_COLOR)}
   def printCentered(message:Any, x:Float, y:Float, color:ScageColor) {printCentered(message, x, y, max_font_size, color)}
@@ -48,7 +56,7 @@ trait ScageMessageTrait {
 
   def printInterface(messages:TraversableOnce[MessageData], parameters:Any*) {
     for(MessageData(message, message_x, message_y, message_color) <- messages) {
-      print(message, message_x, message_y, message_color)
+      print(message, message_x, message_y, color = message_color)
     }
   }
 }
@@ -88,10 +96,35 @@ class ScageMessage(
     }
   }
 
-  def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor) {
+  // DEFAULT_COLOR support because client programs CAN pass DEFAULT_COLOR
+  // align one of those: left, none (same as left), center, xcenter, right
+  def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor, align:String) {
     val print_color = if(color != DEFAULT_COLOR) color.toSlickColor else currentColor.toSlickColor
+
+    val (new_x, new_y) = align match {
+      case "center" =>
+        val bounds = messageBounds(message, size)
+        val num_lines = message.toString.filter(_ == '\n').length + 1
+        val x_offset = x - bounds.ix/2
+        val y_offset = y - bounds.iy/2 + (bounds.y - bounds.y/num_lines)
+        (x_offset, y_offset)
+      case "xcenter" =>
+        val bounds = messageBounds(message, size)
+        val num_lines = message.toString.filter(_ == '\n').length + 1
+        val x_offset = x - bounds.ix/2
+        val y_offset = y + (bounds.y - bounds.y/num_lines)
+        (x_offset, y_offset)
+      case "right" =>
+        val bounds = messageBounds(message, size)
+        val num_lines = message.toString.filter(_ == '\n').length + 1
+        val x_offset = x - bounds.ix
+        val y_offset = y + (bounds.y - bounds.y/num_lines)
+        (x_offset, y_offset)
+      case _ => (x, y)
+    }
+
     GL11.glPushMatrix()
-    font.drawString(x.toInt, y.toInt, size, message.toString, print_color)
+    font.drawString(new_x.toInt, new_y.toInt, size, message.toString, print_color)
     GL11.glPopMatrix()
   }
 

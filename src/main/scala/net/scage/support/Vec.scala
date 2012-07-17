@@ -60,6 +60,9 @@ class Vec(val x:Float = 0, val y:Float = 0) {
   def norma = math.sqrt(norma2).toFloat
   def n = this/norma
 
+  def perpendicular = Vec(-y, x)
+  def p = perpendicular.n
+
   def dist2(v:Vec) = (x - v.x)*(x - v.x) + (y - v.y)*(y - v.y)
   def dist(v:Vec) = math.sqrt(dist2(v)).toFloat
 
