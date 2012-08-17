@@ -55,7 +55,10 @@ Hello World Example
 
 ###Network api example
 
-Client sends to server random 2d vectors and server sends back corresponded normalized values.
+Scage's network api represents an asynchronous (in general) client-server model (using Scala's actors framework) and is based on 
+simple text protocol over TCP/IP. Clients and server are send messages to each other in JSON format. 
+
+In the example belowe client sends to server random 2d vectors and server sends back corresponded normalized values.
 
     import net.scage.ScageApp
     import net.scage.support.net.{NetClient, NetServer}
