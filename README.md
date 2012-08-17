@@ -25,6 +25,8 @@ Features
  - Easy app building/deploing (as a standalone or via webstart) using maven infrastructure.
  - Multiple platforms support: Windows, Linux, Mac, Solaris (thanks to Java and lwjgl actually). Similar build process for any platform (with maven).
  - Client/server network api upon actors with simple text protocol based on json format.
+ 
+Please read the project wiki and especially see [Examples](https://github.com/dunnololda/scage/wiki/Examples) page to learn more!
 
 Hello World Example
 -------------------
