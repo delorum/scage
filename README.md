@@ -125,7 +125,7 @@ Add to your pom.xml the following:
           <dependency>
               <groupId>su.msk.dunno</groupId>
               <artifactId>scage</artifactId>
-              <version>0.8</version>
+              <version>0.9</version>
               <scope>compile</scope>
           </dependency>
       </dependencies>
