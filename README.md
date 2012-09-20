@@ -25,6 +25,8 @@ Features
  - Easy app building/deploing (as a standalone or via webstart) using maven infrastructure.
  - Multiple platforms support: Windows, Linux, Mac, Solaris (thanks to Java and lwjgl actually). Similar build process for any platform (with maven).
  - Client/server network api upon actors with simple text protocol based on json format.
+ 
+Please read the project wiki and especially see [Examples](https://github.com/dunnololda/scage/wiki/Examples) page to learn more!
 
 Hello World Example
 -------------------
@@ -53,7 +55,10 @@ Hello World Example
 
 ###Network api example
 
-Client sends to server random 2d vectors and server sends back corresponded normalized values.
+Scage's network api represents an asynchronous (in general) client-server model (using Scala's actors framework) and is based on 
+simple text protocol over TCP/IP. Clients and server are send messages to each other in JSON format. 
+
+In the example below client sends to server random 2d vectors and server sends back corresponded normalized values.
 
     import net.scage.ScageApp
     import net.scage.support.net.{NetClient, NetServer}
@@ -125,7 +130,7 @@ Add to your pom.xml the following:
           <dependency>
               <groupId>su.msk.dunno</groupId>
               <artifactId>scage</artifactId>
-              <version>0.8</version>
+              <version>0.9</version>
               <scope>compile</scope>
           </dependency>
       </dependencies>
