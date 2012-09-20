@@ -4,7 +4,7 @@
   <groupId>su.msk.dunno</groupId>
   <artifactId>scage</artifactId>
   <packaging>jar</packaging>
-  <version>0.9.1-SNAPSHOT</version>
+  <version>0.9.1</version>
   <inceptionYear>2011</inceptionYear>
 
   <name>Scage</name>
@@ -157,6 +157,7 @@
       <resources>
         <resource>
             <directory>src/main/resources</directory>
+            <filtering>true</filtering>
         </resource>
       </resources>
       <testResources>

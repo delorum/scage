@@ -202,25 +202,23 @@ trait Scage extends OperationMapping with Pausable with Runnable {
 
   private[scage] val actions = defaultContainer("actions")
 
-  def actionNoPause(action_func: => Any):Int = {actions.addOp(() => action_func)}
-
-  def actionNoPause(period:Long)(action_func: => Unit):Int = {
+  def actionIgnorePause(action_func: => Any):Int = {actions.addOp(() => action_func)}
+  def actionIgnorePause(period:Long)(action_func: => Unit):Int = {
     if(period > 0) {
       var last_action_time:Long = 0
-      actionNoPause {
+      actionIgnorePause {
         if(System.currentTimeMillis - last_action_time > period) {
           action_func
           last_action_time = System.currentTimeMillis
         }
       }
-    } else actionNoPause {
+    } else actionIgnorePause {
         action_func
     }
   }
-
-  def actionDynamicPeriodNoPause(period: => Long)(action_func: => Unit):Int = {
+  def actionDynamicPeriodIgnorePause(period: => Long)(action_func: => Unit):Int = {
     var last_action_time:Long = 0
-    actionNoPause {
+    actionIgnorePause {
       if(System.currentTimeMillis - last_action_time > period) {
         action_func
         last_action_time = System.currentTimeMillis
@@ -230,11 +228,10 @@ trait Scage extends OperationMapping with Pausable with Runnable {
 
   // pausable actions
   def action(action_func: => Any):Int = {
-    actionNoPause {
+    actionIgnorePause {
       if(!onPause) action_func
     }
   }
-
   def action(period:Long)(action_func: => Unit):Int = {
     if(period > 0) {
       var last_action_time:Long = 0
@@ -248,8 +245,36 @@ trait Scage extends OperationMapping with Pausable with Runnable {
         action_func
     }
   }
-
   def actionDynamicPeriod(period: => Long)(action_func: => Unit):Int = {
+    var last_action_time:Long = 0
+    action {
+      if(System.currentTimeMillis - last_action_time > period) {
+        action_func
+        last_action_time = System.currentTimeMillis
+      }
+    }
+  }
+
+  // actions while on pause
+  def actionOnPause(action_func: => Any):Int = {
+    actionIgnorePause {
+      if(onPause) action_func
+    }
+  }
+  def actionOnPause(period:Long)(action_func: => Unit):Int = {
+    if(period > 0) {
+      var last_action_time:Long = 0
+      action {
+        if(System.currentTimeMillis - last_action_time > period) {
+          action_func
+          last_action_time = System.currentTimeMillis
+        }
+      }
+    } else action {
+        action_func
+    }
+  }
+  def actionDynamicPeriodOnPause(period: => Long)(action_func: => Unit):Int = {
     var last_action_time:Long = 0
     action {
       if(System.currentTimeMillis - last_action_time > period) {
