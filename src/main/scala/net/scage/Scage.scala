@@ -79,6 +79,10 @@ trait OperationMapping extends HaveCurrentOperation {
       val op_id = nextId
       addOperationWithMapping(ScageOperation(op_id, op))
     }
+
+    def addOp(op_id:Int, op:() => Any) = {
+      addOperationWithMapping(ScageOperation(op_id, op))
+    }
   }
 
   protected def defaultContainer(container_name:String) = new DefaultOperationContainer(container_name)

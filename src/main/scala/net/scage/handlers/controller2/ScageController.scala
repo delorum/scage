@@ -21,7 +21,7 @@ trait ScageController extends Scage {
     ScageController.key_presses.get(key_code) match {
       case Some(kp:KeyPress) => kp
       case None =>
-        val kp = KeyPress(key_code, false, 0L)
+        val kp = KeyPress(key_code, was_pressed = false, 0L)
         ScageController.key_presses += (key_code -> kp)
         kp
     }
@@ -31,9 +31,34 @@ trait ScageController extends Scage {
     ScageController.mouse_button_presses.get(mouse_button) match {
       case Some(mbp:MouseButtonPress) => mbp
       case None =>
-        val mbp = MouseButtonPress(mouse_button, false, 0L)
+        val mbp = MouseButtonPress(mouse_button, was_pressed = false, 0L)
         ScageController.mouse_button_presses += (mouse_button -> mbp)
         mbp
+    }
+  }
+
+  protected def areLinesIntersect(a1: Vec, a2: Vec, b1: Vec, b2: Vec): Boolean = {
+    val common = (a2.x - a1.x) * (b2.y - b1.y) - (a2.y - a1.y) * (b2.x - b1.x)
+    common != 0 && {
+      val rH = (a1.y - b1.y) * (b2.x - b1.x) - (a1.x - b1.x) * (b2.y - b1.y)
+      val sH = (a1.y - b1.y) * (a2.x - a1.x) - (a1.x - b1.x) * (a2.y - a1.y)
+
+      val r = rH / common
+      val s = sH / common
+
+      r >= 0 && r <= 1 && s >= 0 && s <= 1
+    }
+  }
+
+  protected def mouseOnArea(mouse_coord:Vec, area:List[Vec]):Boolean = {
+    if (area.length < 2) false
+    else {
+      val a1 = mouse_coord
+      val a2 = Vec(Integer.MAX_VALUE, mouse_coord.y)
+      val intersections = (area.last :: area.init).zip(area).foldLeft(0) {
+        case (result, (b1, b2)) => if (areLinesIntersect(a1, a2, b1, b2)) result + 1 else result
+      }
+      intersections % 2 != 0
     }
   }
   
@@ -55,6 +80,16 @@ trait ScageController extends Scage {
   def rightMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
   def rightMouseIgnorePause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
   def rightMouseOnPause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
+
+  def windowButtonInfo(window_button_id:Int):Option[(Boolean, Long)]
+
+  def windowLeftMouse(area:List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
+  def windowLeftMouseIgnorePause(area:List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
+  def windowLeftMouseOnPause(area:List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
+
+  def windowRightMouse(area:List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
+  def windowRightMouseIgnorePause(area:List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
+  def windowRightMouseOnPause(area:List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
 
   def mouseMotion(onMotion: Vec => Any):Int
   def mouseMotionIgnorePause(onMotion: Vec => Any):Int

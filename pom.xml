@@ -4,7 +4,7 @@
   <groupId>su.msk.dunno</groupId>
   <artifactId>scage</artifactId>
   <packaging>jar</packaging>
-  <version>0.9.1</version>
+  <version>0.9.2-SNAPSHOT</version>
   <inceptionYear>2011</inceptionYear>
 
   <name>Scage</name>
