@@ -38,35 +38,43 @@ trait ScageController extends Scage {
   }
   
   def key(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}):Int
-  def keyNoPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}):Int
-  def keyPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}):Int
+  def keyIgnorePause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}):Int
+  def keyOnPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}):Int
 
   def anykey(onKeyDown: => Any):Int
-  def anykeyNoPause(onKeyDown: => Any):Int
+  def anykeyIgnorePause(onKeyDown: => Any):Int
+  def anykeyOnPause(onKeyDown: => Any):Int
 
   def mouseCoord:Vec
   def isMouseMoved:Boolean
 
   def leftMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
-  def leftMouseNoPause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
+  def leftMouseIgnorePause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
+  def leftMouseOnPause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
 
   def rightMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
-  def rightMouseNoPause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
+  def rightMouseIgnorePause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
+  def rightMouseOnPause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
 
   def mouseMotion(onMotion: Vec => Any):Int
-  def mouseMotionNoPause(onMotion: Vec => Any):Int
+  def mouseMotionIgnorePause(onMotion: Vec => Any):Int
+  def mouseMotionOnPause(onMotion: Vec => Any):Int
 
   def leftMouseDrag(onDrag: Vec => Any):Int
-  def leftMouseDragNoPause(onDrag: Vec => Any):Int
+  def leftMouseDragIgnorePause(onDrag: Vec => Any):Int
+  def leftMouseDragOnPause(onDrag: Vec => Any):Int
 
   def rightMouseDrag(onDrag: Vec => Any):Int
-  def rightMouseDragNoPause(onDrag: Vec => Any):Int
+  def rightMouseDragIgnorePause(onDrag: Vec => Any):Int
+  def rightMouseDragOnPause(onDrag: Vec => Any):Int
 
   def mouseWheelUp(onWheelUp: Vec => Any):Int
-  def mouseWheelUpNoPause(onWheelUp: Vec => Any):Int
+  def mouseWheelUpIgnorePause(onWheelUp: Vec => Any):Int
+  def mouseWheelUpOnPause(onWheelUp: Vec => Any):Int
 
   def mouseWheelDown(onWheelDown: Vec => Any):Int
-  def mouseWheelDownNoPause(onWheelDown: Vec => Any):Int
+  def mouseWheelDownIgnorePause(onWheelDown: Vec => Any):Int
+  def mouseWheelDownOnPause(onWheelDown: Vec => Any):Int
 
   def checkControls()
 
