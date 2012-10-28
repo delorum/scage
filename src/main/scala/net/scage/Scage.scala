@@ -338,19 +338,19 @@ trait Scage extends OperationMapping with Pausable with Runnable {
   private val events = mutable.HashMap[String, mutable.HashMap[Int, PartialFunction[Any, Unit]]]()
   def onEventWithArguments(event_name:String)(event_action: PartialFunction[Any, Unit]) = {
     val event_id = nextId
-    events.get(event_name) match {
+    (events.get(event_name) match {
       case Some(events_for_name) =>
         events_for_name += (event_id -> event_action)
       case None => events += (event_name -> mutable.HashMap(event_id -> event_action))
-    }
+    }):Unit
     (event_name, event_id)
   }
   def onEvent(event_name:String)(event_action: => Unit) = {
     val event_id = nextId
-    events.get(event_name) match {
+    (events.get(event_name) match {
       case Some(events_for_name) => events_for_name += (event_id -> {case _ => event_action})
       case None => events += (event_name -> mutable.HashMap(event_id -> {case _ => event_action}))
-    }
+    }):Unit
     (event_name, event_id)
   }
   def callEvent(event_name:String, arg:Any) {
