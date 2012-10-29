@@ -36,6 +36,50 @@ trait ScageController extends Scage {
         mbp
     }
   }
+
+  protected def areLinesIntersect(a1: Vec, a2: Vec, b1: Vec, b2: Vec): Boolean = {
+    val common = (a2.x - a1.x) * (b2.y - b1.y) - (a2.y - a1.y) * (b2.x - b1.x)
+    common != 0 && {
+      val rH = (a1.y - b1.y) * (b2.x - b1.x) - (a1.x - b1.x) * (b2.y - b1.y)
+      val sH = (a1.y - b1.y) * (a2.x - a1.x) - (a1.x - b1.x) * (a2.y - a1.y)
+
+      val r = rH / common
+      val s = sH / common
+
+      r >= 0 && r <= 1 && s >= 0 && s <= 1
+    }
+  }
+
+  protected def coordOnArea(mouse_coord:Vec, area:List[Vec]):Boolean = {
+    if (area.length < 2) false
+    else {
+      val a1 = mouse_coord
+      val a2 = Vec(Integer.MAX_VALUE, mouse_coord.y)
+      val intersections = (area.last :: area.init).zip(area).foldLeft(0) {
+        case (result, (b1, b2)) => if (areLinesIntersect(a1, a2, b1, b2)) result + 1 else result
+      }
+      intersections % 2 != 0
+    }
+  }
+
+  def keyPressed(key_code:Int):Boolean = {
+    val KeyPress(_, was_pressed, _) = keyPress(key_code)
+    was_pressed
+  }
+
+  def leftMousePressed:Boolean = {
+    val MouseButtonPress(_, was_pressed, _) = mouseButtonPress(0)
+    was_pressed
+  }
+
+  def rightMousePressed:Boolean = {
+    val MouseButtonPress(_, was_pressed, _) = mouseButtonPress(1)
+    was_pressed
+  }
+
+  def mouseOnArea(area:List[Vec]):Boolean = {
+    coordOnArea(mouseCoord, area)
+  }
   
   def key(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}):Int
   def keyIgnorePause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}):Int

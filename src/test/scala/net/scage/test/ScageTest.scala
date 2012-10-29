@@ -276,17 +276,17 @@ class ScageTest extends TestCase("app") {
         }
 
         // window button test
-        private var button_pressed = false
         val window_button_area = List(windowCenter + windowCenter/2 + Vec(-40, -40),
                                       windowCenter + windowCenter/2 + Vec(40, -40),
                                       windowCenter + windowCenter/2 + Vec(0, 40))
         val window_button = leftMouseOnArea(area = window_button_area,
-          onBtnDown = m => {println("window button pressed"); button_pressed = true},
-          onBtnUp   = m => {println("window button released"); button_pressed = false})
+          onBtnDown = m => {println("window button pressed")},
+          onBtnUp   = m => {println("window button released")})
         render {
-          currentColor = if(button_pressed) RED else WHITE
+          val window_button_pressed = leftMousePressed && mouseOnArea(window_button_area)
+          currentColor = if(window_button_pressed) RED else WHITE
           drawPolygon(window_button_area)
-          if(!button_pressed) print("Press Me", windowCenter + windowCenter/2, align = "center")
+          if(!window_button_pressed) print("Press Me", windowCenter + windowCenter/2, align = "center")
           else print("Release Me", windowCenter + windowCenter/2, align = "center")
         }
 
