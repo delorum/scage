@@ -3,9 +3,11 @@ package net.scage.handlers.controller2
 import net.scage.support.Vec
 import org.lwjgl.input.{Keyboard, Mouse}
 import collection.mutable
+import net.scage.support.ScageId._
 
 case class SingleKeyEvent(key_code:Int, repeat_time: () => Long, onKeyDown: () => Any, onKeyUp: () => Any)
 case class SingleMouseButtonEvent(button_code:Int, repeat_time: () => Long, onButtonDown: Vec => Any, onButtonUp: Vec => Any)
+case class WindowButtonEvent(area:List[Vec], button_code:Int, repeat_time: () => Long, onButtonDown: Vec => Any, onButtonUp: Vec => Any)
 
 trait SingleController extends ScageController {
   private var keyboard_keys = mutable.HashMap[Int, SingleKeyEvent]()  // was_pressed, last_pressed_time, repeat_time, onKeyDown, onKeyUp

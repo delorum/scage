@@ -21,7 +21,7 @@ trait ScageController extends Scage {
     ScageController.key_presses.get(key_code) match {
       case Some(kp:KeyPress) => kp
       case None =>
-        val kp = KeyPress(key_code, false, 0L)
+        val kp = KeyPress(key_code, was_pressed = false, 0L)
         ScageController.key_presses += (key_code -> kp)
         kp
     }
@@ -31,10 +31,54 @@ trait ScageController extends Scage {
     ScageController.mouse_button_presses.get(mouse_button) match {
       case Some(mbp:MouseButtonPress) => mbp
       case None =>
-        val mbp = MouseButtonPress(mouse_button, false, 0L)
+        val mbp = MouseButtonPress(mouse_button, was_pressed = false, 0L)
         ScageController.mouse_button_presses += (mouse_button -> mbp)
         mbp
     }
+  }
+
+  protected def areLinesIntersect(a1: Vec, a2: Vec, b1: Vec, b2: Vec): Boolean = {
+    val common = (a2.x - a1.x) * (b2.y - b1.y) - (a2.y - a1.y) * (b2.x - b1.x)
+    common != 0 && {
+      val rH = (a1.y - b1.y) * (b2.x - b1.x) - (a1.x - b1.x) * (b2.y - b1.y)
+      val sH = (a1.y - b1.y) * (a2.x - a1.x) - (a1.x - b1.x) * (a2.y - a1.y)
+
+      val r = rH / common
+      val s = sH / common
+
+      r >= 0 && r <= 1 && s >= 0 && s <= 1
+    }
+  }
+
+  protected def coordOnArea(mouse_coord:Vec, area:List[Vec]):Boolean = {
+    if (area.length < 2) false
+    else {
+      val a1 = mouse_coord
+      val a2 = Vec(Integer.MAX_VALUE, mouse_coord.y)
+      val intersections = (area.last :: area.init).zip(area).foldLeft(0) {
+        case (result, (b1, b2)) => if (areLinesIntersect(a1, a2, b1, b2)) result + 1 else result
+      }
+      intersections % 2 != 0
+    }
+  }
+
+  def keyPressed(key_code:Int):Boolean = {
+    val KeyPress(_, was_pressed, _) = keyPress(key_code)
+    was_pressed
+  }
+
+  def leftMousePressed:Boolean = {
+    val MouseButtonPress(_, was_pressed, _) = mouseButtonPress(0)
+    was_pressed
+  }
+
+  def rightMousePressed:Boolean = {
+    val MouseButtonPress(_, was_pressed, _) = mouseButtonPress(1)
+    was_pressed
+  }
+
+  def mouseOnArea(area:List[Vec]):Boolean = {
+    coordOnArea(mouseCoord, area)
   }
   
   def key(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}):Int
@@ -76,7 +120,7 @@ trait ScageController extends Scage {
   def mouseWheelDownIgnorePause(onWheelDown: Vec => Any):Int
   def mouseWheelDownOnPause(onWheelDown: Vec => Any):Int
 
-  def checkControls()
+  private[scage] def checkControls()
 
   class ControlDeletionsContainer extends DefaultOperationContainer("control_deleters") {
     override protected def _delOperation(op_id:Int, show_warnings:Boolean) = {

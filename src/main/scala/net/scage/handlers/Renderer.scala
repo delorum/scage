@@ -590,7 +590,7 @@ trait Renderer extends Scage {
   }
 
   val framerate = property("render.framerate", 0)
-  def performRendering() {
+  private[scage] def performRendering() {
     if(Display.isCloseRequested) Scage.stopApp()
     else {
       clearScreen()

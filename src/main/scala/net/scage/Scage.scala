@@ -75,9 +75,12 @@ trait OperationMapping extends HaveCurrentOperation {
     def operations:Seq[ScageOperation] = _operations
     def length:Int = _operations.length
 
-    def addOp(op:() => Any) = {
-      val op_id = nextId
+    def addOp(op_id:Int, op:() => Any):Int = {
       addOperationWithMapping(ScageOperation(op_id, op))
+    }
+
+    def addOp(op:() => Any):Int = {
+      addOp(nextId, op)
     }
   }
 

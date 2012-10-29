@@ -274,6 +274,22 @@ class ScageTest extends TestCase("app") {
           openglRotate((msecsFromInit % 3600).toFloat/10)
           drawFilledPolygon(Array(Vec(-20, -5), Vec(20, -5), Vec(0, 20)), GREEN)
         }
+
+        // window button test
+        val window_button_area = List(windowCenter + windowCenter/2 + Vec(-40, -40),
+                                      windowCenter + windowCenter/2 + Vec(40, -40),
+                                      windowCenter + windowCenter/2 + Vec(0, 40))
+        val window_button = leftMouseOnArea(area = window_button_area,
+          onBtnDown = m => {println("window button pressed")},
+          onBtnUp   = m => {println("window button released")})
+        render {
+          val window_button_pressed = leftMousePressed && mouseOnArea(window_button_area)
+          currentColor = if(window_button_pressed) RED else WHITE
+          drawPolygon(window_button_area)
+          if(!window_button_pressed) print("Press Me", windowCenter + windowCenter/2, align = "center")
+          else print("Release Me", windowCenter + windowCenter/2, align = "center")
+        }
+
       }.main(Array[String]())
       assertTrue(true)
     }
