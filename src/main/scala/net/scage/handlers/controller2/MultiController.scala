@@ -13,8 +13,6 @@ trait MultiController extends ScageController {
   private var keyboard_keys = HashMap[Int, ArrayBuffer[MultiKeyEvent]]()  // was_pressed, last_pressed_time, repeat_time, onKeyDown, onKeyUp
   private var anykeys = ArrayBuffer[() => Any]()
   private var mouse_buttons = HashMap[Int, ArrayBuffer[MultiMouseButtonEvent]]()
-  private var window_buttons = mutable.ArrayBuffer[(WindowButtonEvent, MouseButtonPress)]()
-  private var window_buttons_info = mutable.HashMap[Int, MouseButtonPress]()
   private var mouse_motions = ArrayBuffer[Vec => Any]()
   private var mouse_drag_motions = HashMap[Int, ArrayBuffer[Vec => Any]]()
   private var mouse_wheel_ups = ArrayBuffer[Vec => Any]()
@@ -84,38 +82,55 @@ trait MultiController extends ScageController {
     mouseButton(1, repeat_time, mouse_coord => if(onPause) onBtnDown(mouse_coord), mouse_coord => if(onPause) onBtnUp(mouse_coord))
   }
 
-  private def windowButton(area:List[Vec], button:Int, repeat_time: => Long = 0, onButtonDown: Vec => Any, onButtonUp: Vec => Any = Vec => {}) = {
-    val window_button_id = nextId
-    val press = MouseButtonPress(button, was_pressed = false, 0L)
-    val window_button_data = (WindowButtonEvent(area, button, () => repeat_time, onButtonDown, onButtonUp), press)
-    window_buttons += window_button_data
-    window_buttons_info += (window_button_id -> press)
-    deletion_operations.addOp(window_button_id, () => {window_buttons -= window_button_data; window_buttons_info -= window_button_id})
-  }
-  def windowButtonInfo(window_button_id:Int):Option[(Boolean, Long)] = {
-    window_buttons_info.get(window_button_id) match {
-      case Some(MouseButtonPress(_, was_pressed, last_pressed_time)) => Some((was_pressed, last_pressed_time))
-      case None => None
+  protected def areLinesIntersect(a1: Vec, a2: Vec, b1: Vec, b2: Vec): Boolean = {
+    val common = (a2.x - a1.x) * (b2.y - b1.y) - (a2.y - a1.y) * (b2.x - b1.x)
+    common != 0 && {
+      val rH = (a1.y - b1.y) * (b2.x - b1.x) - (a1.x - b1.x) * (b2.y - b1.y)
+      val sH = (a1.y - b1.y) * (a2.x - a1.x) - (a1.x - b1.x) * (a2.y - a1.y)
+
+      val r = rH / common
+      val s = sH / common
+
+      r >= 0 && r <= 1 && s >= 0 && s <= 1
     }
   }
-  def windowLeftMouse(area:List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
-    windowButton(area, 0, repeat_time, mouse_coord => if(!onPause) onBtnDown(mouse_coord), mouse_coord => if(!onPause) onBtnUp(mouse_coord))
-  }
-  def windowLeftMouseIgnorePause(area:List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
-    windowButton(area, 0, repeat_time, mouse_coord => onBtnDown(mouse_coord), mouse_coord => onBtnUp(mouse_coord))
-  }
-  def windowLeftMouseOnPause(area:List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
-    windowButton(area, 0, repeat_time, mouse_coord => if(onPause) onBtnDown(mouse_coord), mouse_coord => if(onPause) onBtnUp(mouse_coord))
+
+  protected def coordOnArea(mouse_coord:Vec, area:List[Vec]):Boolean = {
+    if (area.length < 2) false
+    else {
+      val a1 = mouse_coord
+      val a2 = Vec(Integer.MAX_VALUE, mouse_coord.y)
+      val intersections = (area.last :: area.init).zip(area).foldLeft(0) {
+        case (result, (b1, b2)) => if (areLinesIntersect(a1, a2, b1, b2)) result + 1 else result
+      }
+      intersections % 2 != 0
+    }
   }
 
-  def windowRightMouse(area:List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
-    windowButton(area, 1, repeat_time, mouse_coord => if(!onPause) onBtnDown(mouse_coord), mouse_coord => if(!onPause) onBtnUp(mouse_coord))
+  def leftMouseOnArea(area: => List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+    mouseButton(0, repeat_time, mouse_coord => if(!onPause && coordOnArea(mouse_coord, area)) onBtnDown(mouse_coord),
+                                mouse_coord => if(!onPause && coordOnArea(mouse_coord, area)) onBtnUp(mouse_coord))
   }
-  def windowRightMouseIgnorePause(area:List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
-    windowButton(area, 1, repeat_time, mouse_coord => onBtnDown(mouse_coord), mouse_coord => onBtnUp(mouse_coord))
+  def leftMouseOnAreaIgnorePause(area: => List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+    mouseButton(0, repeat_time, mouse_coord => if(coordOnArea(mouse_coord, area)) onBtnDown(mouse_coord),
+                                mouse_coord => if(coordOnArea(mouse_coord, area)) onBtnUp(mouse_coord))
   }
-  def windowRightMouseOnPause(area:List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
-    windowButton(area, 1, repeat_time, mouse_coord => if(onPause) onBtnDown(mouse_coord), mouse_coord => if(onPause) onBtnUp(mouse_coord))
+  def leftMouseOnAreaOnPause(area: => List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+    mouseButton(0, repeat_time, mouse_coord => if(onPause && coordOnArea(mouse_coord, area)) onBtnDown(mouse_coord),
+                                mouse_coord => if(onPause && coordOnArea(mouse_coord, area)) onBtnUp(mouse_coord))
+  }
+
+  def rightMouseOnArea(area: => List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+    mouseButton(1, repeat_time, mouse_coord => if(!onPause && coordOnArea(mouse_coord, area)) onBtnDown(mouse_coord),
+                                mouse_coord => if(!onPause && coordOnArea(mouse_coord, area)) onBtnUp(mouse_coord))
+  }
+  def rightMouseOnAreaIgnorePause(area: => List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+    mouseButton(1, repeat_time, mouse_coord => if(coordOnArea(mouse_coord, area)) onBtnDown(mouse_coord),
+                                mouse_coord => if(coordOnArea(mouse_coord, area)) onBtnUp(mouse_coord))
+  }
+  def rightMouseOnAreaOnPause(area: => List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+    mouseButton(1, repeat_time, mouse_coord => if(onPause && coordOnArea(mouse_coord, area)) onBtnDown(mouse_coord),
+                                mouse_coord => if(onPause && coordOnArea(mouse_coord, area)) onBtnUp(mouse_coord))
   }
 
   def mouseMotion(onMotion: Vec => Any) = {
@@ -205,6 +220,7 @@ trait MultiController extends ScageController {
           is_repeatable = repeat_time > 0
           if !was_pressed || (is_repeatable && System.currentTimeMillis() - last_pressed_time > repeat_time)
         } {
+          key_data.was_pressed = true
           key_data.last_pressed_time = System.currentTimeMillis()
           onKeyDown()
         }
@@ -214,6 +230,7 @@ trait MultiController extends ScageController {
           key_data <- events_for_key
           MultiKeyEvent(_, _, _, _, onKeyUp) = key_data
         } {
+          key_data.was_pressed = false
           onKeyUp()
         }
       }
@@ -242,6 +259,7 @@ trait MultiController extends ScageController {
           is_repeatable = repeat_time > 0
           if !was_pressed || (is_repeatable && System.currentTimeMillis() - last_pressed_time > repeat_time)
         } {
+          button_data.was_pressed = true
           button_data.last_pressed_time = System.currentTimeMillis()
           onButtonDown(mouse_coord)
         }
@@ -251,27 +269,9 @@ trait MultiController extends ScageController {
           button_data <- events_for_button
           MultiMouseButtonEvent(_, _, _, _, onButtonUp) = button_data
         } {
+          button_data.was_pressed = false
           onButtonUp(mouse_coord)
         }
-      }
-    }
-
-    for {
-      (window_button_data, mouse_button_press) <- window_buttons
-      WindowButtonEvent(area, button, repeat_time_func, onButtonDown, onButtonUp) = window_button_data
-      MouseButtonPress(_, was_pressed, last_pressed_time) = mouse_button_press
-      repeat_time = repeat_time_func()
-      is_repeatable = repeat_time > 0
-    } {
-      if(Mouse.isButtonDown(button) && mouseOnArea(mouse_coord, area)) {
-        if(!was_pressed || (is_repeatable && System.currentTimeMillis() - last_pressed_time > repeat_time)) {
-          mouse_button_press.was_pressed = true
-          mouse_button_press.last_pressed_time = System.currentTimeMillis()
-          onButtonDown(mouse_coord)
-        }
-      } else if(was_pressed) {
-        mouse_button_press.was_pressed = false
-        onButtonUp(mouse_coord)
       }
     }
 

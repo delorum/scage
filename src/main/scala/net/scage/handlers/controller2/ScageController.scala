@@ -36,31 +36,6 @@ trait ScageController extends Scage {
         mbp
     }
   }
-
-  protected def areLinesIntersect(a1: Vec, a2: Vec, b1: Vec, b2: Vec): Boolean = {
-    val common = (a2.x - a1.x) * (b2.y - b1.y) - (a2.y - a1.y) * (b2.x - b1.x)
-    common != 0 && {
-      val rH = (a1.y - b1.y) * (b2.x - b1.x) - (a1.x - b1.x) * (b2.y - b1.y)
-      val sH = (a1.y - b1.y) * (a2.x - a1.x) - (a1.x - b1.x) * (a2.y - a1.y)
-
-      val r = rH / common
-      val s = sH / common
-
-      r >= 0 && r <= 1 && s >= 0 && s <= 1
-    }
-  }
-
-  protected def mouseOnArea(mouse_coord:Vec, area:List[Vec]):Boolean = {
-    if (area.length < 2) false
-    else {
-      val a1 = mouse_coord
-      val a2 = Vec(Integer.MAX_VALUE, mouse_coord.y)
-      val intersections = (area.last :: area.init).zip(area).foldLeft(0) {
-        case (result, (b1, b2)) => if (areLinesIntersect(a1, a2, b1, b2)) result + 1 else result
-      }
-      intersections % 2 != 0
-    }
-  }
   
   def key(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}):Int
   def keyIgnorePause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}):Int
@@ -80,16 +55,6 @@ trait ScageController extends Scage {
   def rightMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
   def rightMouseIgnorePause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
   def rightMouseOnPause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
-
-  def windowButtonInfo(window_button_id:Int):Option[(Boolean, Long)]
-
-  def windowLeftMouse(area:List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
-  def windowLeftMouseIgnorePause(area:List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
-  def windowLeftMouseOnPause(area:List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
-
-  def windowRightMouse(area:List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
-  def windowRightMouseIgnorePause(area:List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
-  def windowRightMouseOnPause(area:List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}):Int
 
   def mouseMotion(onMotion: Vec => Any):Int
   def mouseMotionIgnorePause(onMotion: Vec => Any):Int
@@ -111,7 +76,7 @@ trait ScageController extends Scage {
   def mouseWheelDownIgnorePause(onWheelDown: Vec => Any):Int
   def mouseWheelDownOnPause(onWheelDown: Vec => Any):Int
 
-  def checkControls()
+  private[scage] def checkControls()
 
   class ControlDeletionsContainer extends DefaultOperationContainer("control_deleters") {
     override protected def _delOperation(op_id:Int, show_warnings:Boolean) = {
