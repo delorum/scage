@@ -83,7 +83,7 @@ class NetServer {
           val is_first_client = client_handlers.isEmpty
           client_handlers += new_client
           if(is_first_client) {
-            actor {Thread.sleep(10); clients_actor ! "check"}
+            delayedAction(clients_actor ! "check", 10)
             if(_ping_timeout > 0) delayedAction(clients_actor ! "ping", _ping_timeout)
             if(_offline_check_timeout > 0) delayedAction(clients_actor ! "offline_check_timeout", _offline_check_timeout)
           }
@@ -117,7 +117,7 @@ class NetServer {
         case "check" =>
           if(!client_handlers.isEmpty) {
             client_handlers.foreach(client => client.check())
-            actor {Thread.sleep(10); clients_actor ! "check"} // maybe separate checks inside every ClientHandler instead?
+            delayedAction(clients_actor ! "check", 10)        // maybe separate checks inside every ClientHandler instead?
           }
         case ("disconnect_client", client:ClientHandler) =>
           client.disconnect()
