@@ -42,7 +42,7 @@ class NetClient {
         val write_error = out.checkError()
         if(write_error) {
           log.warn("failed to send data to server: write error!")
-          actor{Thread.sleep(1000); io_actor ! ("connect", server_url, port, ping_timeout, onServerDataReceived)}
+          delayedAction(io_actor ! ("connect", server_url, port, ping_timeout, onServerDataReceived), 10)
         }
       } else log.warn("not connected to send data!")  // maybe perform connect here?
     }
@@ -70,12 +70,12 @@ class NetClient {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream, "UTF-8"))
             is_connected = true
             log.info("connected!")
-            actor{Thread.sleep(10); io_actor ! "check"}
+            delayedAction(io_actor ! "check", 10)
             if(ping_timeout > 0) delayedAction(io_actor ! "ping", ping_timeout)
           } catch {
             case e:Exception => {
               log.error("failed to connect to server "+server_url+" at port "+port+": "+e)
-              actor{Thread.sleep(1000); io_actor ! ("connect", server_url, port, ping_timeout, onServerDataReceived)}
+              delayedAction(io_actor ! ("connect", server_url, port, ping_timeout, onServerDataReceived), 1000)
             }
           }
         case ("send", data:State) => performSend(data)
@@ -117,7 +117,7 @@ class NetClient {
                 }
               }
             }
-            actor{Thread.sleep(10); io_actor ! "check"}
+            delayedAction(io_actor ! "check", 10)
           } // will stop checking otherwise
         case "ping" =>
           if(is_connected) {

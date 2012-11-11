@@ -5,6 +5,7 @@ import collection.mutable.{ArrayBuffer, HashMap}
 import com.weiglewilczek.slf4s.Logger
 import net.scage.{ScageOperation, Scage}
 import collection.mutable
+import org.lwjgl.input.{Mouse, Keyboard}
 
 case class KeyPress(key_code:Int, var was_pressed:Boolean, var last_pressed_time:Long)
 case class MouseButtonPress(button_code:Int, var was_pressed:Boolean, var last_pressed_time:Long)
@@ -63,18 +64,21 @@ trait ScageController extends Scage {
   }
 
   def keyPressed(key_code:Int):Boolean = {
-    val KeyPress(_, was_pressed, _) = keyPress(key_code)
-    was_pressed
+    /*val KeyPress(_, was_pressed, _) = keyPress(key_code)
+    was_pressed*/
+    Keyboard.isKeyDown(key_code)
   }
 
   def leftMousePressed:Boolean = {
-    val MouseButtonPress(_, was_pressed, _) = mouseButtonPress(0)
-    was_pressed
+    /*val MouseButtonPress(_, was_pressed, _) = mouseButtonPress(0)
+    was_pressed*/
+    Mouse.isButtonDown(0)
   }
 
   def rightMousePressed:Boolean = {
-    val MouseButtonPress(_, was_pressed, _) = mouseButtonPress(1)
-    was_pressed
+    /*val MouseButtonPress(_, was_pressed, _) = mouseButtonPress(1)
+    was_pressed*/
+    Mouse.isButtonDown(1)
   }
 
   def mouseOnArea(area:List[Vec]):Boolean = {
