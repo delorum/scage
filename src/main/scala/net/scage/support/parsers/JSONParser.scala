@@ -18,8 +18,10 @@ class JSONParser extends JavaTokenParsers {
 
   private lazy val anyString = ("""([^"\p{Cntrl}\\]|\\[\\/bfnrt]|\\u[a-fA-F0-9]{4})*""").r
 
+  private lazy val my_ident = ("""([^"\p{Cntrl}\\]|\\[\\/bfnrt]|\\u[a-fA-F0-9]{4})*""").r
+
   private lazy val member: Parser[(String, Any)] = (
-    "\""~ident~"\""~":"~value ^^ { case "\""~member_name~"\""~":"~member_value => (member_name, member_value) }
+    "\""~anyString~"\""~":"~value ^^ { case "\""~member_name~"\""~":"~member_value => (member_name, member_value) }
   )
 
   private lazy val value: Parser[Any] = (

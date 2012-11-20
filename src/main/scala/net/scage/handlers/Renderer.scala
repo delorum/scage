@@ -144,6 +144,33 @@ trait RendererLib {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
+  def drawSlidingLines(edges:Vec*) {
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+    GL11.glBegin(GL11.GL_LINES)
+    edges.sliding(2).foreach {
+      case Seq(a,b) =>
+        GL11.glVertex2f(a.x, a.y)
+        GL11.glVertex2f(b.x, b.y)
+      case _ =>
+    }
+    GL11.glEnd()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
+  }
+
+  def  drawSlidingLines(edges:Seq[Vec], color:ScageColor = DEFAULT_COLOR) {
+    if(color != DEFAULT_COLOR) currentColor = color
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+    GL11.glBegin(GL11.GL_LINES)
+    edges.sliding(2).foreach {
+      case Seq(a,b) =>
+        GL11.glVertex2f(a.x, a.y)
+        GL11.glVertex2f(b.x, b.y)
+      case _ =>
+    }
+    GL11.glEnd()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
+  }
+
   def drawLines(edges:Traversable[Vec], color:ScageColor = DEFAULT_COLOR) {
     if(color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
@@ -568,14 +595,14 @@ trait Renderer extends Scage {
     while(System.currentTimeMillis() > next_game_tick && loops < MAX_FRAMESKIP) {
       restartToggled = false
       def _execute(_actions:Traversable[ScageOperation]) {
-        if(_actions.nonEmpty && !restartToggled) {
-          val ScageOperation(action_id, action_operation) = _actions.head
-          currentOperation = action_id
-          action_operation()
-          _execute(_actions.tail)
-        }
+        val ScageOperation(action_id, action_operation) = _actions.head
+        currentOperation = action_id
+        action_operation()
+        if(_actions.nonEmpty && !restartToggled) _execute(_actions.tail)
       }
-      _execute(actions.operations)
+      if(_actions.nonEmpty) {
+        _execute(actions.operations)
+      }
       next_game_tick += SKIP_TICKS
       loops += 1
 

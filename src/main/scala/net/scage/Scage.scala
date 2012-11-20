@@ -290,14 +290,14 @@ trait Scage extends OperationMapping with Pausable with Runnable {
   private[scage] def executeActions() { // assuming to run in cycle, so we leave off any log messages
     restartToggled = false
     def _execute(_actions:Traversable[ScageOperation]) {
-      if(_actions.nonEmpty && !restartToggled) {
-        val ScageOperation(action_id, action_operation) = _actions.head
-        currentOperation = action_id
-        action_operation()
-        _execute(_actions.tail)
-      }
+      val ScageOperation(action_id, action_operation) = _actions.head
+      currentOperation = action_id
+      action_operation()
+      if(_actions.nonEmpty && !restartToggled) _execute(_actions.tail)
     }
-    _execute(actions.operations)
+    if(_actions.nonEmpty) {
+      _execute(actions.operations)
+    }
   }
 
   def delAction(operation_id:Int) = {actions.delOperation(operation_id)}

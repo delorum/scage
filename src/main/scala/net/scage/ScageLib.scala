@@ -34,6 +34,11 @@ trait ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXML
     def /(v:Vec) = v/i
   }
 
+  implicit def long2vecrich(i:Long) = new {
+    def *(v:Vec) = v*i
+    def /(v:Vec) = v/i
+  }
+
   implicit def float2vecrich(f:Float) = new {
     def *(v:Vec) = v*f
     def /(v:Vec) = v/f
@@ -43,6 +48,9 @@ trait ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXML
     def *(v:Vec) = v*d
     def /(v:Vec) = v/d
   }
+
+  implicit def vec2dvec(v:Vec)  = v.toDVec
+  implicit def dvec2vec(dv:Vec) = dv.toVec
 
   // support
 
