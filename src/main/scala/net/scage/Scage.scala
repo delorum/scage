@@ -293,9 +293,9 @@ trait Scage extends OperationMapping with Pausable with Runnable {
       val ScageOperation(action_id, action_operation) = _actions.head
       currentOperation = action_id
       action_operation()
-      if(_actions.nonEmpty && !restartToggled) _execute(_actions.tail)
+      if(_actions.tail.nonEmpty && !restartToggled) _execute(_actions.tail)
     }
-    if(_actions.nonEmpty) {
+    if(actions.operations.nonEmpty) {
       _execute(actions.operations)
     }
   }

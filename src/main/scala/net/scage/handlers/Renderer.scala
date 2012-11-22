@@ -171,6 +171,35 @@ trait RendererLib {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
+  def drawGroupedLines(edges:Vec*) {
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+    GL11.glBegin(GL11.GL_LINES)
+    val edges_ext = if(edges.length % 2 == 0) edges else edges.init
+    edges_ext.grouped(2).foreach {
+      case Seq(a,b) =>
+        GL11.glVertex2f(a.x, a.y)
+        GL11.glVertex2f(b.x, b.y)
+      case _ =>
+    }
+    GL11.glEnd()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
+  }
+
+  def  drawGroupedLines(edges:Seq[Vec], color:ScageColor = DEFAULT_COLOR) {
+    if(color != DEFAULT_COLOR) currentColor = color
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+    GL11.glBegin(GL11.GL_LINES)
+    val edges_ext = if(edges.length % 2 == 0) edges else edges.init
+    edges_ext.grouped(2).foreach {
+      case Seq(a,b) =>
+        GL11.glVertex2f(a.x, a.y)
+        GL11.glVertex2f(b.x, b.y)
+      case _ =>
+    }
+    GL11.glEnd()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
+  }
+
   def drawLines(edges:Traversable[Vec], color:ScageColor = DEFAULT_COLOR) {
     if(color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
@@ -598,9 +627,9 @@ trait Renderer extends Scage {
         val ScageOperation(action_id, action_operation) = _actions.head
         currentOperation = action_id
         action_operation()
-        if(_actions.nonEmpty && !restartToggled) _execute(_actions.tail)
+        if(_actions.tail.nonEmpty && !restartToggled) _execute(_actions.tail)
       }
-      if(_actions.nonEmpty) {
+      if(actions.operations.nonEmpty) {
         _execute(actions.operations)
       }
       next_game_tick += SKIP_TICKS
