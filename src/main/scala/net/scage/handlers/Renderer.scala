@@ -17,8 +17,7 @@ import net.scage.support.tracer3.{Trace, ScageTracer}
 import java.awt.GraphicsEnvironment
 import net.scage.{ScageOperation, Scage}
 import collection.mutable.ArrayBuffer
-import net.scage.support.{SynchronizedSortedBuffer, SortedBuffer, ScageColor, Vec}
-import collection.mutable
+import net.scage.support.{SortedBuffer, ScageColor, Vec}
 
 object DisplayListsHolder {
   private val log = Logger(this.getClass.getName)
@@ -622,12 +621,12 @@ trait Renderer extends Scage {
   override private[scage] def executeActions() {  // maybe rename it to not confuse clients
     loops = 0
     while(System.currentTimeMillis() > next_game_tick && loops < MAX_FRAMESKIP) {
-      restartToggled = false
+      restart_toggled = false
       def _execute(_actions:Traversable[ScageOperation]) {
         val ScageOperation(action_id, action_operation) = _actions.head
-        currentOperation = action_id
+        current_operation_id = action_id
         action_operation()
-        if(_actions.tail.nonEmpty && !restartToggled) _execute(_actions.tail)
+        if(_actions.tail.nonEmpty && !restart_toggled) _execute(_actions.tail)
       }
       if(actions.operations.nonEmpty) {
         _execute(actions.operations)
@@ -655,7 +654,7 @@ trait Renderer extends Scage {
         GL11.glTranslatef(coord.x , coord.y, 0.0f)
         GL11.glScalef(_global_scale, _global_scale, 1)
         for(RenderOperation(render_id, render_operation, _) <- renders.operations) {
-          currentOperation = render_id
+          current_operation_id = render_id
           GL11.glPushMatrix()
           render_operation()
           GL11.glPopMatrix()
@@ -663,7 +662,7 @@ trait Renderer extends Scage {
       GL11.glPopMatrix()
 
       for(ScageOperation(interface_id, interface_operation) <- interfaces.operations) {
-        currentOperation = interface_id
+        current_operation_id = interface_id
         interface_operation()
       }
 
@@ -672,11 +671,4 @@ trait Renderer extends Scage {
       countFPS()
     }
   }
-}
-
-trait SynchronizedRenderer extends Renderer {
-  class SynchronizedRenderOperationsContainer extends RenderOperationsContainer {
-    override protected val _render_operations = new SynchronizedSortedBuffer[RenderOperation]()
-  }
-  override def rendersContainer = new SynchronizedRenderOperationsContainer
 }
