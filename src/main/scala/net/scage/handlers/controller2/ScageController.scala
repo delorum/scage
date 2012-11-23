@@ -150,10 +150,3 @@ trait ScageController extends Scage {
   def delAllControlsExcept(except_control_ids:Int*) {deletion_operations.delAllOperationsExcept(except_control_ids:_*)}
 }
 
-trait SynchronizedScageController extends ScageController {
-  class SynchronizedControlDeletionsContainer extends ControlDeletionsContainer {
-    override protected val _operations = new ArrayBuffer[ScageOperation] with mutable.SynchronizedBuffer[ScageOperation]
-  }
-  override def controlDeletersContainer:ControlDeletionsContainer = new SynchronizedControlDeletionsContainer
-}
-

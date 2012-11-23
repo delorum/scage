@@ -19,7 +19,7 @@ trait SingleController extends ScageController {
   private var on_mouse_wheel_down: Vec => Any = v => {}
 
   def key(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) = {
-    keyboard_keys(key_code) = SingleKeyEvent(key_code, () => repeat_time, () => if(!onPause) onKeyDown, () => if(!onPause) onKeyUp)
+    keyboard_keys(key_code) = SingleKeyEvent(key_code, () => repeat_time, () => if(!on_pause) onKeyDown, () => if(!on_pause) onKeyUp)
     deletion_operations.addOp(() => keyboard_keys -= key_code)
   }
   def keyIgnorePause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) = {
@@ -27,12 +27,12 @@ trait SingleController extends ScageController {
     deletion_operations.addOp(() => keyboard_keys -= key_code)
   }
   def keyOnPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}):Int = {
-    keyboard_keys(key_code) = SingleKeyEvent(key_code, () => repeat_time, () => if(onPause) onKeyDown, () => if(onPause) onKeyUp)
+    keyboard_keys(key_code) = SingleKeyEvent(key_code, () => repeat_time, () => if(on_pause) onKeyDown, () => if(on_pause) onKeyUp)
     deletion_operations.addOp(() => keyboard_keys -= key_code)
   }
 
   def anykey(onKeyDown: => Any) = {
-    anykey = () => if(!onPause) onKeyDown
+    anykey = () => if(!on_pause) onKeyDown
     deletion_operations.addOp(() => anykey = () => {})
   }
   def anykeyIgnorePause(onKeyDown: => Any) = {
@@ -40,7 +40,7 @@ trait SingleController extends ScageController {
     deletion_operations.addOp(() => anykey = () => {})
   }
   def anykeyOnPause(onKeyDown: => Any) = {
-    anykey = () => if(onPause) onKeyDown
+    anykey = () => if(on_pause) onKeyDown
     deletion_operations.addOp(() => anykey = () => {})
   }
 
@@ -52,27 +52,27 @@ trait SingleController extends ScageController {
   }
 
   def leftMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
-    mouseButton(0, repeat_time, mouse_coord => if(!onPause) onBtnDown(mouse_coord), mouse_coord => if(!onPause) onBtnUp(mouse_coord))
+    mouseButton(0, repeat_time, mouse_coord => if(!on_pause) onBtnDown(mouse_coord), mouse_coord => if(!on_pause) onBtnUp(mouse_coord))
   }
   def leftMouseIgnorePause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
     mouseButton(0, repeat_time, onBtnDown, onBtnUp)
   }
   def leftMouseOnPause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
-    mouseButton(0, repeat_time, mouse_coord => if(onPause) onBtnDown(mouse_coord), mouse_coord => if(onPause) onBtnUp(mouse_coord))
+    mouseButton(0, repeat_time, mouse_coord => if(on_pause) onBtnDown(mouse_coord), mouse_coord => if(on_pause) onBtnUp(mouse_coord))
   }
 
   def rightMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
-    mouseButton(1, repeat_time, mouse_coord => if(!onPause) onBtnDown(mouse_coord), mouse_coord => if(!onPause) onBtnUp(mouse_coord))
+    mouseButton(1, repeat_time, mouse_coord => if(!on_pause) onBtnDown(mouse_coord), mouse_coord => if(!on_pause) onBtnUp(mouse_coord))
   }
   def rightMouseIgnorePause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
     mouseButton(1, repeat_time, onBtnDown, onBtnUp)
   }
   def rightMouseOnPause(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
-    mouseButton(1, repeat_time, mouse_coord => if(onPause) onBtnDown(mouse_coord), mouse_coord => if(onPause) onBtnUp(mouse_coord))
+    mouseButton(1, repeat_time, mouse_coord => if(on_pause) onBtnDown(mouse_coord), mouse_coord => if(on_pause) onBtnUp(mouse_coord))
   }
   
   def mouseMotion(onMotion: Vec => Any) = {
-    on_mouse_motion = mouse_coord => if(!onPause) onMotion(mouse_coord)
+    on_mouse_motion = mouse_coord => if(!on_pause) onMotion(mouse_coord)
     deletion_operations.addOp(() => on_mouse_motion = v => {})
   }
   def mouseMotionIgnorePause(onMotion: Vec => Any) = {
@@ -80,7 +80,7 @@ trait SingleController extends ScageController {
     deletion_operations.addOp(() => on_mouse_motion = v => {})
   }
   def mouseMotionOnPause(onMotion: Vec => Any) = {
-    on_mouse_motion = mouse_coord => if(onPause) onMotion(mouse_coord)
+    on_mouse_motion = mouse_coord => if(on_pause) onMotion(mouse_coord)
     deletion_operations.addOp(() => on_mouse_motion = v => {})
   }
 
@@ -90,27 +90,27 @@ trait SingleController extends ScageController {
   }
 
   def leftMouseDrag(onDrag: Vec => Any) = {
-    mouseDrag(0, mouse_coord => if(!onPause) onDrag(mouse_coord))
+    mouseDrag(0, mouse_coord => if(!on_pause) onDrag(mouse_coord))
   }
   def leftMouseDragIgnorePause(onDrag: Vec => Any) = {
     mouseDrag(0, onDrag)
   }
   def leftMouseDragOnPause(onDrag: Vec => Any) = {
-    mouseDrag(0, mouse_coord => if(onPause) onDrag(mouse_coord))
+    mouseDrag(0, mouse_coord => if(on_pause) onDrag(mouse_coord))
   }
 
   def rightMouseDrag(onDrag: Vec => Any) = {
-    mouseDrag(1, mouse_coord => if(!onPause) onDrag(mouse_coord))
+    mouseDrag(1, mouse_coord => if(!on_pause) onDrag(mouse_coord))
   }
   def rightMouseDragIgnorePause(onDrag: Vec => Any) = {
     mouseDrag(1, onDrag)
   }
   def rightMouseDragOnPause(onDrag: Vec => Any) = {
-    mouseDrag(1, mouse_coord => if(onPause) onDrag(mouse_coord))
+    mouseDrag(1, mouse_coord => if(on_pause) onDrag(mouse_coord))
   }
 
   def mouseWheelUp(onWheelUp: Vec => Any) = {
-    on_mouse_wheel_up = mouse_coord => if(!onPause) onWheelUp(mouse_coord)
+    on_mouse_wheel_up = mouse_coord => if(!on_pause) onWheelUp(mouse_coord)
     deletion_operations.addOp(() => on_mouse_wheel_up = v => {})
   }
   def mouseWheelUpIgnorePause(onWheelUp: Vec => Any) = {
@@ -118,12 +118,12 @@ trait SingleController extends ScageController {
     deletion_operations.addOp(() => on_mouse_wheel_up = v => {})
   }
   def mouseWheelUpOnPause(onWheelUp: Vec => Any) = {
-    on_mouse_wheel_up = mouse_coord => if(onPause) onWheelUp(mouse_coord)
+    on_mouse_wheel_up = mouse_coord => if(on_pause) onWheelUp(mouse_coord)
     deletion_operations.addOp(() => on_mouse_wheel_up = v => {})
   }
 
   def mouseWheelDown(onWheelDown: Vec => Any) = {
-    on_mouse_wheel_down = mouse_coord => if(!onPause) onWheelDown(mouse_coord)
+    on_mouse_wheel_down = mouse_coord => if(!on_pause) onWheelDown(mouse_coord)
     deletion_operations.addOp(() => on_mouse_wheel_down = v => {})
   }
   def mouseWheelDownIgnorePause(onWheelDown: Vec => Any) = {
@@ -131,7 +131,7 @@ trait SingleController extends ScageController {
     deletion_operations.addOp(() => on_mouse_wheel_down = v => {})
   }
   def mouseWheelDownOnPause(onWheelDown: Vec => Any) = {
-    on_mouse_wheel_down = mouse_coord => if(onPause) onWheelDown(mouse_coord)
+    on_mouse_wheel_down = mouse_coord => if(on_pause) onWheelDown(mouse_coord)
     deletion_operations.addOp(() => on_mouse_wheel_down = v => {})
   }
 

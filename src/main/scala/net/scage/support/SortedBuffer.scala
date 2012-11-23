@@ -27,26 +27,6 @@ class SortedBuffer[A <: Ordered[A]](init_arr:A*) extends Seq[A] with Growable[A]
   def iterator: Iterator[A] = arr.iterator
 }
 
-class SynchronizedSortedBuffer[A <: Ordered[A]](init_arr:A*) extends SortedBuffer[A](init_arr:_*) {
-  override def remove(idx:Int) = synchronized {super.remove(idx)}
-
-  override def clear() {synchronized {super.clear()}}
-
-  override def +=(elem:A) = synchronized[this.type] {
-    super.+=(elem)
-    this
-  }
-
-  override def -=(elem:A) = synchronized[this.type] {
-    super.-=(elem)
-    this
-  }
-
-  override def apply(idx: Int) = synchronized {super.apply(idx)}
-  override def length: Int = synchronized {super.length}
-  override def iterator: Iterator[A] = synchronized {super.iterator}
-}
-
 object SortedBuffer {
   def apply[A <: Ordered[A]](init_arr:A*) = new SortedBuffer(init_arr:_*)
 }

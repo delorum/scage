@@ -1,13 +1,13 @@
 package net.scage
 
-import handlers.controller2.{SynchronizedScageController, ScageController, SingleController}
+import handlers.controller2.{ScageController, SingleController}
 import com.weiglewilczek.slf4s.Logger
-import handlers.{SynchronizedRenderer, Renderer}
+import handlers.Renderer
 import support.ScageProperties._
 import handlers.RendererLib._
 
 import java.awt.{BorderLayout, Canvas}
-import org.lwjgl.opengl.{GL11, Display}
+import org.lwjgl.opengl.Display
 import java.applet.Applet
 
 
@@ -19,10 +19,10 @@ abstract class Screen(val unit_name:String = "Scage Screen") extends Scage with 
     log.info("starting screen "+unit_name+"...")
     executePreinits()
     executeInits()
-    isRunning = true
+    is_running = true
     prepareRendering()
     log.info(unit_name+": run")
-    while(isRunning && Scage.isAppRunning) {
+    while(is_running && Scage.isAppRunning) {
       checkControls()
       executeActions()
       performRendering()
@@ -32,8 +32,6 @@ abstract class Screen(val unit_name:String = "Scage Screen") extends Scage with 
     scage_log.info(unit_name+" was stopped")
   }
 }
-
-trait SynchronizedScreen extends SynchronizedScage with SynchronizedRenderer with SynchronizedScageController
 
 abstract class ScreenApp(
   unit_name:String  = property("app.name", "Scage App"),
@@ -46,10 +44,10 @@ abstract class ScreenApp(
   override def run() {
     executePreinits()
     executeInits()
-    isRunning = true
+    is_running = true
     prepareRendering()
     scage_log.info(unit_name+": run")
-    while(isRunning && Scage.isAppRunning) {
+    while(is_running && Scage.isAppRunning) {
       checkControls()
       executeActions()
       performRendering()

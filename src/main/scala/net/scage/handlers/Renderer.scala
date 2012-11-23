@@ -17,8 +17,7 @@ import net.scage.support.tracer3.{Trace, ScageTracer}
 import java.awt.GraphicsEnvironment
 import net.scage.{ScageOperation, Scage}
 import collection.mutable.ArrayBuffer
-import net.scage.support.{SynchronizedSortedBuffer, SortedBuffer, ScageColor, Vec}
-import collection.mutable
+import net.scage.support.{SortedBuffer, ScageColor, Vec}
 
 object DisplayListsHolder {
   private val log = Logger(this.getClass.getName)
@@ -141,6 +140,62 @@ trait RendererLib {
     	GL11.glBegin(GL11.GL_LINES)
     		edges.foreach(edge => GL11.glVertex2f(edge.x, edge.y))
     	GL11.glEnd()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
+  }
+
+  def drawSlidingLines(edges:Vec*) {
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+    GL11.glBegin(GL11.GL_LINES)
+    edges.sliding(2).foreach {
+      case Seq(a,b) =>
+        GL11.glVertex2f(a.x, a.y)
+        GL11.glVertex2f(b.x, b.y)
+      case _ =>
+    }
+    GL11.glEnd()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
+  }
+
+  def  drawSlidingLines(edges:Seq[Vec], color:ScageColor = DEFAULT_COLOR) {
+    if(color != DEFAULT_COLOR) currentColor = color
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+    GL11.glBegin(GL11.GL_LINES)
+    edges.sliding(2).foreach {
+      case Seq(a,b) =>
+        GL11.glVertex2f(a.x, a.y)
+        GL11.glVertex2f(b.x, b.y)
+      case _ =>
+    }
+    GL11.glEnd()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
+  }
+
+  def drawGroupedLines(edges:Vec*) {
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+    GL11.glBegin(GL11.GL_LINES)
+    val edges_ext = if(edges.length % 2 == 0) edges else edges.init
+    edges_ext.grouped(2).foreach {
+      case Seq(a,b) =>
+        GL11.glVertex2f(a.x, a.y)
+        GL11.glVertex2f(b.x, b.y)
+      case _ =>
+    }
+    GL11.glEnd()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
+  }
+
+  def  drawGroupedLines(edges:Seq[Vec], color:ScageColor = DEFAULT_COLOR) {
+    if(color != DEFAULT_COLOR) currentColor = color
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+    GL11.glBegin(GL11.GL_LINES)
+    val edges_ext = if(edges.length % 2 == 0) edges else edges.init
+    edges_ext.grouped(2).foreach {
+      case Seq(a,b) =>
+        GL11.glVertex2f(a.x, a.y)
+        GL11.glVertex2f(b.x, b.y)
+      case _ =>
+    }
+    GL11.glEnd()
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
@@ -566,16 +621,16 @@ trait Renderer extends Scage {
   override private[scage] def executeActions() {  // maybe rename it to not confuse clients
     loops = 0
     while(System.currentTimeMillis() > next_game_tick && loops < MAX_FRAMESKIP) {
-      restartToggled = false
+      restart_toggled = false
       def _execute(_actions:Traversable[ScageOperation]) {
-        if(_actions.nonEmpty && !restartToggled) {
-          val ScageOperation(action_id, action_operation) = _actions.head
-          currentOperation = action_id
-          action_operation()
-          _execute(_actions.tail)
-        }
+        val ScageOperation(action_id, action_operation) = _actions.head
+        current_operation_id = action_id
+        action_operation()
+        if(_actions.tail.nonEmpty && !restart_toggled) _execute(_actions.tail)
       }
-      _execute(actions.operations)
+      if(actions.operations.nonEmpty) {
+        _execute(actions.operations)
+      }
       next_game_tick += SKIP_TICKS
       loops += 1
 
@@ -599,7 +654,7 @@ trait Renderer extends Scage {
         GL11.glTranslatef(coord.x , coord.y, 0.0f)
         GL11.glScalef(_global_scale, _global_scale, 1)
         for(RenderOperation(render_id, render_operation, _) <- renders.operations) {
-          currentOperation = render_id
+          current_operation_id = render_id
           GL11.glPushMatrix()
           render_operation()
           GL11.glPopMatrix()
@@ -607,7 +662,7 @@ trait Renderer extends Scage {
       GL11.glPopMatrix()
 
       for(ScageOperation(interface_id, interface_operation) <- interfaces.operations) {
-        currentOperation = interface_id
+        current_operation_id = interface_id
         interface_operation()
       }
 
@@ -616,11 +671,4 @@ trait Renderer extends Scage {
       countFPS()
     }
   }
-}
-
-trait SynchronizedRenderer extends Renderer {
-  class SynchronizedRenderOperationsContainer extends RenderOperationsContainer {
-    override protected val _render_operations = new SynchronizedSortedBuffer[RenderOperation]()
-  }
-  override def rendersContainer = new SynchronizedRenderOperationsContainer
 }
