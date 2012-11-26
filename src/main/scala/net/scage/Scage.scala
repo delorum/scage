@@ -4,6 +4,83 @@ import com.weiglewilczek.slf4s.Logger
 import support.ScageId._
 import collection.mutable.ArrayBuffer
 import collection.mutable
+import support.ScageProperties._
+
+trait CommandLineInterface {
+  this:App =>
+  private val log = Logger(this.getClass.getName)
+  case class CliArg(short:String, long:String, description:String, has_value:Boolean)
+  private val cli_args_short = mutable.HashMap[String, CliArg]()
+  private val cli_args_long  = mutable.HashMap[String, CliArg]()
+
+  def commandLineArg(short:String, long:String, description:String, has_value:Boolean) {
+    val new_cli_arg = CliArg(short, long, description, has_value)
+    cli_args_short += (short -> new_cli_arg)
+    cli_args_long  += (long  -> new_cli_arg)
+  }
+  def commandLineArgAndParse(short:String, long:String, description:String, has_value:Boolean) {
+    commandLineArg(short, long, description, has_value)
+    parseCommandLineArgs()
+  }
+
+
+  def commandLineArgs(args:(String, String, String, Boolean)*) {
+    args.foreach {
+      case (short:String, long:String, description:String, has_value:Boolean) =>
+        commandLineArg(short, long, description, has_value)
+    }
+  }
+  def commandLineArgsAndParse(args:(String, String, String, Boolean)*) {
+    commandLineArgs(args:_*)
+    parseCommandLineArgs()
+  }
+
+  private def printHelpAndExit() {
+    println("Options:")
+    cli_args_short.values.foreach {
+      case CliArg(short, long, description, has_value) =>
+        val short_only = "-"+short
+        val except_descr =  short_only+(List().padTo(10 - short_only.length, " ").mkString)+"--"+long+" "+(if(has_value) "arg" else "")
+        println(except_descr+(List().padTo(20 - except_descr.length, " ").mkString)+description)
+    }
+    System.exit(0)
+  }
+
+  private def checkPropInMap(m:mutable.HashMap[String, CliArg], prop:String, pos:Int) {
+    prop match {
+      case "help" => printHelpAndExit()
+      case p => m.get(p) match {
+        case Some(CliArg(_, long, _, has_value)) =>
+          if(!has_value) {
+            addProperty(long, true)
+          } else {
+            if(pos >= this.args.length) log.warn("required value for command line property: "+prop)
+            else {
+              val value = this.args(pos+1)
+              addProperty(long, value)
+            }
+          }
+        case None => log.warn("unknown command line property: "+prop)
+      }
+    }
+  }
+
+  def parseCommandLineArgs() {
+    this.args.zipWithIndex.filter {case (arg, pos) => arg.startsWith("-")}.map {case (arg, pos) => (arg.toList, pos)}.foreach {case (arg, pos) =>
+      arg match {
+        case '-' :: '-' :: prop => checkPropInMap(cli_args_long,  prop.mkString, pos)
+        case '-' :: prop        => checkPropInMap(cli_args_short, prop.mkString, pos)
+        case prop               => log.warn("unknown command line property: "+prop.mkString)
+      }
+    }
+    cli_args_short.values.filter {
+      case CliArg(short, long, _, has_value) =>
+        !has_value && !this.args.contains("--"+long) && !this.args.contains("-"+short)
+    }.foreach {
+      case CliArg(_, long, _, _) => addProperty(long, false)
+    }
+  }
+}
 
 case class ScageOperation(op_id:Int, op:() => Any)
 
@@ -406,7 +483,9 @@ object Scage {
   def stopApp() {is_all_units_stop = true}
 }
 
-class ScageApp(val unit_name:String = "Scage App") extends Scage /*with ScageMain */with App {
+class ScageApp(
+  val unit_name:String = property("app.name", "Scage App")
+) extends Scage with CommandLineInterface with App {
   override def main(args:Array[String]) {
     scage_log.info("starting main unit "+unit_name+"...")
     super.main(args)

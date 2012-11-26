@@ -37,7 +37,7 @@ abstract class ScreenApp(
   unit_name:String  = property("app.name", "Scage App"),
   window_width:Int  = property("screen.width", 800),
   window_height:Int = property("screen.height", 600)
-) extends Screen(unit_name) with App {
+) extends Screen(unit_name) with CommandLineInterface with App {
   val app_start_moment = System.currentTimeMillis()
   def msecsFromAppStart = System.currentTimeMillis() - app_start_moment
 
