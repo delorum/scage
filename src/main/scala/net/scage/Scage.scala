@@ -200,7 +200,62 @@ trait OperationMapping {
   def operationExists(op_id:Int) = mapping.contains(op_id)
 }
 
-trait Scage extends OperationMapping {
+/**
+  this 'events'-functionality seems useless as the amount of usecases in real projects is zero
+  but I plan to keep it, because I still have hope that someday I construct such usecase =)
+*/
+trait Events {
+  private val log = Logger(this.getClass.getName)
+  private val events = mutable.HashMap[String, mutable.HashMap[Int, PartialFunction[Any, Unit]]]()
+  def onEventWithArguments(event_name:String)(event_action: PartialFunction[Any, Unit]) = {
+    val event_id = nextId
+    (events.get(event_name) match {
+      case Some(events_for_name) =>
+        events_for_name += (event_id -> event_action)
+      case None => events += (event_name -> mutable.HashMap(event_id -> event_action))
+    }):Unit // this fixes some very huge compilation problem (very slow compilation)
+    (event_name, event_id)
+  }
+  def onEvent(event_name:String)(event_action: => Unit) = {
+    val event_id = nextId
+    (events.get(event_name) match {
+      case Some(events_for_name) => events_for_name += (event_id -> {case _ => event_action})
+      case None => events += (event_name -> mutable.HashMap(event_id -> {case _ => event_action}))
+    }):Unit
+    (event_name, event_id)
+  }
+  def callEvent(event_name:String, arg:Any) {
+    events.get(event_name) match {
+      case Some(events_for_name) =>
+        for(event <- events_for_name.values) event(arg) // fail-fast if not matched!
+      case None => //log.warn("event "+event_name+" not found")
+    }
+  }
+  def callEvent(event_name:String) {
+    events.get(event_name) match {
+      case Some(events_for_name) =>
+        for(event <- events_for_name.values) event() // fail-fast if not matched!
+      case None => //log.warn("event "+event_name+" not found")
+    }
+  }
+  def delEvents(event_ids:(String, Int)*) {
+    for((event_name, event_id) <- event_ids) {
+      events.get(event_name) match {
+        case Some(events_for_name) =>
+          if(events_for_name.contains(event_id)) {
+            events_for_name -= event_id
+            log.debug("deleted event for name "+event_name+" with id "+event_id)
+          } else {
+            log.warn("event for name "+event_name+" with id "+event_id+" not found among events so wasn't deleted")
+          }
+        case None =>
+          log.warn("events for name "+event_name+" not found so event with id "+event_id+" wasn't deleted")
+      }
+    }
+  }
+}
+
+trait Scage extends OperationMapping with Events {
   def unit_name:String
 
   protected val scage_log = Logger(this.getClass.getName)
@@ -423,57 +478,6 @@ trait Scage extends OperationMapping {
     restart_toggled = true
     executeClears()
     executeInits()
-  }
-
-  /* this 'events'-functionality seems useless as the amount of usecases in real projects is zero
-     but I plan to keep it, because I still have hope that someday I construct such usecase =)
-  */
-  private val events = mutable.HashMap[String, mutable.HashMap[Int, PartialFunction[Any, Unit]]]()
-  def onEventWithArguments(event_name:String)(event_action: PartialFunction[Any, Unit]) = {
-    val event_id = nextId
-    (events.get(event_name) match {
-      case Some(events_for_name) =>
-        events_for_name += (event_id -> event_action)
-      case None => events += (event_name -> mutable.HashMap(event_id -> event_action))
-    }):Unit // this fixes some very huge compilation problem (very slow compilation)
-    (event_name, event_id)
-  }
-  def onEvent(event_name:String)(event_action: => Unit) = {
-    val event_id = nextId
-    (events.get(event_name) match {
-      case Some(events_for_name) => events_for_name += (event_id -> {case _ => event_action})
-      case None => events += (event_name -> mutable.HashMap(event_id -> {case _ => event_action}))
-    }):Unit
-    (event_name, event_id)
-  }
-  def callEvent(event_name:String, arg:Any) {
-    events.get(event_name) match {
-      case Some(events_for_name) =>
-        for(event <- events_for_name.values) event(arg) // fail-fast if not matched!
-      case None => //scage_log.warn("event "+event_name+" not found")
-    }
-  }
-  def callEvent(event_name:String) {
-    events.get(event_name) match {
-      case Some(events_for_name) =>
-        for(event <- events_for_name.values) event() // fail-fast if not matched!
-      case None => //scage_log.warn("event "+event_name+" not found")
-    }
-  }
-  def delEvents(event_ids:(String, Int)*) {
-    for((event_name, event_id) <- event_ids) {
-      events.get(event_name) match {
-        case Some(events_for_name) =>
-          if(events_for_name.contains(event_id)) {
-            events_for_name -= event_id
-            scage_log.debug("deleted event for name "+event_name+" with id "+event_id)
-          } else {
-            scage_log.warn("event for name "+event_name+" with id "+event_id+" not found among events so wasn't deleted")
-          }
-        case None =>
-          scage_log.warn("events for name "+event_name+" not found so event with id "+event_id+" wasn't deleted")
-      }
-    }
   }
 }
 
