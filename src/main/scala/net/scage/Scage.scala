@@ -4,6 +4,83 @@ import com.weiglewilczek.slf4s.Logger
 import support.ScageId._
 import collection.mutable.ArrayBuffer
 import collection.mutable
+import support.ScageProperties._
+
+trait CommandLineInterface {
+  this:App =>
+  private val log = Logger(this.getClass.getName)
+  case class CliArg(short:String, long:String, description:String, has_value:Boolean)
+  private val cli_args_short = mutable.HashMap[String, CliArg]()
+  private val cli_args_long  = mutable.HashMap[String, CliArg]()
+
+  def commandLineArg(short:String, long:String, description:String, has_value:Boolean) {
+    val new_cli_arg = CliArg(short, long, description, has_value)
+    cli_args_short += (short -> new_cli_arg)
+    cli_args_long  += (long  -> new_cli_arg)
+  }
+  def commandLineArgAndParse(short:String, long:String, description:String, has_value:Boolean) {
+    commandLineArg(short, long, description, has_value)
+    parseCommandLineArgs()
+  }
+
+
+  def commandLineArgs(args:(String, String, String, Boolean)*) {
+    args.foreach {
+      case (short:String, long:String, description:String, has_value:Boolean) =>
+        commandLineArg(short, long, description, has_value)
+    }
+  }
+  def commandLineArgsAndParse(args:(String, String, String, Boolean)*) {
+    commandLineArgs(args:_*)
+    parseCommandLineArgs()
+  }
+
+  private def printHelpAndExit() {
+    println("Options:")
+    cli_args_short.values.foreach {
+      case CliArg(short, long, description, has_value) =>
+        val short_only = "-"+short
+        val except_descr =  short_only+(List().padTo(10 - short_only.length, " ").mkString)+"--"+long+" "+(if(has_value) "arg" else "")
+        println(except_descr+(List().padTo(20 - except_descr.length, " ").mkString)+description)
+    }
+    System.exit(0)
+  }
+
+  private def checkPropInMap(m:mutable.HashMap[String, CliArg], prop:String, pos:Int) {
+    prop match {
+      case "help" => printHelpAndExit()
+      case p => m.get(p) match {
+        case Some(CliArg(_, long, _, has_value)) =>
+          if(!has_value) {
+            addProperty(long, true)
+          } else {
+            if(pos >= this.args.length) log.warn("required value for command line property: "+prop)
+            else {
+              val value = this.args(pos+1)
+              addProperty(long, value)
+            }
+          }
+        case None => log.warn("unknown command line property: "+prop)
+      }
+    }
+  }
+
+  def parseCommandLineArgs() {
+    this.args.zipWithIndex.filter {case (arg, pos) => arg.startsWith("-")}.map {case (arg, pos) => (arg.toList, pos)}.foreach {case (arg, pos) =>
+      arg match {
+        case '-' :: '-' :: prop => checkPropInMap(cli_args_long,  prop.mkString, pos)
+        case '-' :: prop        => checkPropInMap(cli_args_short, prop.mkString, pos)
+        case prop               => log.warn("unknown command line property: "+prop.mkString)
+      }
+    }
+    cli_args_short.values.filter {
+      case CliArg(short, long, _, has_value) =>
+        !has_value && !this.args.contains("--"+long) && !this.args.contains("-"+short)
+    }.foreach {
+      case CliArg(_, long, _, _) => addProperty(long, false)
+    }
+  }
+}
 
 case class ScageOperation(op_id:Int, op:() => Any)
 
@@ -123,7 +200,62 @@ trait OperationMapping {
   def operationExists(op_id:Int) = mapping.contains(op_id)
 }
 
-trait Scage extends OperationMapping {
+/**
+  this 'events'-functionality seems useless as the amount of usecases in real projects is zero
+  but I plan to keep it, because I still have hope that someday I construct such usecase =)
+*/
+trait Events {
+  private val log = Logger(this.getClass.getName)
+  private val events = mutable.HashMap[String, mutable.HashMap[Int, PartialFunction[Any, Unit]]]()
+  def onEventWithArguments(event_name:String)(event_action: PartialFunction[Any, Unit]) = {
+    val event_id = nextId
+    (events.get(event_name) match {
+      case Some(events_for_name) =>
+        events_for_name += (event_id -> event_action)
+      case None => events += (event_name -> mutable.HashMap(event_id -> event_action))
+    }):Unit // this fixes some very huge compilation problem (very slow compilation)
+    (event_name, event_id)
+  }
+  def onEvent(event_name:String)(event_action: => Unit) = {
+    val event_id = nextId
+    (events.get(event_name) match {
+      case Some(events_for_name) => events_for_name += (event_id -> {case _ => event_action})
+      case None => events += (event_name -> mutable.HashMap(event_id -> {case _ => event_action}))
+    }):Unit
+    (event_name, event_id)
+  }
+  def callEvent(event_name:String, arg:Any) {
+    events.get(event_name) match {
+      case Some(events_for_name) =>
+        for(event <- events_for_name.values) event(arg) // fail-fast if not matched!
+      case None => //log.warn("event "+event_name+" not found")
+    }
+  }
+  def callEvent(event_name:String) {
+    events.get(event_name) match {
+      case Some(events_for_name) =>
+        for(event <- events_for_name.values) event() // fail-fast if not matched!
+      case None => //log.warn("event "+event_name+" not found")
+    }
+  }
+  def delEvents(event_ids:(String, Int)*) {
+    for((event_name, event_id) <- event_ids) {
+      events.get(event_name) match {
+        case Some(events_for_name) =>
+          if(events_for_name.contains(event_id)) {
+            events_for_name -= event_id
+            log.debug("deleted event for name "+event_name+" with id "+event_id)
+          } else {
+            log.warn("event for name "+event_name+" with id "+event_id+" not found among events so wasn't deleted")
+          }
+        case None =>
+          log.warn("events for name "+event_name+" not found so event with id "+event_id+" wasn't deleted")
+      }
+    }
+  }
+}
+
+trait Scage extends OperationMapping with Events {
   def unit_name:String
 
   protected val scage_log = Logger(this.getClass.getName)
@@ -347,57 +479,6 @@ trait Scage extends OperationMapping {
     executeClears()
     executeInits()
   }
-
-  /* this 'events'-functionality seems useless as the amount of usecases in real projects is zero
-     but I plan to keep it, because I still have hope that someday I construct such usecase =)
-  */
-  private val events = mutable.HashMap[String, mutable.HashMap[Int, PartialFunction[Any, Unit]]]()
-  def onEventWithArguments(event_name:String)(event_action: PartialFunction[Any, Unit]) = {
-    val event_id = nextId
-    (events.get(event_name) match {
-      case Some(events_for_name) =>
-        events_for_name += (event_id -> event_action)
-      case None => events += (event_name -> mutable.HashMap(event_id -> event_action))
-    }):Unit // this fixes some very huge compilation problem (very slow compilation)
-    (event_name, event_id)
-  }
-  def onEvent(event_name:String)(event_action: => Unit) = {
-    val event_id = nextId
-    (events.get(event_name) match {
-      case Some(events_for_name) => events_for_name += (event_id -> {case _ => event_action})
-      case None => events += (event_name -> mutable.HashMap(event_id -> {case _ => event_action}))
-    }):Unit
-    (event_name, event_id)
-  }
-  def callEvent(event_name:String, arg:Any) {
-    events.get(event_name) match {
-      case Some(events_for_name) =>
-        for(event <- events_for_name.values) event(arg) // fail-fast if not matched!
-      case None => //scage_log.warn("event "+event_name+" not found")
-    }
-  }
-  def callEvent(event_name:String) {
-    events.get(event_name) match {
-      case Some(events_for_name) =>
-        for(event <- events_for_name.values) event() // fail-fast if not matched!
-      case None => //scage_log.warn("event "+event_name+" not found")
-    }
-  }
-  def delEvents(event_ids:(String, Int)*) {
-    for((event_name, event_id) <- event_ids) {
-      events.get(event_name) match {
-        case Some(events_for_name) =>
-          if(events_for_name.contains(event_id)) {
-            events_for_name -= event_id
-            scage_log.debug("deleted event for name "+event_name+" with id "+event_id)
-          } else {
-            scage_log.warn("event for name "+event_name+" with id "+event_id+" not found among events so wasn't deleted")
-          }
-        case None =>
-          scage_log.warn("events for name "+event_name+" not found so event with id "+event_id+" wasn't deleted")
-      }
-    }
-  }
 }
 
 object Scage {
@@ -406,7 +487,9 @@ object Scage {
   def stopApp() {is_all_units_stop = true}
 }
 
-class ScageApp(val unit_name:String = "Scage App") extends Scage /*with ScageMain */with App {
+class ScageApp(
+  val unit_name:String = property("app.name", "Scage App")
+) extends Scage with CommandLineInterface with App {
   override def main(args:Array[String]) {
     scage_log.info("starting main unit "+unit_name+"...")
     super.main(args)

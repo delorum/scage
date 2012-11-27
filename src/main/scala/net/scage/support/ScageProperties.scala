@@ -75,6 +75,12 @@ object ScageProperties extends ScagePropertiesTrait {
     }
     _getProperty(key, props)
   }
+
+  def addProperty(key:String, value:Any) {
+    log.info("added custom property: "+key+" -> "+value)
+    props.head.put(key, value.toString)
+  }
+
   private def defaultValue[A](key:String, default:A) = {
     log.info("default value for property "+key+" is "+(if("".equals(default.toString)) "empty string" else default))
     props.head.put(key, default.toString)
@@ -95,10 +101,10 @@ object ScageProperties extends ScagePropertiesTrait {
           case _ => result.asInstanceOf[A]  // I believe its 'Double' here =)
         }
       case "Boolean" =>
-        if(p.equalsIgnoreCase("yes")  || p.equalsIgnoreCase("1") ||
-          p.equalsIgnoreCase("true") || p.equalsIgnoreCase("on")) true.asInstanceOf[A]
+        if(p.equalsIgnoreCase("yes")        || p.equalsIgnoreCase("1") ||
+          p.equalsIgnoreCase("true")        || p.equalsIgnoreCase("on")) true.asInstanceOf[A]
         else if(p.equalsIgnoreCase("no")    || p.equalsIgnoreCase("0") ||
-          p.equalsIgnoreCase("false") || p.equalsIgnoreCase("off")) false.asInstanceOf[A]
+          p.equalsIgnoreCase("false")       || p.equalsIgnoreCase("off")) false.asInstanceOf[A]
         else {
           throw new Exception("supported boolean properties are: yes/no, 1/0, true/false, on/off")
         }
