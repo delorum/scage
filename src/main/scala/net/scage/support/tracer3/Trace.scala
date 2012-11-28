@@ -8,7 +8,7 @@ trait TraceTrait {
   def changeState(changer:ChangerType, state:State) // maybe 'changeState' is not the right name..
   def state:State
 
-  val id = nextId
+  final val id = nextId             // make it final because it is very important to keep it completely unique!
   private[tracer3] var _location = Vec(0, 0)
   def location:Vec = _location
 

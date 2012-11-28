@@ -88,21 +88,30 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x
   def containsTrace(trace_id:Int) = traces_by_ids.contains(trace_id)
   def containsTrace(trace:T) = traces_by_ids.contains(trace.id)
 
-  // WARNING: its very important not to directly pass contents of point_matrix(trace.location.ix)(trace.location.iy),
-  // traces_by_ids or traces_list as it cannot remove from itself properly, causing NullPointerException!
-  def removeTraces(traces_to_remove:T*) {  // maybe return result (true/false)
-    traces_to_remove.foreach(trace => {   // maybe call toList before foreach to copy the list
-      if(traces_by_ids.contains(trace.id)) {
+  protected def _removeTrace(trace_id:Int, show_warn:Boolean) {
+    traces_by_ids.get(trace_id) match {
+      case Some(trace) =>
         point_matrix(trace.location.ix)(trace.location.iy) -= trace
         traces_by_ids -= trace.id
         traces_list -= trace
         log.debug("removed trace #"+trace.id)
-      } else log.warn("trace #"+trace.id+" not found")
-    })
+      case None => if(show_warn) log.warn("trace #"+trace_id+" not found")
+    }
   }
-  def removeTracesById(trace_ids:Int*) {
-    removeTraces(traces_list.filter(elem => trace_ids.contains(elem.id)):_*)
-  }
+
+  def removeTrace(trace:T)                {_removeTrace(trace.id, show_warn = true)}
+  def removeTraceNoWarn(trace:T)          {_removeTrace(trace.id, show_warn = false)}
+  def removeTraceById(trace_id:Int)       {_removeTrace(trace_id, show_warn = true)}
+  def removeTraceByIdNoWarn(trace_id:Int) {_removeTrace(trace_id, show_warn = false)}
+
+  // WARNING: its very important not to directly pass contents of point_matrix(trace.location.ix)(trace.location.iy),
+  // traces_by_ids or traces_list as it cannot remove from itself properly, causing NullPointerException!
+  // maybe return result (true/false)
+  // maybe call toList before foreach to copy the list
+  def removeTraces(traces_to_remove:T*)       {traces_to_remove.foreach(t => _removeTrace(t.id, show_warn = true))}
+  def removeTracesNoWarn(traces_to_remove:T*) {traces_to_remove.foreach(t => _removeTrace(t.id, show_warn = false))}
+  def removeTracesById(trace_ids:Int*)        {trace_ids.foreach(t_id     => _removeTrace(t_id, show_warn = true))}
+  def removeTracesByIdNoWarn(trace_ids:Int*)  {trace_ids.foreach(t_id     => _removeTrace(t_id, show_warn = false))}
   def removeAllTraces() {
     clearMatrix(point_matrix)
     traces_by_ids.clear()
