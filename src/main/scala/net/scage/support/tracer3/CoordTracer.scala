@@ -29,18 +29,16 @@ extends ScageTracer[T](field_from_x,field_to_x,field_from_y,field_to_y,init_h_x,
     trace
   }
 
-  override def removeTraces(traces_to_remove:T*) {
-    traces_to_remove.foreach(trace => {
-      if(traces_by_ids.contains(trace.id)) {
+  override protected def _removeTrace(trace_id:Int, show_warn:Boolean) {
+    traces_by_ids.get(trace_id) match {
+      case Some(trace) =>
         val trace_point = point(trace.location)
         point_matrix(trace_point.ix)(trace_point.iy) -= trace
         traces_by_ids -= trace.id
         traces_list -= trace
         log.debug("removed trace #"+trace.id)
-      } else {
-        log.warn("trace #"+trace.id+" not found")
-      }
-    })
+      case None => if(show_warn) log.warn("trace #"+trace_id+" not found")
+    }
   }
 
   def tracesNearCoord(coord:Vec, xrange:Range, yrange:Range, condition:T => Boolean):IndexedSeq[T] = {
