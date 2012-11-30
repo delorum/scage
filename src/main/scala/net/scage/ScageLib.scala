@@ -56,6 +56,58 @@ trait ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXML
 
   def msecs = System.currentTimeMillis()
   def msecsFrom(moment:Long) = System.currentTimeMillis() - moment
+
+  // Vec/DVec helper methods
+
+  def areLinesIntersect(a1: Vec, a2: Vec, b1: Vec, b2: Vec): Boolean = {
+    val common = (a2.x - a1.x) * (b2.y - b1.y) - (a2.y - a1.y) * (b2.x - b1.x)
+    common != 0 && {
+      val rH = (a1.y - b1.y) * (b2.x - b1.x) - (a1.x - b1.x) * (b2.y - b1.y)
+      val sH = (a1.y - b1.y) * (a2.x - a1.x) - (a1.x - b1.x) * (a2.y - a1.y)
+
+      val r = rH / common
+      val s = sH / common
+
+      r >= 0 && r <= 1 && s >= 0 && s <= 1
+    }
+  }
+
+  def areLinesIntersect(a1: DVec, a2: DVec, b1: DVec, b2: DVec): Boolean = {
+    val common = (a2.x - a1.x) * (b2.y - b1.y) - (a2.y - a1.y) * (b2.x - b1.x)
+    common != 0 && {
+      val rH = (a1.y - b1.y) * (b2.x - b1.x) - (a1.x - b1.x) * (b2.y - b1.y)
+      val sH = (a1.y - b1.y) * (a2.x - a1.x) - (a1.x - b1.x) * (a2.y - a1.y)
+
+      val r = rH / common
+      val s = sH / common
+
+      r >= 0 && r <= 1 && s >= 0 && s <= 1
+    }
+  }
+
+  def coordOnArea(coord:Vec, area:List[Vec]):Boolean = {
+    if (area.length < 2) false
+    else {
+      val a1 = coord
+      val a2 = Vec(Integer.MAX_VALUE, coord.y)
+      val intersections = (area.last :: area.init).zip(area).foldLeft(0) {
+        case (result, (b1, b2)) => if (areLinesIntersect(a1, a2, b1, b2)) result + 1 else result
+      }
+      intersections % 2 != 0
+    }
+  }
+
+  def coordOnArea(coord:DVec, area:List[DVec]):Boolean = {
+    if (area.length < 2) false
+    else {
+      val a1 = coord
+      val a2 = Vec(Integer.MAX_VALUE, coord.y)
+      val intersections = (area.last :: area.init).zip(area).foldLeft(0) {
+        case (result, (b1, b2)) => if (areLinesIntersect(a1, a2, b1, b2)) result + 1 else result
+      }
+      intersections % 2 != 0
+    }
+  }
 }
 
 object ScageLib extends ScageLib
