@@ -1,18 +1,18 @@
 package net.scage.handlers.controller2
 
 import net.scage.support.Vec
-import collection.mutable.{ArrayBuffer, HashMap}
 import com.weiglewilczek.slf4s.Logger
 import net.scage.{ScageOperation, Scage}
-import collection.mutable
 import org.lwjgl.input.{Mouse, Keyboard}
+import net.scage.ScageLib.coordOnArea
+import collection.mutable
 
 case class KeyPress(key_code:Int, var was_pressed:Boolean, var last_pressed_time:Long)
 case class MouseButtonPress(button_code:Int, var was_pressed:Boolean, var last_pressed_time:Long)
 
 object ScageController {
-  private val key_presses = HashMap[Int, KeyPress]()
-  private val mouse_button_presses = HashMap[Int, MouseButtonPress]()
+  private val key_presses = mutable.HashMap[Int, KeyPress]()
+  private val mouse_button_presses = mutable.HashMap[Int, MouseButtonPress]()
 }
 
 trait ScageController extends Scage {
@@ -35,31 +35,6 @@ trait ScageController extends Scage {
         val mbp = MouseButtonPress(mouse_button, was_pressed = false, 0L)
         ScageController.mouse_button_presses += (mouse_button -> mbp)
         mbp
-    }
-  }
-
-  protected def areLinesIntersect(a1: Vec, a2: Vec, b1: Vec, b2: Vec): Boolean = {
-    val common = (a2.x - a1.x) * (b2.y - b1.y) - (a2.y - a1.y) * (b2.x - b1.x)
-    common != 0 && {
-      val rH = (a1.y - b1.y) * (b2.x - b1.x) - (a1.x - b1.x) * (b2.y - b1.y)
-      val sH = (a1.y - b1.y) * (a2.x - a1.x) - (a1.x - b1.x) * (a2.y - a1.y)
-
-      val r = rH / common
-      val s = sH / common
-
-      r >= 0 && r <= 1 && s >= 0 && s <= 1
-    }
-  }
-
-  protected def coordOnArea(mouse_coord:Vec, area:List[Vec]):Boolean = {
-    if (area.length < 2) false
-    else {
-      val a1 = mouse_coord
-      val a2 = Vec(Integer.MAX_VALUE, mouse_coord.y)
-      val intersections = (area.last :: area.init).zip(area).foldLeft(0) {
-        case (result, (b1, b2)) => if (areLinesIntersect(a1, a2, b1, b2)) result + 1 else result
-      }
-      intersections % 2 != 0
     }
   }
 
