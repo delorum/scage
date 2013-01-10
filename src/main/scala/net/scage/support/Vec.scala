@@ -32,8 +32,8 @@ object Vec {
 }
 
 class Vec(val x:Float = 0, val y:Float = 0) {
-  def ix = x.toInt
-  def iy = y.toInt
+  lazy val ix = x.toInt
+  lazy val iy = y.toInt
 
   def this(v:Vec)              = this(v.x, v.y)
   def this(v:ROVector2f)       = this(v.getX, v.getY)
@@ -114,8 +114,8 @@ object DVec {
 }
 
 class DVec(val x:Double = 0, val y:Double = 0) {
-  def ix = x.toInt
-  def iy = y.toInt
+  lazy val ix = x.toInt
+  lazy val iy = y.toInt
 
   def this(dv:DVec)            = this(dv.x, dv.y)
   def this(v:Vec)              = this(v.x, v.y)
