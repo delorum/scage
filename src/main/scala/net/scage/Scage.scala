@@ -548,7 +548,7 @@ trait Scage extends OperationMapping with Events {
       val ScageOperation(action_id, action_operation) = _actions.head
       current_operation_id = action_id
       action_operation()
-      if (_actions.tail.nonEmpty && !restart_toggled) _execute(_actions.tail)
+      if (_actions.nonEmpty && _actions.tail.nonEmpty && !restart_toggled) _execute(_actions.tail)
     }
     if (actions.operations.nonEmpty) {
       _execute(actions.operations)
