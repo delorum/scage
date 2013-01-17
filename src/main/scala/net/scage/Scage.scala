@@ -351,18 +351,36 @@ trait Scage extends OperationMapping with Events {
 
   protected var on_pause = false
 
+  private[scage] var last_pause_start_moment = 0l
+  def lastPauseStartMoment = last_pause_start_moment
+
+  private[scage] var pause_period_since_preinit = 0l
+  def pausePeriod = pause_period_since_preinit
+
+  private[scage] var pause_period_since_init = 0l
+  def pausePeriodSinceInit = pause_period_since_init
+
   def onPause = on_pause
-
   def switchPause() {
-    on_pause = !on_pause; scage_log.info("pause = " + on_pause)
+    on_pause = !on_pause
+    if(on_pause) {
+      last_pause_start_moment = System.currentTimeMillis()
+    } else {
+      pause_period_since_preinit += (System.currentTimeMillis() - last_pause_start_moment)
+      pause_period_since_init    += (System.currentTimeMillis() - last_pause_start_moment)
+    }
+    scage_log.info("pause = " + on_pause)
   }
-
   def pause() {
-    on_pause = true; scage_log.info("pause = " + on_pause)
+    on_pause = true
+    last_pause_start_moment = System.currentTimeMillis()
+    scage_log.info("pause = " + on_pause)
   }
-
   def pauseOff() {
-    on_pause = false; scage_log.info("pause = " + on_pause)
+    on_pause = false
+    pause_period_since_preinit += (System.currentTimeMillis() - last_pause_start_moment)
+    pause_period_since_init    += (System.currentTimeMillis() - last_pause_start_moment)
+    scage_log.info("pause = " + on_pause)
   }
 
   protected var restart_toggled = false
@@ -379,10 +397,13 @@ trait Scage extends OperationMapping with Events {
   }
 
   private var preinit_moment = System.currentTimeMillis()
-
   def preinitMoment = preinit_moment
 
   def msecsFromPreinit = System.currentTimeMillis() - preinit_moment
+  def msecsFromPreinitWithoutPause = {
+    if(on_pause) last_pause_start_moment - pause_period_since_preinit - preinit_moment
+    else System.currentTimeMillis() - pause_period_since_preinit - preinit_moment
+  }
 
   // 'preinits' suppose to run only once during unit's first run(). No public method exists to run them inside run-loop
   private[scage] def executePreinits() {
@@ -392,6 +413,7 @@ trait Scage extends OperationMapping with Events {
       preinit_operation()
     }
     preinit_moment = System.currentTimeMillis()
+    pause_period_since_preinit = 0l
   }
 
   def delPreinit(operation_id: Int) = {
@@ -418,10 +440,13 @@ trait Scage extends OperationMapping with Events {
   }
 
   private var init_moment = System.currentTimeMillis()
-
   def initMoment = init_moment
 
   def msecsFromInit = System.currentTimeMillis() - init_moment
+  def msecsFromInitWithoutPause = {
+    if(on_pause) last_pause_start_moment - pause_period_since_init - init_moment
+    else System.currentTimeMillis() - pause_period_since_init - init_moment
+  }
 
   private[scage] def executeInits() {
     scage_log.info(unit_name + ": init")
@@ -430,6 +455,7 @@ trait Scage extends OperationMapping with Events {
       init_operation()
     }
     init_moment = System.currentTimeMillis()
+    pause_period_since_init = 0l
     scage_log.info("inits: " + inits.length + "; actions: " + actions.length + "; clears: " + clears.length)
   }
 
@@ -520,20 +546,20 @@ trait Scage extends OperationMapping with Events {
   def actionOnPause(period: Long)(action_func: => Unit): Int = {
     if (period > 0) {
       var last_action_time: Long = 0
-      action {
+      actionOnPause {
         if (System.currentTimeMillis - last_action_time > period) {
           action_func
           last_action_time = System.currentTimeMillis
         }
       }
-    } else action {
+    } else actionOnPause {
       action_func
     }
   }
 
   def actionDynamicPeriodOnPause(period: => Long)(action_func: => Unit): Int = {
     var last_action_time: Long = 0
-    action {
+    actionOnPause {
       if (System.currentTimeMillis - last_action_time > period) {
         action_func
         last_action_time = System.currentTimeMillis
@@ -668,6 +694,9 @@ object Scage {
 class ScageApp(
                 val unit_name: String = property("app.name", "Scage App")
                 ) extends Scage with CommandLineInterface with App {
+  val app_start_moment = System.currentTimeMillis()
+  def msecsFromAppStart = System.currentTimeMillis() - app_start_moment
+
   override def main(args: Array[String]) {
     scage_log.info("starting main unit " + unit_name + "...")
     super.main(args)
