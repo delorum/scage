@@ -94,16 +94,29 @@ trait MultiController extends ScageController {
                                 mouse_coord => if(on_pause && coordOnArea(mouse_coord, area)) onBtnUp(mouse_coord))
   }
 
-  def leftMouseOnRect(leftup:Vec, width:Int, height:Int, repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+  def leftMouseOnRect(leftup:Vec, width:Float, height:Float, repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
     val area = List(leftup, leftup + Vec(width, 0), leftup + Vec(width, -height), leftup + Vec(0, -height))
     leftMouseOnArea(area, repeat_time, onBtnDown, onBtnUp)
   }
-  def leftMouseOnRectIgnorePause(leftup:Vec, width:Int, height:Int, repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+  def leftMouseOnRectIgnorePause(leftup:Vec, width:Float, height:Float, repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
     val area = List(leftup, leftup + Vec(width, 0), leftup + Vec(width, -height), leftup + Vec(0, -height))
     leftMouseOnAreaIgnorePause(area, repeat_time, onBtnDown, onBtnUp)
   }
-  def leftMouseOnRectOnPause(leftup:Vec, width:Int, height:Int, repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+  def leftMouseOnRectOnPause(leftup:Vec, width:Float, height:Float, repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
     val area = List(leftup, leftup + Vec(width, 0), leftup + Vec(width, -height), leftup + Vec(0, -height))
+    leftMouseOnAreaOnPause(area, repeat_time, onBtnDown, onBtnUp)
+  }
+
+  def leftMouseOnRectCentered(coord:Vec, width:Float, height:Float, repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+    val area = List(coord + Vec(-width/2,  height/2), coord + Vec( width/2,  height/2), coord + Vec( width/2, -height/2), coord + Vec(-width/2, -height/2))
+    leftMouseOnArea(area, repeat_time, onBtnDown, onBtnUp)
+  }
+  def leftMouseOnRectCenteredIgnorePause(coord:Vec, width:Float, height:Float, repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+    val area = List(coord + Vec(-width/2,  height/2), coord + Vec( width/2,  height/2), coord + Vec( width/2, -height/2), coord + Vec(-width/2, -height/2))
+    leftMouseOnAreaIgnorePause(area, repeat_time, onBtnDown, onBtnUp)
+  }
+  def leftMouseOnRectCenteredOnPause(coord:Vec, width:Float, height:Float, repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+    val area = List(coord + Vec(-width/2,  height/2), coord + Vec( width/2,  height/2), coord + Vec( width/2, -height/2), coord + Vec(-width/2, -height/2))
     leftMouseOnAreaOnPause(area, repeat_time, onBtnDown, onBtnUp)
   }
 
@@ -120,16 +133,29 @@ trait MultiController extends ScageController {
                                 mouse_coord => if(on_pause && coordOnArea(mouse_coord, area)) onBtnUp(mouse_coord))
   }
 
-  def rightMouseOnRect(leftup:Vec, width:Int, height:Int, repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+  def rightMouseOnRect(leftup:Vec, width:Float, height:Float, repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
     val area = List(leftup, leftup + Vec(width, 0), leftup + Vec(width, -height), leftup + Vec(0, -height))
     rightMouseOnArea(area, repeat_time, onBtnDown, onBtnUp)
   }
-  def rightMouseOnRectIgnorePause(leftup:Vec, width:Int, height:Int, repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+  def rightMouseOnRectIgnorePause(leftup:Vec, width:Float, height:Float, repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
     val area = List(leftup, leftup + Vec(width, 0), leftup + Vec(width, -height), leftup + Vec(0, -height))
     rightMouseOnAreaIgnorePause(area, repeat_time, onBtnDown, onBtnUp)
   }
-  def rightMouseOnRectOnPause(leftup:Vec, width:Int, height:Int, repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+  def rightMouseOnRectOnPause(leftup:Vec, width:Float, height:Float, repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
     val area = List(leftup, leftup + Vec(width, 0), leftup + Vec(width, -height), leftup + Vec(0, -height))
+    rightMouseOnAreaOnPause(area, repeat_time, onBtnDown, onBtnUp)
+  }
+
+  def rightMouseOnRectCentered(coord:Vec, width:Float, height:Float, repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+    val area = List(coord + Vec(-width/2,  height/2), coord + Vec( width/2,  height/2), coord + Vec( width/2, -height/2), coord + Vec(-width/2, -height/2))
+    rightMouseOnArea(area, repeat_time, onBtnDown, onBtnUp)
+  }
+  def rightMouseOnRectCenteredIgnorePause(coord:Vec, width:Float, height:Float, repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+    val area = List(coord + Vec(-width/2,  height/2), coord + Vec( width/2,  height/2), coord + Vec( width/2, -height/2), coord + Vec(-width/2, -height/2))
+    rightMouseOnAreaIgnorePause(area, repeat_time, onBtnDown, onBtnUp)
+  }
+  def rightMouseOnRectCenteredOnPause(coord:Vec, width:Float, height:Float, repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+    val area = List(coord + Vec(-width/2,  height/2), coord + Vec( width/2,  height/2), coord + Vec( width/2, -height/2), coord + Vec(-width/2, -height/2))
     rightMouseOnAreaOnPause(area, repeat_time, onBtnDown, onBtnUp)
   }
 

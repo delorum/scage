@@ -4,8 +4,10 @@ import handlers.RendererLib
 import support._
 import support.messages._
 
-trait ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXMLTrait with RendererLib with LWJGLKeyboard with ScageColorTrait with ScageIdTrait {
+object ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXMLTrait with RendererLib with LWJGLKeyboard with ScageColorTrait with ScageIdTrait with EventsTrait {
   def property[A : Manifest](key:String, default: => A):A = ScageProperties.property(key, default)
+  def optProperty[A : Manifest](key:String):Option[A] = ScageProperties.optProperty(key)
+  def reqProperty[A : Manifest](key:String):A = ScageProperties.reqProperty(key)
   def property[A : Manifest](key:String, default: => A, condition:(A => (Boolean,  String))):A = ScageProperties.property(key, default, condition)
   
   lazy val max_font_size = ScageMessage.max_font_size
@@ -22,6 +24,12 @@ trait ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXML
   def xmlOrDefault(message_id:String, parameters:Any*):String = ScageXML.xmlOrDefault(message_id, parameters:_*)
   def xmlInterface(interface_id:String, parameters:Any*):Array[MessageData] = ScageXML.xmlInterface(interface_id, parameters:_*)
   def xmlInterfaceStrings(interface_id:String, parameters:Any*):Array[String] = ScageXML.xmlInterfaceStrings(interface_id, parameters:_*)
+
+  def onEventWithArguments(event_name: String)(event_action: PartialFunction[Any, Unit]):(String, Int) = Events.onEventWithArguments(event_name)(event_action)
+  def onEvent(event_name: String)(event_action: => Unit):(String, Int) = Events.onEvent(event_name)(event_action)
+  def callEvent(event_name: String, arg: Any) = Events.callEvent(event_name, arg)
+  def callEvent(event_name: String) = Events.callEvent(event_name)
+  def delEvents(event_ids: (String, Int)*) = Events.delEvents(event_ids:_*)
 
   def stopApp() {Scage.stopApp()}
 
@@ -85,29 +93,79 @@ trait ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXML
     }
   }
 
-  def coordOnArea(coord:Vec, area:List[Vec]):Boolean = {
+  def coordOnRect(coord:Vec, leftup:Vec, width:Float, height:Float):Boolean = {
+    coord.x >= leftup.x && coord.x < leftup.x+width &&
+      coord.y >= leftup.y-height && coord.y < leftup.y
+  }
+
+  def coordOnRectCentered(coord:Vec, center:Vec, width:Float, height:Float):Boolean = {
+    coord.x >= (center.x-width/2) && coord.x < (center.x+width/2) &&
+      coord.y >= (center.y-height/2) && coord.y < (center.y+height/2)
+  }
+
+  def coordOnArea(coord:Vec, area:Seq[Vec]):Boolean = {
     if (area.length < 2) false
     else {
-      val a1 = coord
-      val a2 = Vec(Integer.MAX_VALUE, coord.y)
-      val intersections = (area.last :: area.init).zip(area).foldLeft(0) {
-        case (result, (b1, b2)) => if (areLinesIntersect(a1, a2, b1, b2)) result + 1 else result
+      val (leftup, width, height) = {
+        val (min_x, max_x, min_y, max_y) = area.foldLeft((Float.MaxValue, 0f, Float.MaxValue, 0f)) {
+          case ((minx, maxx, miny, maxy), Vec(x, y)) =>
+            (if(x < minx) x else minx,
+             if(x > maxx) x else maxx,
+             if(y < miny) y else miny,
+             if(y > maxy) y else maxy)
+        }
+        val l = Vec(min_x, max_y)
+        val w =  max_x - min_x
+        val h = max_y - min_y
+        (l, w, h)
       }
-      intersections % 2 != 0
+      if(!coordOnRect(coord, leftup, width, height)) false
+      else {
+        val a1 = coord
+        val a2 = Vec(Integer.MAX_VALUE, coord.y)
+        val intersections = (Seq(area.last) ++ area.init).zip(area).foldLeft(0) {
+          case (result, (b1, b2)) => if (areLinesIntersect(a1, a2, b1, b2)) result + 1 else result
+        }
+        intersections % 2 != 0
+      }
     }
   }
 
-  def coordOnArea(coord:DVec, area:List[DVec]):Boolean = {
+  def coordOnRect(coord:DVec, leftup:DVec, width:Double, height:Double):Boolean = {
+    coord.x >= leftup.x && coord.x < leftup.x+width &&
+      coord.y >= leftup.y-height && coord.y < leftup.y
+  }
+
+  def coordOnRectCentered(coord:DVec, center:DVec, width:Float, height:Float):Boolean = {
+    coord.x >= (center.x-width/2) && coord.x < (center.x+width/2) &&
+      coord.y >= (center.y-height/2) && coord.y < (center.y+height/2)
+  }
+
+  def coordOnArea(coord:DVec, area:Seq[DVec]):Boolean = {
     if (area.length < 2) false
     else {
-      val a1 = coord
-      val a2 = Vec(Integer.MAX_VALUE, coord.y)
-      val intersections = (area.last :: area.init).zip(area).foldLeft(0) {
-        case (result, (b1, b2)) => if (areLinesIntersect(a1, a2, b1, b2)) result + 1 else result
+      val (leftup, width, height) = {
+        val (min_x, max_x, min_y, max_y) = area.foldLeft((Double.MaxValue, 0.0, Double.MaxValue, 0.0)) {
+          case ((minx, maxx, miny, maxy), DVec(x, y)) =>
+            (if(x < minx) x else minx,
+             if(x > maxx) x else maxx,
+             if(y < miny) y else miny,
+             if(y > maxy) y else maxy)
+        }
+        val l = DVec(min_x, max_y)
+        val w =  max_x - min_x
+        val h = max_y - min_y
+        (l, w, h)
       }
-      intersections % 2 != 0
+      if(!coordOnRect(coord, leftup, width, height)) false
+      else {
+        val a1 = coord
+        val a2 = DVec(Integer.MAX_VALUE, coord.y)
+        val intersections = (Seq(area.last) ++ area.init).zip(area).foldLeft(0) {
+          case (result, (b1, b2)) => if (areLinesIntersect(a1, a2, b1, b2)) result + 1 else result
+        }
+        intersections % 2 != 0
+      }
     }
   }
 }
-
-object ScageLib extends ScageLib

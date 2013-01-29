@@ -3,6 +3,7 @@ package net.scage
 import handlers.controller2.{ScageController, SingleController}
 import com.weiglewilczek.slf4s.Logger
 import handlers.Renderer
+import support.CommandLineInterface
 import support.ScageProperties._
 import handlers.RendererLib._
 
@@ -37,7 +38,7 @@ abstract class ScreenApp(
   unit_name:String  = property("app.name", "Scage App"),
   window_width:Int  = property("screen.width", 800),
   window_height:Int = property("screen.height", 600)
-) extends Screen(unit_name) with CommandLineInterface with App {
+) extends Screen(unit_name) with CommandLineInterface {
   val app_start_moment = System.currentTimeMillis()
   def msecsFromAppStart = System.currentTimeMillis() - app_start_moment
 
