@@ -22,6 +22,25 @@ is_main_unit=true
 
 -----------------
 
+Можно таки завести кнопку:
+def windowButton(message: => String, coord:Vec, onClick:(m:Vec => Any), screen:Screen with MultiController):(Int, Int) {
+    val i = screen.interface {
+        print(message, coord, align = "center")
+    }
+    def area = {
+        val Vec(w, h) = messageBounds(message)
+        List(coord + Vec(-w/2, h/2), coord + Vec(w/2, h/2), coord + Vec(w/2, -h/2), coord + Vec(-w/2, -h/2))
+    }
+    val m = screen.leftMouseOnArea(area, onClick)
+    (i, m)
+}
+функция возвращает два числа - айдишники операций, по которым кнопку можно удалить. Также можно сделать классом и в нем
+сделать метод для самоудаления и все такое. Хз, где разместить этот метод, или класс и вопрос целесообразности.
+
+задание messagesBase, interfacesBase в ScageXML
+
+areaForMessage(), areForMessageCentered()
+
 еще варианты *MouseOnRect*, где width, height - одним объектом Vec. Тогда туда сразу можно подставить значение messageBounds()
 
 мб оптимизировать все эти *OnRect*, *OnRectCentered*, добавить функцию coordOnRect() - такая функция гораздо проще, чем coordOnArea(),

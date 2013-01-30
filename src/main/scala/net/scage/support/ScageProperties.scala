@@ -36,28 +36,33 @@ trait ScagePropertiesTrait {
   def booleanProperty(key:String, condition:(Boolean => (Boolean,  String))) = property(key, false, (value:Boolean) => (true, ""))
 
   lazy val app_version:String = property("app.version", "Release")  // I think its not quite right to place this props definitions in trait but that way its much less code
+  lazy val app_name:String = property("app.name", "ScageApp").toLowerCase.replaceAll(" ", "")
 }
 
 object ScageProperties extends ScagePropertiesTrait {
-  private lazy val log = Logger(this.getClass.getName)
+  private val log = Logger(this.getClass.getName)
 
-  private lazy val _properties:ArrayBuffer[String] = {
+  private val _properties:ArrayBuffer[String] = {
     def _pew(name:String):List[String] = {
       val system_property = System.getProperty(name)
       if(system_property == null || "" == system_property) List()
       else system_property.split(",").map(_.trim()).toList
     }
     val res = ArrayBuffer[String]() ++= _pew("scage.properties") ++= _pew("jnlp.scage.properties") ++= _pew("scageproperties") ++= _pew("jnlp.scageproperties")
-    if (res.length == 0) res += "scage.properties"
+    /*if (res.length == 0) res += "scage.properties"*/
     res
   }
   def properties:Seq[String] = _properties
 
-  private lazy val props = ArrayBuffer[Properties]() ++= _properties.map(load) += load("maven.properties") += System.getProperties
+  private val props = {
+    if(_properties.length == 0) ArrayBuffer[Properties](new Properties) ++= _properties.map(load) += load("maven.properties") += System.getProperties
+    else                        ArrayBuffer[Properties]()               ++= _properties.map(load) += load("maven.properties") += System.getProperties
+  }
   def reloadProperties() {
     log.info("reloading properties")
     props.clear()
-    props ++= _properties.map(load) += load("maven.properties") += System.getProperties
+    if(_properties.length == 0) props += new Properties += load("maven.properties") += System.getProperties
+    else                        props ++= _properties.map(load) += load("maven.properties") += System.getProperties
   }
 
   private def load(property_filename:String):Properties = {
@@ -81,6 +86,8 @@ object ScageProperties extends ScagePropertiesTrait {
     log.info(description+" : "+key+" -> "+value)
     props.head.put(key, value.toString)
   }
+
+  def containsProperty(key:String):Boolean = getProperty(key).nonEmpty
 
   def addPropertyFile(filename:String, description:String) {
     log.info(description+" : "+filename)

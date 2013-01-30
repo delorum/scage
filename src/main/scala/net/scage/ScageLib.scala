@@ -17,6 +17,12 @@ object ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXM
   def lang = ScageXML.lang
   def lang_=(new_lang:String) {ScageXML.lang = new_lang}
 
+  def messagesBase = ScageXML.messagesBase
+  def messagesBase_=(new_base:String) {ScageXML.messagesBase = new_base}
+
+  def interfacesBase = ScageXML.interfacesBase
+  def interfacesBase_=(new_base:String) {ScageXML.interfacesBase = new_base}
+
   def messagesFile:String = ScageXML.messagesFile
   def interfacesFile:String = ScageXML.interfacesFile
 

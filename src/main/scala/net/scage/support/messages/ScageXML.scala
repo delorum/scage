@@ -17,6 +17,12 @@ trait ScageXMLTrait {
   def lang:String
   def lang_=(new_lang:String)
 
+  def messagesBase:String
+  def messagesBase_=(new_base:String)
+
+  def interfacesBase:String
+  def interfacesBase_=(new_base:String)
+
   def messagesFile:String
   def interfacesFile:String
 
@@ -27,10 +33,16 @@ trait ScageXMLTrait {
 }
 
 class ScageXML(private var _lang:String   = property("xml.lang", "en"),
-               val messages_base:String   = property("xml.strings.base", "resources/strings/" +stringProperty("app.name").toLowerCase+"_strings"),
-               val interfaces_base:String = property("xml.interfaces.base", "resources/interfaces/"+stringProperty("app.name").toLowerCase+"_interfaces")
+               private var messages_base:String   = property("xml.strings.base", "resources/strings/" +app_name+"_strings"),
+               private var interfaces_base:String = property("xml.interfaces.base", "resources/interfaces/"+app_name+"_interfaces")
 ) extends ScageXMLTrait {
   private val log = Logger(this.getClass.getName)
+
+  def messagesBase = messages_base
+  def messagesBase_=(new_base:String) {messages_base = new_base}
+
+  def interfacesBase = interfaces_base
+  def interfacesBase_=(new_base:String) {interfaces_base = new_base}
 
   def lang = _lang
   def lang_=(new_lang:String) {
