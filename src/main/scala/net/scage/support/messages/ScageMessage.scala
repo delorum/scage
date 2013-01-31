@@ -32,6 +32,7 @@ trait ScageMessageTrait {
   def print(message:Any, coord:Vec) {print(message, coord.x, coord.y, max_font_size, DEFAULT_COLOR, "none")}
 
   def messageBounds(message:Any, size:Float):Vec
+  def areaForMessage(coord:Vec, message:Any, size:Float):Seq[Vec]
 
   def printCentered(message:Any, x:Float, y:Float, size:Float, color:ScageColor) {
     print(message, x, y, size, color, align = "center")
@@ -131,6 +132,11 @@ class ScageMessage(
   def messageBounds(message:Any, size:Float = max_font_size) = {
     val msg_str = new ColoredString(message.toString, DEFAULT_COLOR).text()
     Vec(font.getWidth(msg_str), font.getHeight(msg_str))*(size/max_font_size)
+  }
+
+  def areaForMessage(coord:Vec, message:Any, size:Float = max_font_size):Seq[Vec] = {
+    val Vec(w, h) = messageBounds(message)
+    List(coord + Vec(-w/2, h/2), coord + Vec(w/2, h/2), coord + Vec(w/2, -h/2), coord + Vec(-w/2, -h/2))
   }
 }
 

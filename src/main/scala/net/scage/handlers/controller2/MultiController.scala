@@ -81,15 +81,15 @@ trait MultiController extends ScageController {
     mouseButton(1, repeat_time, mouse_coord => if(on_pause) onBtnDown(mouse_coord), mouse_coord => if(on_pause) onBtnUp(mouse_coord))
   }
 
-  def leftMouseOnArea(area: => List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+  def leftMouseOnArea(area: => Seq[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
     mouseButton(0, repeat_time, mouse_coord => if(!on_pause && coordOnArea(mouse_coord, area)) onBtnDown(mouse_coord),
                                 mouse_coord => if(!on_pause && coordOnArea(mouse_coord, area)) onBtnUp(mouse_coord))
   }
-  def leftMouseOnAreaIgnorePause(area: => List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+  def leftMouseOnAreaIgnorePause(area: => Seq[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
     mouseButton(0, repeat_time, mouse_coord => if(coordOnArea(mouse_coord, area)) onBtnDown(mouse_coord),
                                 mouse_coord => if(coordOnArea(mouse_coord, area)) onBtnUp(mouse_coord))
   }
-  def leftMouseOnAreaOnPause(area: => List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+  def leftMouseOnAreaOnPause(area: => Seq[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
     mouseButton(0, repeat_time, mouse_coord => if(on_pause && coordOnArea(mouse_coord, area)) onBtnDown(mouse_coord),
                                 mouse_coord => if(on_pause && coordOnArea(mouse_coord, area)) onBtnUp(mouse_coord))
   }
@@ -120,15 +120,15 @@ trait MultiController extends ScageController {
     leftMouseOnAreaOnPause(area, repeat_time, onBtnDown, onBtnUp)
   }
 
-  def rightMouseOnArea(area: => List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+  def rightMouseOnArea(area: => Seq[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
     mouseButton(1, repeat_time, mouse_coord => if(!on_pause && coordOnArea(mouse_coord, area)) onBtnDown(mouse_coord),
                                 mouse_coord => if(!on_pause && coordOnArea(mouse_coord, area)) onBtnUp(mouse_coord))
   }
-  def rightMouseOnAreaIgnorePause(area: => List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+  def rightMouseOnAreaIgnorePause(area: => Seq[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
     mouseButton(1, repeat_time, mouse_coord => if(coordOnArea(mouse_coord, area)) onBtnDown(mouse_coord),
                                 mouse_coord => if(coordOnArea(mouse_coord, area)) onBtnUp(mouse_coord))
   }
-  def rightMouseOnAreaOnPause(area: => List[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
+  def rightMouseOnAreaOnPause(area: => Seq[Vec], repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
     mouseButton(1, repeat_time, mouse_coord => if(on_pause && coordOnArea(mouse_coord, area)) onBtnDown(mouse_coord),
                                 mouse_coord => if(on_pause && coordOnArea(mouse_coord, area)) onBtnUp(mouse_coord))
   }

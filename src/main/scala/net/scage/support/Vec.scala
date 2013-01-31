@@ -83,6 +83,7 @@ class Vec(val x:Float = 0, val y:Float = 0) {
   def rotateDeg(ang:Double) = rotateRad(ang/180*math.Pi)
 
   def copy = new Vec(x, y)
+  def copy(x:Float = x, y:Float = y) = new Vec(x, y)
 
   def toDVec = new DVec(x, y)
 
@@ -164,6 +165,7 @@ class DVec(val x:Double = 0, val y:Double = 0) {
   def rotateDeg(ang:Double) = rotateRad(ang/180*math.Pi)
 
   def copy = new DVec(x, y)
+  def copy(x:Double = x, y:Double = y) = new DVec(x, y)
 
   def toVec = new Vec(x, y)
 
