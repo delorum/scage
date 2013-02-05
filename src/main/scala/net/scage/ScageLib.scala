@@ -5,15 +5,15 @@ import support._
 import support.messages._
 
 object ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXMLTrait with RendererLib with LWJGLKeyboard with ScageColorTrait with ScageIdTrait with EventsTrait {
-  def property[A : Manifest](key:String, default: => A):A = ScageProperties.property(key, default)
-  def optProperty[A : Manifest](key:String):Option[A] = ScageProperties.optProperty(key)
-  def reqProperty[A : Manifest](key:String):A = ScageProperties.reqProperty(key)
+  def property[A : Manifest](key:String, default: => A):A                                      = ScageProperties.property(key, default)
+  def optProperty[A : Manifest](key:String):Option[A]                                          = ScageProperties.optProperty(key)
+  def reqProperty[A : Manifest](key:String):A                                                  = ScageProperties.reqProperty(key)
   def property[A : Manifest](key:String, default: => A, condition:(A => (Boolean,  String))):A = ScageProperties.property(key, default, condition)
   
   lazy val max_font_size = ScageMessage.max_font_size
   def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor, align:String) {ScageMessage.print(message, x, y, size, color, align)}
-  def messageBounds(message:Any, size:Float = max_font_size):Vec = ScageMessage.messageBounds(message, size)
-  def areaForMessage(coord:Vec, message:Any, size:Float = max_font_size):Seq[Vec] = ScageMessage.areaForMessage(coord, message, size)
+  def messageBounds(message:Any, size:Float = max_font_size):Vec                                           = ScageMessage.messageBounds(message, size)
+  def areaForMessage(message:Any, coord:Vec, size:Float = max_font_size, align:String = "center"):Seq[Vec] = ScageMessage.areaForMessage(message, coord, size, align)
 
   def lang = ScageXML.lang
   def lang_=(new_lang:String) {ScageXML.lang = new_lang}
@@ -24,19 +24,19 @@ object ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXM
   def interfacesBase = ScageXML.interfacesBase
   def interfacesBase_=(new_base:String) {ScageXML.interfacesBase = new_base}
 
-  def messagesFile:String = ScageXML.messagesFile
+  def messagesFile:String   = ScageXML.messagesFile
   def interfacesFile:String = ScageXML.interfacesFile
 
-  def xml(message_id:String, parameters:Any*):String = ScageXML.xml(message_id, parameters:_*)
-  def xmlOrDefault(message_id:String, parameters:Any*):String = ScageXML.xmlOrDefault(message_id, parameters:_*)
-  def xmlInterface(interface_id:String, parameters:Any*):Array[MessageData] = ScageXML.xmlInterface(interface_id, parameters:_*)
+  def xml(message_id:String, parameters:Any*):String                          = ScageXML.xml(message_id, parameters:_*)
+  def xmlOrDefault(message_id:String, parameters:Any*):String                 = ScageXML.xmlOrDefault(message_id, parameters:_*)
+  def xmlInterface(interface_id:String, parameters:Any*):Array[MessageData]   = ScageXML.xmlInterface(interface_id, parameters:_*)
   def xmlInterfaceStrings(interface_id:String, parameters:Any*):Array[String] = ScageXML.xmlInterfaceStrings(interface_id, parameters:_*)
 
   def onEventWithArguments(event_name: String)(event_action: PartialFunction[Any, Unit]):(String, Int) = Events.onEventWithArguments(event_name)(event_action)
-  def onEvent(event_name: String)(event_action: => Unit):(String, Int) = Events.onEvent(event_name)(event_action)
-  def callEvent(event_name: String, arg: Any) = Events.callEvent(event_name, arg)
-  def callEvent(event_name: String) = Events.callEvent(event_name)
-  def delEvents(event_ids: (String, Int)*) = Events.delEvents(event_ids:_*)
+  def onEvent(event_name: String)(event_action: => Unit):(String, Int)                                 = Events.onEvent(event_name)(event_action)
+  def callEvent(event_name: String, arg: Any)                                                          = Events.callEvent(event_name, arg)
+  def callEvent(event_name: String)                                                                    = Events.callEvent(event_name)
+  def delEvents(event_ids: (String, Int)*)                                                             = Events.delEvents(event_ids:_*)
 
   def stopApp() {Scage.stopApp()}
 
@@ -69,7 +69,7 @@ object ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXM
 
   // support
 
-  def msecs = System.currentTimeMillis()
+  def msecs                  = System.currentTimeMillis()
   def msecsFrom(moment:Long) = System.currentTimeMillis() - moment
 
   // Vec/DVec helper methods
@@ -175,4 +175,40 @@ object ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXM
       }
     }
   }
+
+  // types
+  type ScageApp        = _root_.net.scage.ScageApp
+  type Scage           = _root_.net.scage.Scage
+  type ScageScreenApp  = _root_.net.scage.ScageScreenApp
+  type ScageScreen     = _root_.net.scage.ScageScreen
+  type ScreenApp       = _root_.net.scage.ScreenApp
+  type Screen          = _root_.net.scage.Screen
+  type Vec             = _root_.net.scage.support.Vec
+  type MultiController = _root_.net.scage.handlers.controller2.MultiController
+  type ScageColor      = _root_.net.scage.support.ScageColor
+  type DefaultTrace    = _root_.net.scage.support.tracer3.DefaultTrace
+  type State           = _root_.net.scage.support.State
+  type Trace           = _root_.net.scage.support.tracer3.Trace
+  type TraceTrait      = _root_.net.scage.support.tracer3.TraceTrait
+  type NetServer       = _root_.net.scage.support.net.NetServer
+  type NetClient       = _root_.net.scage.support.net.NetClient
+
+  type CoordTracer[A <: _root_.net.scage.support.tracer3.TraceTrait] = _root_.net.scage.support.tracer3.CoordTracer[A]
+  type ScageTracer[A <: _root_.net.scage.support.tracer3.TraceTrait] = _root_.net.scage.support.tracer3.ScageTracer[A]
+
+  type StaticLine       = _root_.net.scage.support.physics.objects.StaticLine
+  type StaticPolygon    = _root_.net.scage.support.physics.objects.StaticPolygon
+  type StaticBox        = _root_.net.scage.support.physics.objects.StaticBox
+  type StaticBall       = _root_.net.scage.support.physics.objects.StaticBall
+  type DynaBox          = _root_.net.scage.support.physics.objects.DynaBox
+  type DynaBall         = _root_.net.scage.support.physics.objects.DynaBall
+
+  val Vec              = _root_.net.scage.support.Vec
+  val CoordTracer      = _root_.net.scage.support.tracer3.CoordTracer
+  val ScageTracer      = _root_.net.scage.support.tracer3.ScageTracer
+  val ScagePhysics     = _root_.net.scage.support.physics.ScagePhysics
+  val State            = _root_.net.scage.support.State
+  val Trace            = _root_.net.scage.support.tracer3.Trace
+  val NetServer        = _root_.net.scage.support.net.NetServer
+  val NetClient        = _root_.net.scage.support.net.NetClient
 }

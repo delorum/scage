@@ -22,6 +22,18 @@ is_main_unit=true
 
 -----------------
 
+ScageLib, мб все-таки вернуть в виде трейта и объекта: тогда в клиентском приложении можно заводить новый объект, который
+наследуется от трейта ScageLib и в нем дописываются дополнительно еще всякие клиентские полезные импорты, таким образом
+экономится еще одна-две строчки)
+
+в параметрах ScageScreen:                       (done)
+window_width -> width, window_heigt -> height, unit_name -> title
+
+оказывается, есть баг: если не предоставить имя главному экрану, приложение не запускается, падает с ошибкой, мол не
+могу найти файл шрифта!
+--
+хм, баг пропал...
+
 Можно таки завести кнопку:
 def windowButton(message: => String, coord:Vec, onClick:(m:Vec => Any), screen:Screen with MultiController):(Int, Int) {
     val i = screen.interface {
@@ -39,7 +51,7 @@ def windowButton(message: => String, coord:Vec, onClick:(m:Vec => Any), screen:S
 
 задание messagesBase, interfacesBase в ScageXML (done)
 
-areaForMessage(), areForMessageCentered()
+areaForMessage(), areForMessageCentered()       (done)
 --
 в ScageMessage. Вместо centered и все такое ввести параметр align.
 
@@ -61,11 +73,13 @@ areaForMessage(), areForMessageCentered()
 надо поправить: функции msecsFrom* не учитываю паузу. Надо доработать апи, чтобы типа были и учитывающие и не   (done)
 учитывающие паузу.
 
-мб в ScageLib заебенить объявления типа:
+мб в ScageLib заебенить объявления типа:                (done)
 type ScageScreenApp = net.scage.ScageScreenApp
 итд, типа чтобы реально тока один импорт был и все. Может сработает?
 ---
 можно использовать опыт библиотеки casbah, где так сделано
+---
+запилил!
 
 Сделать ScageLib чисто объектом. В качестве трейта не используется никогда все равно.    (done)
 

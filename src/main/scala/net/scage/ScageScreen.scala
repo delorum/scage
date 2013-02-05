@@ -35,10 +35,10 @@ abstract class Screen(val unit_name:String = "Scage Screen") extends Scage with 
 }
 
 abstract class ScreenApp(
-  unit_name:String  = property("app.name", "Scage App"),
-  window_width:Int  = property("screen.width", 800),
-  window_height:Int = property("screen.height", 600)
-) extends Screen(unit_name) with CommandLineInterface {
+  title:String  = property("app.name", "Scage App"),
+  width:Int  = property("screen.width", 800),
+  height:Int = property("screen.height", 600)
+) extends Screen(title) with CommandLineInterface {
   val app_start_moment = System.currentTimeMillis()
   def msecsFromAppStart = System.currentTimeMillis() - app_start_moment
 
@@ -59,22 +59,22 @@ abstract class ScreenApp(
   }
 
   override def main(args:Array[String]) {
-    scage_log.info("starting main screen "+unit_name+"...")
-    initgl(window_width, window_height, unit_name)
+    scage_log.info("starting main screen "+title+"...")
+    initgl(width, height, title)
     drawWelcomeMessages()
     super.main(args)
     run()
     destroygl()
-    scage_log.info(unit_name+" was stopped")
+    scage_log.info(title+" was stopped")
     System.exit(0)  // need explicit exit for the app's utilizing NetServer/NetClient as they have actors
   }
 }
 
 class ScageScreen(unit_name:String = "Scage Screen") extends Screen(unit_name) with SingleController
 
-class ScageScreenApp(unit_name:String = property("app.name", "Scage App"),
-                     window_width:Int  = property("screen.width", 800),
-                     window_height:Int = property("screen.height", 600)) extends ScreenApp(unit_name, window_width, window_height) with SingleController
+class ScageScreenApp(title:String = property("app.name", "Scage App"),
+                     width:Int  = property("screen.width", 800),
+                     height:Int = property("screen.height", 600)) extends ScreenApp(title, width, height) with SingleController
 
 abstract class ScageApplet extends Applet {
   def screen:ScageScreenApp
