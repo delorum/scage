@@ -400,6 +400,18 @@ trait Scage extends OperationMapping {
     }
   }
 
+  val main_loop = actors.Actor.self
+  def fromActors[R](period: Long)(f: PartialFunction[Any, R]):Int = {
+    def _receive() {
+      val start = System.currentTimeMillis()
+      main_loop.receiveWithin(0)(f)
+      if (System.currentTimeMillis() - start < period) _receive()
+    }
+    actionIgnorePause(period) {
+      _receive()
+    }
+  }
+
   private[scage] def executeActions() {
     // assuming to run in cycle, so we leave off any log messages
     restart_toggled = false
