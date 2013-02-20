@@ -98,30 +98,53 @@ class ScageMessage(
   }
 
   // DEFAULT_COLOR support because client programs CAN pass DEFAULT_COLOR
-  // align one of those: left, none (same as left), center, xcenter, right
+  // align is one of those: top-left, top-center, top-right, center-left, center, center-right, bottom-left, bottom-center, bottom-right, default
   def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor, align:String) {
     val print_color = if(color != DEFAULT_COLOR) color.toSlickColor else currentColor.toSlickColor
-
+    val bounds = messageBounds(message, size)
+    val num_lines = message.toString.filter(_ == '\n').length + 1
+    val line_height = bounds.y/num_lines
     val (new_x, new_y) = align match {
-      case "center" =>
-        val bounds = messageBounds(message, size)
-        val num_lines = message.toString.filter(_ == '\n').length + 1
-        val x_offset = x - bounds.ix/2
-        val y_offset = y - bounds.iy/2 + (bounds.y - bounds.y/num_lines)
+      case "top-left" =>
+        val x_offset = x
+        val y_offset = y - line_height
         (x_offset, y_offset)
-      case "xcenter" =>
-        val bounds = messageBounds(message, size)
-        val num_lines = message.toString.filter(_ == '\n').length + 1
+      case "top-center" =>
         val x_offset = x - bounds.ix/2
-        val y_offset = y + (bounds.y - bounds.y/num_lines)
+        val y_offset = y - line_height
         (x_offset, y_offset)
-      case "right" =>
-        val bounds = messageBounds(message, size)
-        val num_lines = message.toString.filter(_ == '\n').length + 1
+      case "top-right" =>
         val x_offset = x - bounds.ix
-        val y_offset = y + (bounds.y - bounds.y/num_lines)
+        val y_offset = y - line_height
         (x_offset, y_offset)
-      case _ => (x, y)
+      case "center-left" =>
+        val x_offset = x
+        val y_offset = y + (bounds.y/2 - line_height)
+        (x_offset, y_offset)
+      case "center" =>
+        val x_offset = x - bounds.ix/2
+        val y_offset = y - bounds.iy/2 + (bounds.y - line_height)
+        (x_offset, y_offset)
+      case "center-right" =>
+        val x_offset = x - bounds.ix
+        val y_offset = y - bounds.iy/2 + (bounds.y - line_height)
+        (x_offset, y_offset)
+      case "bottom-left" =>
+        val x_offset = x
+        val y_offset = y + (bounds.y - line_height)
+        (x_offset, y_offset)
+      case "bottom-center" =>
+        val x_offset = x - bounds.ix/2
+        val y_offset = y + (bounds.y - line_height)
+        (x_offset, y_offset)
+      case "bottom-right" =>
+        val x_offset = x - bounds.ix
+        val y_offset = y + (bounds.y - line_height)
+        (x_offset, y_offset)
+      case "default" => (x, y)
+      case a =>
+        log.warn("unknow text align: "+a)
+        (x, y)
     }
 
     GL11.glPushMatrix()
@@ -134,16 +157,34 @@ class ScageMessage(
     Vec(font.getWidth(msg_str), font.getHeight(msg_str))*(size/max_font_size)
   }
 
+  // align is one of those: top-left, top-center, top-right, center-left, center, center-right, bottom-left, bottom-center, bottom-right, default
   def areaForMessage(message:Any, coord:Vec, size:Float = max_font_size, align:String = "center"):Seq[Vec] = {
     val Vec(w, h) = messageBounds(message, size)
     align match {
+      case "top-left" =>
+        List(coord, coord + Vec(w, 0), coord + Vec(w, -h), coord + Vec(0, -h))
+      case "top-center" =>
+        List(coord + Vec(-w/2, 0), coord + Vec(w/2, 0), coord + Vec(w/2, -h), coord + Vec(-w/2, -h))
+      case "top-right" =>
+        List(coord + Vec(-w, 0), coord, coord + Vec(0, -h), coord + Vec(-w, -h))
+      case "center-left" =>
+        List(coord + Vec(0, h/2), coord + Vec(w, h/2), coord + Vec(w, -h/2), coord + Vec(0, -h/2))
       case "center" =>
         List(coord + Vec(-w/2, h/2), coord + Vec(w/2, h/2), coord + Vec(w/2, -h/2), coord + Vec(-w/2, -h/2))
-      case "xcenter" =>
+      case "center-right" =>
+        List(coord + Vec(-w, h/2), coord + Vec(0, h/2), coord + Vec(0, -h/2), coord + Vec(-w, -h/2))
+      case "bottom-left" =>
+        List(coord + Vec(0, h), coord + Vec(w, h), coord + Vec(w, 0), coord)
+      case "bottom-center" =>
         List(coord + Vec(-w/2, h), coord + Vec(w/2, h), coord + Vec(w/2, 0), coord + Vec(-w/2, 0))
-      case "right" =>
-        List(coord + Vec(-w, h), coord + Vec(0, h), coord + Vec(0, 0), coord + Vec(-w, 0))
-      case _ =>
+      case "bottom-right" =>
+        List(coord + Vec(-w, h), coord + Vec(0, h), coord, coord + Vec(-w, 0))
+      case "default" =>
+        val num_lines = message.toString.filter(_ == '\n').length + 1
+        val lh = h/num_lines
+        List(coord + Vec(0, h/2-lh), coord + Vec(w, h/2-lh), coord + Vec(w, -h/2-lh), coord + Vec(0, -h/2-lh))
+      case a =>
+        log.warn("unknown text align: "+a)
         List(coord + Vec(-w/2, h/2), coord + Vec(w/2, h/2), coord + Vec(w/2, -h/2), coord + Vec(-w/2, -h/2))
     }
   }
