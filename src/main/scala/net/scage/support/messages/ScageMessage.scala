@@ -15,21 +15,21 @@ trait ScageMessageTrait {
   // also I have an error: two overloaded methods define default arguments (x:Float, y:Float and coord:Vec)
   def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor, align:String)
 
-  def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor) {print(message, x, y, size, color, "none")}
+  def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor) {print(message, x, y, size, color, "default")}
   def print(message:Any, x:Float, y:Float, size:Float, align:String) {print(message, x, y, size, DEFAULT_COLOR, align)}
   def print(message:Any, x:Float, y:Float, color:ScageColor, align:String) {print(message, x, y, max_font_size, color, align)}
   def print(message:Any, x:Float, y:Float, align:String) {print(message, x, y, max_font_size, DEFAULT_COLOR, align)}
-  def print(message:Any, x:Float, y:Float, size:Float) {print(message, x, y, size, DEFAULT_COLOR, "none")}
-  def print(message:Any, x:Float, y:Float, color:ScageColor) {print(message, x, y, max_font_size, color, "none")}
-  def print(message:Any, x:Float, y:Float) {print(message, x, y, max_font_size, currentColor, "none")}
+  def print(message:Any, x:Float, y:Float, size:Float) {print(message, x, y, size, DEFAULT_COLOR, "default")}
+  def print(message:Any, x:Float, y:Float, color:ScageColor) {print(message, x, y, max_font_size, color, "default")}
+  def print(message:Any, x:Float, y:Float) {print(message, x, y, max_font_size, currentColor, "default")}
 
-  def print(message:Any, coord:Vec, size:Float, color:ScageColor) {print(message, coord.x, coord.y, size, color, "none")}
+  def print(message:Any, coord:Vec, size:Float, color:ScageColor) {print(message, coord.x, coord.y, size, color, "default")}
   def print(message:Any, coord:Vec, size:Float, align:String) {print(message, coord.x, coord.y, size, DEFAULT_COLOR, align)}
   def print(message:Any, coord:Vec, color:ScageColor, align:String) {print(message, coord.x, coord.y, max_font_size, color, align)}
   def print(message:Any, coord:Vec, align:String) {print(message, coord.x, coord.y, max_font_size, DEFAULT_COLOR, align)}
-  def print(message:Any, coord:Vec, size:Float) {print(message, coord.x, coord.y, size, DEFAULT_COLOR, "none")}
-  def print(message:Any, coord:Vec, color:ScageColor) {print(message, coord.x, coord.y, max_font_size, color, "none")}
-  def print(message:Any, coord:Vec) {print(message, coord.x, coord.y, max_font_size, DEFAULT_COLOR, "none")}
+  def print(message:Any, coord:Vec, size:Float) {print(message, coord.x, coord.y, size, DEFAULT_COLOR, "default")}
+  def print(message:Any, coord:Vec, color:ScageColor) {print(message, coord.x, coord.y, max_font_size, color, "default")}
+  def print(message:Any, coord:Vec) {print(message, coord.x, coord.y, max_font_size, DEFAULT_COLOR, "default")}
 
   def messageBounds(message:Any, size:Float):Vec
   def areaForMessage(message:Any, coord:Vec, size:Float, align:String):Seq[Vec]
