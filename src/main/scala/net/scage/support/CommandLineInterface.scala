@@ -58,7 +58,7 @@ trait CommandLineInterface extends App {
     }
 
     {
-      val short = "h"
+      val short = "help"
       val long = "help"
       val description = "show this usage information"
       val short_only = "-" + short
@@ -82,7 +82,10 @@ trait CommandLineInterface extends App {
               throw new Exception("failed to start")
             }
             else {
-              val value = this.args.drop(pos+1).takeWhile(a => !a.startsWith("-")).mkString(" ")
+              def isNextProp(str:String):Boolean = {
+                cli_args_short.contains(str.replaceFirst("-", "")) || cli_args_long.contains(str.replaceFirst("--", ""))
+              }
+              val value = this.args.drop(pos+1).takeWhile(a => !isNextProp(a)).mkString(" ")
               addProperty(long, value, "added command line property")
             }
           }
@@ -96,7 +99,7 @@ trait CommandLineInterface extends App {
   def parseCommandLineArgs() {
     // перебираем переданные в программу аргументы и заполняем проперти
     this.args.zipWithIndex.filter {
-      case (arg, pos) => arg.startsWith("-")
+      case (arg, pos) => arg.startsWith("-") && arg != "-"
     }.map {
       case (arg, pos) => (arg.toList, pos)
     }.foreach {
