@@ -184,6 +184,7 @@ object ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXM
   type ScreenApp       = _root_.net.scage.ScreenApp
   type Screen          = _root_.net.scage.Screen
   type Vec             = _root_.net.scage.support.Vec
+  type DVec            = _root_.net.scage.support.DVec
   type MultiController = _root_.net.scage.handlers.controller2.MultiController
   type ScageColor      = _root_.net.scage.support.ScageColor
   type DefaultTrace    = _root_.net.scage.support.tracer3.DefaultTrace
@@ -204,6 +205,7 @@ object ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXM
   type DynaBall         = _root_.net.scage.support.physics.objects.DynaBall
 
   val Vec              = _root_.net.scage.support.Vec
+  val DVec             = _root_.net.scage.support.DVec
   val CoordTracer      = _root_.net.scage.support.tracer3.CoordTracer
   val ScageTracer      = _root_.net.scage.support.tracer3.ScageTracer
   val ScagePhysics     = _root_.net.scage.support.physics.ScagePhysics
