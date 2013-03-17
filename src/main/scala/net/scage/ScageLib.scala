@@ -213,4 +213,5 @@ object ScageLib extends ScagePropertiesTrait with ScageMessageTrait with ScageXM
   val Trace            = _root_.net.scage.support.tracer3.Trace
   val NetServer        = _root_.net.scage.support.net.NetServer
   val NetClient        = _root_.net.scage.support.net.NetClient
+  val ScageColor       = _root_.net.scage.support.ScageColor
 }

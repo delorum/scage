@@ -153,6 +153,7 @@
     <testSourceDirectory>src/test/scala</testSourceDirectory>
       <filters>
             <filter>build.properties</filter>
+          <filter>local-build.properties</filter>
           </filters>
       <resources>
         <resource>
@@ -180,6 +181,7 @@
                   <configuration>
                     <files>
                       <file>build.properties</file>
+                      <filter>local-build.properties</filter>
                     </files>
                     <quiet>true</quiet>
                   </configuration>
@@ -265,7 +267,7 @@
             <version>2.7.2</version>
             <configuration>
                 <argLine>
-                    -Dscage.properties=scagetest-properties.txt -Djava.library.path=${project.build.directory}/libs/natives/${os.type} -DLWJGL_DISABLE_XRANDR=true
+                    -Dscage.properties=scagetest-properties.txt -Djava.library.path=${project.build.directory}/native/${os.type} -DLWJGL_DISABLE_XRANDR=true
                 </argLine>
             </configuration>
         </plugin>
