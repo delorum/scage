@@ -128,12 +128,16 @@ trait CommandLineInterface extends App {
   }
 
   override def main(args:Array[String]) {
-    try {
+    if(System.getProperties.containsKey("without-trycatch")) {
       super.main(args)
-    } catch {
-      case e:Exception =>
-        println(e.getLocalizedMessage)
-        printHelpAndExit()
+    } else {
+      try {
+        super.main(args)
+      } catch {
+        case e:Exception =>
+          println(e.getLocalizedMessage)
+          printHelpAndExit()
+      }
     }
   }
 }
