@@ -10,6 +10,7 @@ import handlers.RendererLib._
 import java.awt.{BorderLayout, Canvas}
 import org.lwjgl.opengl.Display
 import java.applet.Applet
+import akka.actor.{Props, ActorSystem, Actor}
 
 
 // abstract classes instead of traits to make it easy to use with MultiController
@@ -152,4 +153,45 @@ abstract class ScageApplet extends Applet {
         throw new RuntimeException("Unable to create display")
     }
   }
+}
+
+case object Run
+
+class ScageScreenAkkaApp(
+  val unit_name:String  = property("app.name", "Scage App"),
+  width:Int  = property("screen.width", 800),
+  height:Int = property("screen.height", 600)) extends Scage with Renderer with SingleController with App {
+  private val scage_system = ActorSystem("scage")
+  scage_system.actorOf(Props(new Actor {
+    override def preStart() {
+      scage_log.info("starting main screen "+unit_name+"...")
+      initgl(width, height, unit_name)
+      drawWelcomeMessages()
+      executePreinits()
+      executeInits()
+      is_running = true
+      prepareRendering()
+      scage_log.info(unit_name+": run")
+      self ! Run
+    }
+
+    def receive = {
+      case Run =>
+        if(is_running && Scage.isAppRunning) {
+          checkControls()
+          executeActions()
+          performRendering()
+          self ! Run
+        } else context.stop(self)
+    }
+
+    override def postStop() {
+      renderExitMessage()
+      executeClears()
+      executeDisposes()
+      destroygl()
+      scage_log.info(unit_name+" was stopped")
+      context.system.shutdown()
+    }
+  }).withDispatcher("scage-dispatcher"))
 }
