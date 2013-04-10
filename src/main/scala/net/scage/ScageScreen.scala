@@ -10,7 +10,7 @@ import handlers.RendererLib._
 import java.awt.{BorderLayout, Canvas}
 import org.lwjgl.opengl.Display
 import java.applet.Applet
-import akka.actor.{Props, ActorSystem, Actor}
+//import akka.actor.{Props, ActorSystem, Actor}
 
 
 // abstract classes instead of traits to make it easy to use with MultiController
@@ -155,8 +155,7 @@ abstract class ScageApplet extends Applet {
   }
 }
 
-case object Run
-
+/*case object Run
 class ScageScreenAkkaApp(
   val unit_name:String  = property("app.name", "Scage App"),
   width:Int  = property("screen.width", 800),
@@ -194,4 +193,4 @@ class ScageScreenAkkaApp(
       context.system.shutdown()
     }
   }).withDispatcher("scage-dispatcher"))
-}
+}*/
