@@ -286,7 +286,7 @@
             <version>2.7.2</version>
             <configuration>
                 <argLine>
-                    -Dscage.properties=scagetest-properties.txt -Djava.library.path=${project.build.directory}/native/${os.type} -DLWJGL_DISABLE_XRANDR=true
+                  -Dscage.properties=scagetest-properties.txt -Djava.library.path=${project.build.directory}/libs/natives/${os.type} -DLWJGL_DISABLE_XRANDR=true
                 </argLine>
             </configuration>
         </plugin>

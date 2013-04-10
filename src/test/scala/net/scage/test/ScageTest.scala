@@ -216,7 +216,7 @@ class ScageTest extends TestCase("app") {
         center = if(globalScale > 1) trace.location else windowCenter
 
         // test network features: server and client in one app. Client sends 2d vectors to server and server sends back normalized vector
-        NetServer.startServer(
+        /*NetServer.startServer(
           onNewConnection = {
             client => client.send(State(("hello" -> "send me vec and I send you back its n!")))
             (true, "")
@@ -267,7 +267,7 @@ class ScageTest extends TestCase("app") {
         dispose {
           NetServer.stopServer()
           NetClient.stopClient()
-        }
+        }*/
 
         render {
           openglMove(windowCenter)

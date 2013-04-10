@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <messages>
+    <message id="error.nomessage">
+        The string with code ? not found
+    </message>
+
     <message id="hello.world">
-        Hello, [rWorld]!
+        Hello World!
+    </message>
+
+    <message id="help">
+        Use WASD to move, Left Mouse Button to shoot and
+		Mouse Wheel for zoom
     </message>
 </messages>
