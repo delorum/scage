@@ -1,10 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>su.msk.dunno</groupId>
+  <groupId>com.github.dunnololda.scage</groupId>
   <artifactId>scage</artifactId>
   <packaging>jar</packaging>
-  <version>0.9.2</version>
+  <version>0.9.3-SNAPSHOT</version>
   <inceptionYear>2011</inceptionYear>
 
   <name>Scage</name>
@@ -12,7 +12,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <scala.version>2.9.1</scala.version>
+    <scala.version>2.10.1</scala.version>
     <lwjgl.version>2.8.2</lwjgl.version>
 
     <!-- github server corresponds to entry in ~/.m2/settings.xml -->
@@ -21,8 +21,8 @@
 
   <repositories>
       <repository>
-        <id>dunnololda's maven repo</id>
-        <url>https://raw.github.com/dunnololda/mvn-repo/master</url>
+          <id>dunnololda's maven repo</id>
+          <url>https://raw.github.com/dunnololda/mvn-repo/master</url>
       </repository>
 
       <repository>
@@ -34,7 +34,7 @@
     <repository>
       <id>scala-tools.org</id>
       <name>Scala-Tools Maven2 Repository</name>
-      <url>http://scala-tools.org/repo-releases</url>
+      <url>https://oss.sonatype.org/content/groups/scala-tools/</url>
     </repository>
 
     <repository>
@@ -93,21 +93,16 @@
 	  <version>1.2.14</version>
 	  <scope>compile</scope>
 	</dependency>-->
-    <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-classic</artifactId>
-        <version>1.0.0</version>
-    </dependency>
+      <dependency>
+          <groupId>com.github.dunnololda</groupId>
+          <artifactId>cli_${scala.version}</artifactId>
+          <version>1.2</version>
+      </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>1.6.1</version>
       <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.weiglewilczek.slf4s</groupId>
-      <artifactId>slf4s_2.9.1</artifactId>
-      <version>1.0.7</version>
     </dependency>
     <dependency>
       <groupId>org.scala-lang</groupId>
@@ -286,7 +281,7 @@
             <version>2.7.2</version>
             <configuration>
                 <argLine>
-                  -Dscage.properties=scagetest-properties.txt -Djava.library.path=${project.build.directory}/libs/natives/${os.type} -DLWJGL_DISABLE_XRANDR=true
+                  -Dapp.properties=scagetest-properties.txt -Djava.library.path=${project.build.directory}/libs/natives/${os.type} -DLWJGL_DISABLE_XRANDR=true
                 </argLine>
             </configuration>
         </plugin>
