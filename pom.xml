@@ -37,11 +37,11 @@
       <url>http://scala-tools.org/repo-releases</url>
     </repository>
 
-    <repository>
+    <!--<repository>
       <id>slick.cokeandcode.com</id>
       <name>Slick Maven Repository</name>
       <url>http://slick.cokeandcode.com/mavenrepo</url>
-    </repository>
+    </repository>-->
 
     <repository>
       <id>lwjgl</id>
