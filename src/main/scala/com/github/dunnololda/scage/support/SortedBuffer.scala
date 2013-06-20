@@ -6,7 +6,9 @@ import collection.generic.{Shrinkable, Growable}
 class SortedBuffer[A <: Ordered[A]](init_arr:A*) extends Seq[A] with Growable[A] with Shrinkable[A] {
   private val arr = ArrayBuffer(init_arr:_*).sortWith(_ < _)
 
-  def remove(idx:Int) = arr.remove(idx)
+  def remove(idx:Int) = {
+    arr.remove(idx)
+  }
 
   def clear() {arr.clear()}
 

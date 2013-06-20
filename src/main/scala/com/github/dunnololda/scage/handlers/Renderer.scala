@@ -618,16 +618,16 @@ trait Renderer extends Scage {
   /*private var actions_run_count = 0
   private var actions_run_moment = System.currentTimeMillis()*/
 
+  private def _execute(_actions:Seq[ScageOperation]) {
+    val ScageOperation(action_id, action_operation) = _actions.head
+    current_operation_id = action_id
+    action_operation()
+    if(_actions.nonEmpty && _actions.tail.nonEmpty && !restart_toggled) _execute(_actions.tail)
+  }
   override private[scage] def executeActions() {  // maybe rename it to not confuse clients
     loops = 0
     while(System.currentTimeMillis() > next_game_tick && loops < MAX_FRAMESKIP) {
       restart_toggled = false
-      def _execute(_actions:Traversable[ScageOperation]) {
-        val ScageOperation(action_id, action_operation) = _actions.head
-        current_operation_id = action_id
-        action_operation()
-        if(_actions.nonEmpty && _actions.tail.nonEmpty && !restart_toggled) _execute(_actions.tail)
-      }
       if(actions.operations.nonEmpty) {
         _execute(actions.operations)
       }
@@ -645,6 +645,21 @@ trait Renderer extends Scage {
   }
 
   val framerate = property("render.framerate", 0)
+
+  private def _perform1(_renders:Seq[ScageOperation]) {
+    val RenderOperation(render_id, render_operation, _) = _renders.head
+    current_operation_id = render_id
+    GL11.glPushMatrix()
+    render_operation()
+    GL11.glPopMatrix()
+    if(_renders.nonEmpty && _renders.tail.nonEmpty && !restart_toggled) _perform1(_renders.tail)
+  }
+  private def _perform2(_interfaces:Seq[ScageOperation]) {
+    val ScageOperation(interface_id, interface_operation) = _interfaces.head
+    current_operation_id = interface_id
+    interface_operation()
+    if(_interfaces.nonEmpty && _interfaces.tail.nonEmpty && !restart_toggled) _perform2(_interfaces.tail)
+  }
   private[scage] def performRendering() {
     if(Display.isCloseRequested) Scage.stopApp()
     else {
@@ -653,17 +668,13 @@ trait Renderer extends Scage {
         val coord = window_center() - central_coord()*_global_scale
         GL11.glTranslatef(coord.x , coord.y, 0.0f)
         GL11.glScalef(_global_scale, _global_scale, 1)
-        for(RenderOperation(render_id, render_operation, _) <- renders.operations) {
-          current_operation_id = render_id
-          GL11.glPushMatrix()
-          render_operation()
-          GL11.glPopMatrix()
+        if(renders.operations.nonEmpty) {
+          _perform1(renders.operations)
         }
       GL11.glPopMatrix()
 
-      for(ScageOperation(interface_id, interface_operation) <- interfaces.operations) {
-        current_operation_id = interface_id
-        interface_operation()
+      if(interfaces.operations.nonEmpty) {
+        _perform2(interfaces.operations)
       }
 
       if(framerate != 0) Display.sync(framerate)

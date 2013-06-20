@@ -202,6 +202,7 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
 
   type ScagePhysics     = com.github.dunnololda.scage.support.physics.ScagePhysics
 
+  type Physical         = com.github.dunnololda.scage.support.physics.Physical
   type StaticLine       = com.github.dunnololda.scage.support.physics.objects.StaticLine
   type StaticPolygon    = com.github.dunnololda.scage.support.physics.objects.StaticPolygon
   type StaticBox        = com.github.dunnololda.scage.support.physics.objects.StaticBox
