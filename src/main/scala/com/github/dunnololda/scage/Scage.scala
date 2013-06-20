@@ -413,15 +413,15 @@ trait Scage extends OperationMapping {
     }
   }
 
+  private def _execute(_actions: Seq[ScageOperation]) {
+    val ScageOperation(action_id, action_operation) = _actions.head
+    current_operation_id = action_id
+    action_operation()
+    if (_actions.nonEmpty && _actions.tail.nonEmpty && !restart_toggled) _execute(_actions.tail)
+  }
   private[scage] def executeActions() {
     // assuming to run in cycle, so we leave off any log messages
     restart_toggled = false
-    def _execute(_actions: Traversable[ScageOperation]) {
-      val ScageOperation(action_id, action_operation) = _actions.head
-      current_operation_id = action_id
-      action_operation()
-      if (_actions.nonEmpty && _actions.tail.nonEmpty && !restart_toggled) _execute(_actions.tail)
-    }
     if (actions.operations.nonEmpty) {
       _execute(actions.operations)
     }
