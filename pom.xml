@@ -338,9 +338,9 @@
         <plugin>
             <groupId>com.github.github</groupId>
             <artifactId>site-maven-plugin</artifactId>
-            <version>0.7</version>
+            <version>0.8</version>
             <configuration>
-                <message>Maven artifacts for ${artifactId} ${project.version}</message>  <!-- git commit message -->
+                <message>Maven artifacts for ${project.artifactId} ${project.version}</message>  <!-- git commit message -->
                 <noJekyll>true</noJekyll>                                  <!-- disable webpage processing -->
                 <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory> <!-- matches distribution management repository url above -->
                 <branch>refs/heads/master</branch>                       <!-- remote branch name -->
