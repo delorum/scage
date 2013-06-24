@@ -23,6 +23,7 @@ trait ScageMessageTrait {
   def print(message:Any, x:Float, y:Float, color:ScageColor) {print(message, x, y, max_font_size, color, "default")}
   def print(message:Any, x:Float, y:Float) {print(message, x, y, max_font_size, currentColor, "default")}
 
+  def print(message:Any, coord:Vec, size:Float, color:ScageColor, align:String) {print(message, coord.x, coord.y, size, color, align)}
   def print(message:Any, coord:Vec, size:Float, color:ScageColor) {print(message, coord.x, coord.y, size, color, "default")}
   def print(message:Any, coord:Vec, size:Float, align:String) {print(message, coord.x, coord.y, size, DEFAULT_COLOR, align)}
   def print(message:Any, coord:Vec, color:ScageColor, align:String) {print(message, coord.x, coord.y, max_font_size, color, align)}
