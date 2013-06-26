@@ -546,8 +546,7 @@ trait Renderer extends Scage {
   def center_= (coord: => Vec) {central_coord = () => coord}
 
   def scaledCoord(coord:Vec) = {
-    if(globalScale == 1) coord
-    else (coord / globalScale) + (center - windowCenter/globalScale)
+    (coord / globalScale) + (center - windowCenter/globalScale)
   }
 
   case class RenderOperation(render_id:Int, render_func:() => Any, position:Int) extends ScageOperation(render_id, render_func) with Ordered[RenderOperation] {
