@@ -219,4 +219,5 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
   val Trace            = com.github.dunnololda.scage.support.tracer3.Trace
   val ScageColor       = com.github.dunnololda.scage.support.ScageColor
   lazy val ScageMessage     = com.github.dunnololda.scage.support.messages.ScageMessage
+  val PathFinder       = com.github.dunnololda.scage.support.PathFinder
 }
