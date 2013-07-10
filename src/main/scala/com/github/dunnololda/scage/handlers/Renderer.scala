@@ -6,7 +6,6 @@ import org.lwjgl.opengl.{DisplayMode, GL11, Display}
 import org.lwjgl.util.glu.GLU
 import com.github.dunnololda.cli.AppProperties._
 import com.github.dunnololda.scage.support.ScageColor._
-import com.github.dunnololda.scage.support.messages.ScageMessage._
 import com.github.dunnololda.scage.support.messages.ScageXML._
 import org.lwjgl.BufferUtils
 import com.github.dunnololda.scage.support.ScageId._
@@ -408,7 +407,7 @@ trait RendererLib {
       val backup_current_color = currentColor
       destroygl()
       initgl(new_window_width, new_window_height)
-      reloadFont()
+      ScageMessage.reloadFont()
       DisplayListsHolder.reloadDisplayLists()
       currentColor = backup_current_color
       backgroundColor = backup_background_color
@@ -665,8 +664,8 @@ trait Renderer extends Scage {
       clearScreen()
       GL11.glPushMatrix()
         val coord = window_center() - central_coord()*_global_scale
-        GL11.glTranslatef(coord.x , coord.y, 0.0f)
-        GL11.glScalef(_global_scale, _global_scale, 1)
+        if(coord.notZero) GL11.glTranslatef(coord.x , coord.y, 0.0f)
+        if(_global_scale != 1) GL11.glScalef(_global_scale, _global_scale, 1)
         if(renders.operations.nonEmpty) {
           _perform1(renders.operations)
         }
