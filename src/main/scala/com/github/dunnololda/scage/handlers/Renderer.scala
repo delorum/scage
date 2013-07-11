@@ -516,7 +516,7 @@ object RendererLib extends RendererLib
 import RendererLib._
 
 trait Renderer extends Scage {
-  private val log = MySimpleLogger(this.getClass.getName)
+  //private val log = MySimpleLogger(this.getClass.getName)
 
   private var _fps:Int = 0
   def fps = _fps
@@ -543,6 +543,40 @@ trait Renderer extends Scage {
   private var central_coord:() => Vec = window_center
   def center = central_coord()
   def center_= (coord: => Vec) {central_coord = () => coord}
+
+  private var rotation_point:() => Vec = () => Vec.zero
+  private var rotation_angle:() => Float = () => 0f // in degrees
+  def rotation = (rotation_point(), rotation_angle())
+  def rotation_=(new_rotation_params: => (Vec, Float)) {
+    rotation_point = () => new_rotation_params._1
+    rotation_angle = () => new_rotation_params._2
+  }
+  def rotationPoint = rotation_point()
+  def rotationPoint_=(new_rotation_point: => Vec) {
+    rotation_point = () => new_rotation_point
+  }
+  def rotationDeg = (rotation_point(), rotation_angle())
+  def rotationDeg_=(new_rotation_params: => (Vec, Float)) {
+    rotation_point = () => new_rotation_params._1
+    rotation_angle = () => new_rotation_params._2
+  }
+  def rotationRad = (rotation_point(), rotation_angle()/180f*math.Pi.toFloat)
+  def rotationRad_=(new_rotation_params: => (Vec, Float)) {
+    rotation_point = () => new_rotation_params._1
+    rotation_angle = () => new_rotation_params._2*180/math.Pi.toFloat
+  }
+  def rotationAngle = rotation_angle()
+  def rotationAngle_=(new_rotation_angle: => Float) {
+    rotation_angle = () => new_rotation_angle
+  }
+  def rotationAngleDeg = rotation_angle()
+  def rotationAngleDeg_=(new_rotation_angle: => Float) {
+    rotation_angle = () => new_rotation_angle
+  }
+  def rotationAngleRad = rotation_angle()/180f*math.Pi.toFloat
+  def rotationAngleRad_=(new_rotation_angle_rad: => Float) {
+    rotation_angle = () => new_rotation_angle_rad*180/math.Pi.toFloat
+  }
 
   def scaledCoord(coord:Vec) = {
     (coord / globalScale) + (center - windowCenter/globalScale)
@@ -666,6 +700,13 @@ trait Renderer extends Scage {
         val coord = window_center() - central_coord()*_global_scale
         if(coord.notZero) GL11.glTranslatef(coord.x , coord.y, 0.0f)
         if(_global_scale != 1) GL11.glScalef(_global_scale, _global_scale, 1)
+        val rot_ang = rotation_angle()
+        if(rot_ang != 0) {
+          val point = rotation_point()
+          GL11.glTranslatef(point.x , point.y, 0.0f)
+          GL11.glRotatef(rot_ang, 0, 0, 1)
+          GL11.glTranslatef(-point.x , -point.y, 0.0f)
+        }
         if(renders.operations.nonEmpty) {
           _perform1(renders.operations)
         }
