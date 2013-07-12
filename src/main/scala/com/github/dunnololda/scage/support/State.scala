@@ -106,7 +106,7 @@ object State {
     }
   }
 
-  private lazy val json_parser = new JSONParser
+  private val json_parser = new JSONParser
   def fromJsonString(json:String):Option[State] = json_parser.evaluate(json)
   def fromJsonStringOrDefault(json:String, default_state:State = State()):State = json_parser.evaluate(json) match {
     case Some(s:State) => s
