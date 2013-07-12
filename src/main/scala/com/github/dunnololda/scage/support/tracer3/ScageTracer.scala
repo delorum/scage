@@ -31,7 +31,7 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x
 
   // for client classes - children of ScageTracer
   protected def setTraceLocation(trace:T, new_location:Vec) {trace._location = new_location}
-  protected implicit def trace2updateable(trace:T) = new ScalaObject {
+  protected implicit def trace2updateable(trace:T) = new {
     def __location = trace._location
     def __location_=(new_location:Vec) {trace._location = new_location}
   }
@@ -135,7 +135,7 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x
   def tracesInPoint(point:Vec):List[T] = tracesInPoint(point.ix, point.iy)
   def tracesInPoint(x:Int, y:Int) = {
     if(!isPointOnArea(x, y)) Nil
-    else (point_matrix(x)(y)).toList
+    else point_matrix(x)(y).toList
   }
 
   def tracesInPointRange(xrange:Range, yrange:Range, condition:T => Boolean):IndexedSeq[T] = tracesNearPoint(Vec.zero, xrange, yrange, condition)
@@ -144,23 +144,23 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x
   def tracesInPointRange(xrange:Range):IndexedSeq[T] = tracesNearPoint(Vec.zero, xrange, xrange)
 
   def tracesNearPoint(point:Vec, xrange:Range, yrange:Range, condition:T => Boolean):IndexedSeq[T] = {
-    (for {
+    for {
       i <- xrange
       j <- yrange
       near_point = outsidePoint(point + Vec(i, j))
       if isPointOnArea(near_point)
       trace <- tracesInPoint(near_point, condition)
-    } yield trace)
+    } yield trace
   }
   def tracesNearPoint(point:Vec, xrange:Range, condition:T => Boolean):IndexedSeq[T] = tracesNearPoint(point, xrange, xrange, condition)
   def tracesNearPoint(point:Vec, xrange:Range, yrange:Range):IndexedSeq[T] = {
-    (for {
+    for {
       i <- xrange
       j <- yrange
       near_point = outsidePoint(point + Vec(i, j))
       if isPointOnArea(near_point)
       trace <- tracesInPoint(near_point)
-    } yield trace)
+    } yield trace
   }
   def tracesNearPoint(point:Vec, xrange:Range):IndexedSeq[T] = tracesNearPoint(point, xrange, xrange)
 
@@ -211,12 +211,7 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x
                   height:Int = N_y,
                   condition:Vec => Boolean,
                   num_tries:Int = 10):Option[Vec] = {
-    for(i <- 0 until num_tries) {
-      log.debug("generating random point, try "+i)
-      val point = randomPoint()
-      if(condition(point)) return Some(point)
-    }      
-    return None  
+    (0 until num_tries).view.map(i => randomPoint()).find(p => condition(p))
   }
   def randomCoord(leftup_x:Int = field_from_x, leftup_y:Int = field_to_y-1, width:Int = field_to_x - field_from_x, height:Int = field_to_y - field_from_y) = {
     pointCenter(point(randomPoint(leftup_x, leftup_y, width, height)))
@@ -227,12 +222,7 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x
                   height:Int = field_to_y - field_from_y,
                   condition:Vec => Boolean,
                   num_tries:Int = 10):Option[Vec] = {
-    for(i <- 0 until num_tries) {
-      log.debug("generating random coord, try "+i)
-      val coord = randomCoord()
-      if(condition(coord)) return Some(coord)
-    }      
-    return None
+    (0 until num_tries).view.map(i => randomCoord()).find(coord => condition(coord))
   }
 
   lazy val trace_grid = {

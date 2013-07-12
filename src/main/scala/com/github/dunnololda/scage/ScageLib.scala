@@ -13,8 +13,7 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
 
   def appName = AppProperties.appName
   def appVersion = AppProperties.appVersion
-  
-  val max_font_size = ScageMessage.max_font_size
+
   def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor, align:String) {ScageMessage.print(message, x, y, size, color, align)}
   def messageBounds(message:Any, size:Float = max_font_size):Vec                                           = ScageMessage.messageBounds(message, size)
   def areaForMessage(message:Any, coord:Vec, size:Float = max_font_size, align:String = "center"):Seq[Vec] = ScageMessage.areaForMessage(message, coord, size, align)
@@ -220,5 +219,6 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
   val Trace            = com.github.dunnololda.scage.support.tracer3.Trace
   val ScageColor       = com.github.dunnololda.scage.support.ScageColor
   val ScageMessage     = com.github.dunnololda.scage.support.messages.ScageMessage
+  val max_font_size    = ScageMessage.max_font_size
   val PathFinder       = com.github.dunnololda.scage.support.PathFinder
 }
