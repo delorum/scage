@@ -196,6 +196,7 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
   type Trace           = com.github.dunnololda.scage.support.tracer3.Trace
   type TraceTrait      = com.github.dunnololda.scage.support.tracer3.TraceTrait
   type ScageMessage    = com.github.dunnololda.scage.support.messages.ScageMessage
+  type PathFinder       = com.github.dunnololda.scage.support.PathFinder
 
   type CoordTracer[A <: com.github.dunnololda.scage.support.tracer3.TraceTrait] = com.github.dunnololda.scage.support.tracer3.CoordTracer[A]
   type ScageTracer[A <: com.github.dunnololda.scage.support.tracer3.TraceTrait] = com.github.dunnololda.scage.support.tracer3.ScageTracer[A]
