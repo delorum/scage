@@ -14,7 +14,7 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
   def appName = AppProperties.appName
   def appVersion = AppProperties.appVersion
   
-  lazy val max_font_size = ScageMessage.max_font_size
+  val max_font_size = ScageMessage.max_font_size
   def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor, align:String) {ScageMessage.print(message, x, y, size, color, align)}
   def messageBounds(message:Any, size:Float = max_font_size):Vec                                           = ScageMessage.messageBounds(message, size)
   def areaForMessage(message:Any, coord:Vec, size:Float = max_font_size, align:String = "center"):Seq[Vec] = ScageMessage.areaForMessage(message, coord, size, align)
@@ -48,28 +48,28 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
 
   // implicits
 
-  implicit def int2vecrich(i:Int) = new {
+  implicit def Int2Vecrich(i:Int) = new {
     def *(v:Vec) = v*i
     def /(v:Vec) = v/i
   }
 
-  implicit def long2vecrich(i:Long) = new {
+  implicit def Long2Vecrich(i:Long) = new {
     def *(v:Vec) = v*i
     def /(v:Vec) = v/i
   }
 
-  implicit def float2vecrich(f:Float) = new {
+  implicit def Float2Vecrich(f:Float) = new {
     def *(v:Vec) = v*f
     def /(v:Vec) = v/f
   }
 
-  implicit def double2vecrich(d:Double) = new {
+  implicit def Double2Vecrich(d:Double) = new {
     def *(v:Vec) = v*d
     def /(v:Vec) = v/d
   }
 
-  implicit def vec2dvec(v:Vec)  = v.toDVec
-  implicit def dvec2vec(dv:Vec) = dv.toVec
+  implicit def Vec2dvec(v:Vec)  = v.toDVec
+  implicit def DVec2Vec(dv:Vec) = dv.toVec
 
   // support
 
@@ -218,6 +218,6 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
   val State            = com.github.dunnololda.scage.support.State
   val Trace            = com.github.dunnololda.scage.support.tracer3.Trace
   val ScageColor       = com.github.dunnololda.scage.support.ScageColor
-  lazy val ScageMessage     = com.github.dunnololda.scage.support.messages.ScageMessage
+  val ScageMessage     = com.github.dunnololda.scage.support.messages.ScageMessage
   val PathFinder       = com.github.dunnololda.scage.support.PathFinder
 }

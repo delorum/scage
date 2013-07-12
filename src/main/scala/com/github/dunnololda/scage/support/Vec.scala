@@ -21,7 +21,7 @@ object Vec {
     case _ => None
   }
   
-  private lazy val vec_parser= new VecParser()
+  private val vec_parser= new VecParser()
   def fromString(vec_str:String):Option[Vec]                          = vec_parser.evaluate(vec_str)
   def fromStringOrDefault(vec_str:String, default_vec:Vec = zero):Vec = vec_parser.evaluate(vec_str) match {
     case Some(v:Vec) => v
