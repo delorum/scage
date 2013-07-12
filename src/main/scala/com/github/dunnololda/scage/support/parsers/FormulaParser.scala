@@ -4,7 +4,7 @@ import scala.math._
 import scala.util.parsing.combinator._
 import scala.util.Random
 import com.github.dunnololda.cli.MySimpleLogger
-import collection.mutable.HashMap
+import scala.collection.mutable
 
 /**
  * Simple parser for arithmetic expressions based on Scala's Combinator Parsers framework
@@ -25,8 +25,8 @@ import collection.mutable.HashMap
  * println(formulaParser.calculate("m/sqrt(1-v^2/c^2)"))  // 80.00000000003415
  */
 
-class FormulaParser(val constants:HashMap[String,Double] = HashMap[String,Double](),
-                    val userFcts: HashMap[String, String => Double] = HashMap[String, String => Double](),
+class FormulaParser(val constants:mutable.HashMap[String,Double] = mutable.HashMap[String,Double](),
+                    val userFcts: mutable.HashMap[String, String => Double] = mutable.HashMap[String, String => Double](),
                     random: Random = new Random) extends JavaTokenParsers {
   require(constants.keySet.intersect(userFcts.keySet).isEmpty)
   constants ++= Map("E" -> E, "PI" -> Pi, "Pi" -> Pi)
@@ -35,23 +35,23 @@ class FormulaParser(val constants:HashMap[String,Double] = HashMap[String,Double
 
   private val unaryOps: Map[String,Double => Double] = Map(
     "" -> {elem:Double => elem},
-    "sqrt" -> (sqrt(_)), 
-    "abs" -> (abs(_)), 
-    "floor" -> (floor(_)), 
-    "ceil" -> (ceil(_)), 
-    "ln" -> (math.log(_)), 
-    "round" -> (round(_)), 
+    "sqrt" -> (sqrt(_)),
+    "abs" -> (abs(_)),
+    "floor" -> (floor(_)),
+    "ceil" -> (ceil(_)),
+    "ln" -> (math.log(_)),
+    "round" -> (round(_)),
     "signum" -> (signum(_))
   )
   private val binaryOps1: Map[String,(Double,Double) => Double] = Map(
-   "+" -> (_+_), "-" -> (_-_), "*" -> (_*_), "/" -> (_/_), "^" -> (pow(_,_))
+   "+" -> (_+_), "-" -> (_-_), "*" -> (_*_), "/" -> (_/_), "^" -> pow
   )
   private val binaryOps2: Map[String,(Double,Double) => Double] = Map(
-   "max" -> (max(_,_)), "min" -> (min(_,_))
+   "max" -> max, "min" -> min
   )
   private def fold(d: Double, l: List[~[String,Double]]) = l.foldLeft(d){ case (d1,op~d2) => binaryOps1(op)(d1,d2) }
-  private implicit def hashmap2Parser[V](m: HashMap[String,V]) = m.keys.map(_ ^^ (identity)).reduceLeft(_ | _)
-  private implicit def map2Parser[V](m: Map[String,V]) = m.keys.map(_ ^^ (identity)).reduceLeft(_ | _)
+  private implicit def hashmap2Parser[V](m: mutable.HashMap[String,V]) = m.keys.map(_ ^^ identity).reduceLeft(_ | _)
+  private implicit def map2Parser[V](m: Map[String,V]) = m.keys.map(_ ^^ identity).reduceLeft(_ | _)
   private def expression:  Parser[Double] = sign~term~rep(("+"|"-")~term) ^^ { case s~t~l => fold(s * t,l) }
   private def sign:        Parser[Double] = opt("+" | "-") ^^ { case None => 1; case Some("+") => 1; case Some("-") => -1 }
   private def term:        Parser[Double] = longFactor~rep(("*"|"/")~longFactor) ^^ { case d~l => fold(d,l) }
@@ -71,10 +71,10 @@ class FormulaParser(val constants:HashMap[String,Double] = HashMap[String,Double
         result
       case x @ Failure(msg, _) => // maybe throw exceptions instead
         log.error("failed to parse formula: "+formula+"\nincorrect syntax: "+msg)
-        0
+        0.0
       case x @ Error(msg, _) =>
         log.error("failed to parse formula: "+formula+"\nincorrect syntax: "+msg)
-        0
+        0.0
     }
   }
 }

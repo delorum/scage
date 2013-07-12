@@ -76,7 +76,7 @@ class Vec(val x:Float = 0, val y:Float = 0) {
   def canEqual(other: Any)  = other.isInstanceOf[Vec]
 
   def deg(v:Vec)            = (180/math.Pi*math.acos(n * v.n)).toFloat
-  def rad(v:Vec)            = (math.acos(n * v.n)).toFloat
+  def rad(v:Vec)            = math.acos(n * v.n).toFloat
   def rotateRad(ang:Double) = new Vec((x * math.cos(ang) - y * math.sin(ang)).toFloat,
                                       (x * math.sin(ang) + y * math.cos(ang)).toFloat)
   def rotate(ang:Double)    = rotateRad(ang)
@@ -157,10 +157,10 @@ class DVec(val x:Double = 0, val y:Double = 0) {
   override val hashCode:Int = (41*(41 + x) + y).toInt
   def canEqual(other: Any) = other.isInstanceOf[DVec]
 
-  def deg(dv:DVec) = (180/math.Pi*math.acos(n * dv.n))
-  def rad(dv:DVec) = (math.acos(n * dv.n))
-  def rotateRad(ang:Double) = new DVec((x * math.cos(ang) - y * math.sin(ang)),
-                                       (x * math.sin(ang) + y * math.cos(ang)))
+  def deg(dv:DVec) = 180 / math.Pi * math.acos(n * dv.n)
+  def rad(dv:DVec) = math.acos(n * dv.n)
+  def rotateRad(ang:Double) = new DVec(x * math.cos(ang) - y * math.sin(ang),
+                                       x * math.sin(ang) + y * math.cos(ang))
   def rotate(ang:Double)    = rotateRad(ang)
   def rotateDeg(ang:Double) = rotateRad(ang/180*math.Pi)
 
