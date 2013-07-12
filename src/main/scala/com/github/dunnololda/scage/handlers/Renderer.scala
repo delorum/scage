@@ -83,7 +83,7 @@ trait RendererLib {
 
   def openglScale(scale_factor:Float) {GL11.glScalef(scale_factor, scale_factor, 1)}
 
-  private lazy val FILLED_CIRCLE = displayList {
+  private val FILLED_CIRCLE = displayList {
     GL11.glBegin(GL11.GL_TRIANGLE_FAN)
     for(i <- 0 until 100) {
       val cosine = math.cos(i*2*math.Pi/100).toFloat
@@ -93,7 +93,7 @@ trait RendererLib {
     GL11.glEnd()
   }
 
-  private lazy val CIRCLE = displayList {
+  private val CIRCLE = displayList {
     GL11.glBegin(GL11.GL_LINE_LOOP)
       for(i <- 0 until 100) {
         val cosine = math.cos(i*2*math.Pi/100).toFloat

@@ -138,7 +138,7 @@ trait ScageColorTrait {
   val BLUE_VIOLET: ScageColor = new ScageColor("Blue_Violet", 0x8A, 0x2B, 0xE2)
   val PURPLE: ScageColor = new ScageColor("Purple", 0xA0, 0x20, 0xF0)
 
-  private lazy val colors = new mutable.HashMap[String, ScageColor]()
+  private val colors = new mutable.HashMap[String, ScageColor]()
   this.getClass.getDeclaredFields.foreach(field => {
     field.setAccessible(true)
     val color = try{field.get(ScageColor).asInstanceOf[ScageColor]}
