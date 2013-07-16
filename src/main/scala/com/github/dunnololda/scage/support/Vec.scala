@@ -75,7 +75,7 @@ class Vec(val x:Float = 0, val y:Float = 0) {
   override val hashCode:Int = (41*(41 + x) + y).toInt
   def canEqual(other: Any)  = other.isInstanceOf[Vec]
 
-  def deg(v:Vec)            = (180/math.Pi*math.acos(n * v.n)).toFloat
+  def deg(v:Vec):Float      = math.acos(n * v.n).toFloat/math.Pi.toFloat*180f
   def rad(v:Vec)            = math.acos(n * v.n).toFloat
   def rotateRad(ang:Double) = new Vec((x * math.cos(ang) - y * math.sin(ang)).toFloat,
                                       (x * math.sin(ang) + y * math.cos(ang)).toFloat)
