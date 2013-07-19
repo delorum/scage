@@ -70,6 +70,28 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
   implicit def Vec2dvec(v:Vec)  = v.toDVec
   implicit def DVec2Vec(dv:Vec) = dv.toVec
 
+  implicit val NumericVec = new Numeric[Vec] {
+    def plus(x: ScageLib.Vec, y: ScageLib.Vec): ScageLib.Vec = x + y
+
+    def minus(x: ScageLib.Vec, y: ScageLib.Vec): ScageLib.Vec = x - y
+
+    def times(x: ScageLib.Vec, y: ScageLib.Vec): ScageLib.Vec = ???
+
+    def negate(x: ScageLib.Vec): ScageLib.Vec = x*(-1)
+
+    def fromInt(x: Int): ScageLib.Vec = Vec(x, x)
+
+    def toInt(x: ScageLib.Vec): Int = x.ix
+
+    def toLong(x: ScageLib.Vec): Long = x.ix
+
+    def toFloat(x: ScageLib.Vec): Float = x.x
+
+    def toDouble(x: ScageLib.Vec): Double = x.x
+
+    def compare(x: ScageLib.Vec, y: ScageLib.Vec): Int = ???
+  }
+
   // support
 
   def msecs                  = System.currentTimeMillis()
