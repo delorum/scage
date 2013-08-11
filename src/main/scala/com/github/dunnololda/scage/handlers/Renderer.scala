@@ -460,7 +460,7 @@ trait RendererLib {
   }
 
   private[scage] def drawWelcomeMessages() {
-    print(xmlOrDefault("renderer.loading", "Loading..."), 20, windowHeight-25, GREEN)
+    ScageMessage.print(xmlOrDefault("renderer.loading", "Loading..."), 20, windowHeight-25, GREEN)
     Display.update()
     Thread.sleep(1000)
 
@@ -501,7 +501,7 @@ trait RendererLib {
   private[scage] def renderExitMessage() {
     backgroundColor = BLACK
     clearScreen()
-    print(xmlOrDefault("renderer.exiting", "Exiting..."), 20, windowHeight-25, GREEN)
+    ScageMessage.print(xmlOrDefault("renderer.exiting", "Exiting..."), 20, windowHeight-25, GREEN)
     Display.update()
     Thread.sleep(1000)
   }
