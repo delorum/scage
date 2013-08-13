@@ -47,7 +47,7 @@ class Vec(val x:Float = 0, val y:Float = 0) {
   def unary_-():Vec = new Vec(-x, -y)
 
   def *(v:Vec) = x*v.x + y*v.y
-  def */(v:Vec) = x*v.y - y*v.x
+  def */(v:Vec) = x*v.y - y*v.x // maybe another symbol as it is a closing comment symbol
 
   def *(k:Double) = new Vec(x*k, y*k)
   def *(k:Float)  = new Vec(x*k, y*k)
@@ -132,7 +132,7 @@ class DVec(val x:Double = 0, val y:Double = 0) {
   def unary_-():DVec = new DVec(-x, -y)
 
   def *(dv:DVec)   = x*dv.x + y*dv.y
-  def */(v:Vec) = x*v.y - y*v.x
+  def */(v:DVec) = x*v.y - y*v.x
 
   def *(k:Double) = new DVec(x*k, y*k)
   def *(k:Float)  = new DVec(x*k, y*k)

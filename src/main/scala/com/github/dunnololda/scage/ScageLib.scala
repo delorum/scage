@@ -58,13 +58,33 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
   }
 
   implicit def Float2Vecrich(f:Float) = new {
-    def *(v:Vec) = v*f
+    def *(v:Vec) = v * f
     def /(v:Vec) = v/f
   }
 
   implicit def Double2Vecrich(d:Double) = new {
     def *(v:Vec) = v*d
     def /(v:Vec) = v/d
+  }
+
+  implicit def Int2DVecrich(i:Int) = new {
+    def *(v:DVec) = v*i
+    def /(v:DVec) = v/i
+  }
+
+  implicit def Long2DVecrich(i:Long) = new {
+    def *(v:DVec) = v*i
+    def /(v:DVec) = v/i
+  }
+
+  implicit def Float2DVecrich(f:Float) = new {
+    def *(v:DVec) = v * f
+    def /(v:DVec) = v/f
+  }
+
+  implicit def Double2DVecrich(d:Double) = new {
+    def *(v:DVec) = v*d
+    def /(v:DVec) = v/d
   }
 
   implicit def Vec2dvec(v:Vec)  = v.toDVec
