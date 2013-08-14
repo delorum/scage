@@ -4,6 +4,7 @@ import handlers.RendererLib
 import support._
 import support.messages._
 import com.github.dunnololda.cli.AppProperties
+import net.phys2d.math.{ROVector2f, Vector2f}
 
 object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib with LWJGLKeyboard with ScageColorTrait with ScageIdTrait with EventsTrait {
   def property[A : Manifest](key:String, default: => A):A                                      = AppProperties.property(key, default)
@@ -85,6 +86,10 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
   implicit def Double2DVecrich(d:Double) = new {
     def *(v:DVec) = v*d
     def /(v:DVec) = v/d
+  }
+
+  implicit def Phys2dVec2Vec(pv:ROVector2f) = new {
+    def toVec:Vec = Vec(pv.getX, pv.getY)
   }
 
   implicit def Vec2dvec(v:Vec)  = v.toDVec

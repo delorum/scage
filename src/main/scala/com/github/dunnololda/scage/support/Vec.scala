@@ -46,8 +46,10 @@ class Vec(val x:Float = 0, val y:Float = 0) {
 
   def unary_-():Vec = new Vec(-x, -y)
 
-  def *(v:Vec) = x*v.x + y*v.y
-  def */(v:Vec) = x*v.y - y*v.x // maybe another symbol as it is a closing comment symbol
+  def project(v:Vec):Vec = v*(this*v)
+
+  def *(v:Vec):Float = x*v.x + y*v.y
+  def */(v:Vec):Float = x*v.y - y*v.x // maybe another symbol as it is a closing comment symbol
 
   def *(k:Double) = new Vec(x*k, y*k)
   def *(k:Float)  = new Vec(x*k, y*k)
