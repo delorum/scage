@@ -163,7 +163,7 @@ You also can use some IDE with good Maven and Scala support (for example, [Intel
 
 ###For non-Maven users.
 
-Please install Maven =) I also try to create an sbt build scenario but that would take a lot of time as my knowledge of SBT is very poor.
+There is a beta SBT integration which is basicly working, but needs some more testing, actually some issues may occur due to LWJGL version (LWJGL is quite complicated to integrate with SBT because of dependency management). Anyway, you can use it. Give me some feedback =).
 
 Feedback
 --------
