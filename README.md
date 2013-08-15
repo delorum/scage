@@ -165,6 +165,59 @@ You also can use some IDE with good Maven and Scala support (for example, [Intel
 
 There is a beta SBT integration which is basicly working, but needs some more testing, actually some issues may occur due to LWJGL version (LWJGL is quite complicated to integrate with SBT because of dependency management). Anyway, you can use it. Give me some feedback =).
 
+First of all, you have to get the last version of Scage and publish it into your local Ivy Repository :
+
+```
+git clone https://github.com/dunnololda/scage.git
+cd scage
+sbt
+update
+update (yeah, one more time)
+publish-local
+```
+
+Now you have Scage installed, congratulations ! You can create a minimal project. Here is the build.sbt you will need :
+
+```
+name := "foobar"
+
+version := "0.0.1-SNAPSHOT"
+
+scalaVersion := "2.10.1"
+
+checksums in update := Nil
+
+resolvers ++= Seq(
+	"dunnololda's maven repo" at "https://raw.github.com/dunnololda/mvn-repo/master",
+	"LWJGL" at "http://adterrasperaspera.com/lwjgl"
+)
+
+libraryDependencies ++= Seq(
+	"scage" %% "scage" % "0.9.3-SNAPSHOT"
+)
+
+seq(slickSettings: _*)
+
+slick.version := "274"
+```
+
+You have to use SBT LWJGL Plugin to get your project to compile, so put this into your project/plugins.sbt :
+
+```
+import sbt._
+
+import Defaults._
+
+libraryDependencies += sbtPluginExtra(
+    m = "com.github.philcali" % "sbt-lwjgl-plugin" % "3.1.4",
+    sbtV = "0.12",
+    scalaV = "2.9.2"
+)
+
+```
+
+Here we are, your project is set up. You can create your first Scage source into /src/main/scala/MyFirstSource.scala. Don't forget that due to SBT LWJGL Plugin, you have to run 'update' twice to compile your project.
+
 Feedback
 --------
 
