@@ -188,8 +188,7 @@ scalaVersion := "2.10.1"
 checksums in update := Nil
 
 resolvers ++= Seq(
-	"dunnololda's maven repo" at "https://raw.github.com/dunnololda/mvn-repo/master",
-	"LWJGL" at "http://adterrasperaspera.com/lwjgl"
+	"dunnololda's maven repo" at "https://raw.github.com/dunnololda/mvn-repo/master"
 )
 
 libraryDependencies ++= Seq(
