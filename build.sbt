@@ -4,6 +4,9 @@ version := "0.9.3-SNAPSHOT"
 
 scalaVersion := "2.10.1"
 
+// We have to do that to pull LWJGL 2.1 required by Phys2D on old repository.
+checksums in update := Nil
+
 resolvers ++= Seq(
 	"dunnololda's maven repo" at "https://raw.github.com/dunnololda/mvn-repo/master",
 	"Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
@@ -20,6 +23,3 @@ libraryDependencies ++= Seq(
 seq(slickSettings: _*)
 
 slick.version := "274"
-
-//@see https://github.com/philcali/sbt-lwjgl-plugin/issues/25
-seq(oldLwjglSettings: _*)
