@@ -4,7 +4,7 @@ import handlers.RendererLib
 import support._
 import support.messages._
 import com.github.dunnololda.cli.AppProperties
-import net.phys2d.math.{ROVector2f, Vector2f}
+import net.phys2d.math.ROVector2f
 
 object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib with LWJGLKeyboard with ScageColorTrait with ScageIdTrait with EventsTrait {
   def property[A : Manifest](key:String, default: => A):A                                      = AppProperties.property(key, default)
