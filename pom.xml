@@ -139,6 +139,12 @@
           <groupId>slick</groupId>
           <artifactId>slick</artifactId>
           <version>274</version>
+          <exclusions>
+              <exclusion>
+                  <groupId>org.lwjgl</groupId>
+                  <artifactId>lwjgl-native</artifactId>
+              </exclusion>
+          </exclusions>
       </dependency>
       <!--<dependency>
           <groupId>org.scalaz</groupId>
