@@ -53,7 +53,7 @@ object ScageBuild extends Build {
 	// TODO should run on "update" only.
 	update <<= update dependsOn phys2DPatch,
 	// TODO : UH ?
-	compile <<= compile in Compile dependsOn nativesExtract,
+	run <<= run in Runtime dependsOn nativesExtract,
 	fork := true,
 	javaOptions ++= Seq("-Djava.library.path=%s".format(file(".") / "libs" / "natives" / defineOs._1), "-DLWJGL_DISABLE_XRANDR=true"),
 	javaOptions in Test ++= Seq("-Dapp.properties=scagetest-properties.txt")
