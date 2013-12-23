@@ -143,8 +143,8 @@ class DVec(val x:Double = 0, val y:Double = 0) {
   def **(dv:DVec)  = new DVec(x*dv.x, y*dv.y)
 
   def /(k:Double):DVec = if(k == 0) new DVec(x*1000, y*1000) else new DVec(x/k, y/k)
-  def /(k:Float):DVec  = this / k
-  def /(k:Int):DVec    = this / k
+  def /(k:Float):DVec  = this / k.toDouble
+  def /(k:Int):DVec    = this / k.toDouble
 
   def norma2:Double = x*x + y*y
   def norma         = math.sqrt(norma2)

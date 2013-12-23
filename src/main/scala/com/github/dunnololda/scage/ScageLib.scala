@@ -68,6 +68,8 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
   implicit def Double2Vecrich(d:Double) = new {
     def *(v:Vec) = v*d
     def /(v:Vec) = v/d
+    def toRad:Double = d/180.0*math.Pi
+    def toDeg:Double = d/math.Pi*180.0
   }
 
   implicit def Int2DVecrich(i:Int) = new {
@@ -92,6 +94,7 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
 
   implicit def Phys2dVec2Vec(pv:ROVector2f) = new {
     def toVec:Vec = Vec(pv.getX, pv.getY)
+    def toDVec:DVec = DVec(pv.getX, pv.getY)
   }
 
   implicit def Vec2dvec(v:Vec)  = v.toDVec
