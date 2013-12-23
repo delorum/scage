@@ -5,9 +5,9 @@ Introduction
 
 Scage is a framework to write simple 2D opengl games. It is written in [Scala](http://scala-lang.org/) and based on several java libraries:
 
- - [phys2d](http://phys2d.cokeandcode.com/) as a physics engine
+ - [phys2d](https://code.google.com/p/phys2d/) as a physics engine
  - [lwjgl](http://lwjgl.org) as an opengl wrapper
- - [slick](http://slick.cokeandcode.com/) as a resource and texture loader
+ - [slick](https://code.google.com/p/phys2d/) as a resource and texture loader
 
 The main purpose of this project is to give a convenient tool for game-developers to write a code of pure functionality without any boilerplate.
 
