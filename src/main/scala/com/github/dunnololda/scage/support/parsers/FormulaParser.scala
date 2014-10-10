@@ -53,7 +53,11 @@ class FormulaParser(val constants:mutable.HashMap[String,Double] = mutable.HashM
   private implicit def hashmap2Parser[V](m: mutable.HashMap[String,V]) = m.keys.map(_ ^^ identity).reduceLeft(_ | _)
   private implicit def map2Parser[V](m: Map[String,V]) = m.keys.map(_ ^^ identity).reduceLeft(_ | _)
   private def expression:  Parser[Double] = sign~term~rep(("+"|"-")~term) ^^ { case s~t~l => fold(s * t,l) }
-  private def sign:        Parser[Double] = opt("+" | "-") ^^ { case None => 1; case Some("+") => 1; case Some("-") => -1 }
+  private def sign:        Parser[Double] = opt("+" | "-") ^^ {
+    case None => 1
+    case Some("+") => 1
+    case Some("-") => -1
+    case _ => 1}
   private def term:        Parser[Double] = longFactor~rep(("*"|"/")~longFactor) ^^ { case d~l => fold(d,l) }
   private def longFactor:  Parser[Double] = shortFactor~rep("^"~shortFactor) ^^ { case d~l => fold(d,l) }
   private def shortFactor: Parser[Double] = fpn | sign~(constant | rnd | unaryFct | binaryFct | userFct | "("~>expression<~")") ^^ { case s~x => s * x }
