@@ -8,3 +8,4 @@
 *.iws
 target
 local-build.properties
+libs
