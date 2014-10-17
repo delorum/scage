@@ -12,7 +12,7 @@ object ScageBuild extends Build {
 
     def defineOs = System.getProperty("os.name").toLowerCase.take(3).toString match {
     	case "lin" => ("linux", "so")
-    	case "mac" | "dar" => ("macosx", "lib")
+    	case "mac" | "dar" => ("osx", "lib")
     	case "win" => ("windows", "dll")
     	case "sun" => ("solaris", "so")
     	case _ => ("unknown", "")
@@ -40,11 +40,13 @@ object ScageBuild extends Build {
     	},
 
 	nativesExtract <<= (streams, classpathTypes, update) map { (s, ct, up) =>
-        	val natives = managedJars(Compile, ct, up) map { _.data } find { _.getName.startsWith("lwjgl-native") }
-        	natives map {
+        	val natives = managedJars(Compile, ct, up) map { _.data } find { (j) =>
+            j.getName.startsWith("lwjgl-platform") && j.getName.endsWith("%s.jar".format(defineOs._1))
+          }
+        	natives map { (e) =>
                 	val target = file(".") / "libs" / "natives"
                 	s.log.info("Extracting LWJGL natives to " + target)
-                	IO.unzip(_, target)
+                	IO.unzip(e, target)
         	} getOrElse {
                 	s.log.warn("Unable to find LWJGL natives jar, try to update again.")
         	}
@@ -55,7 +57,7 @@ object ScageBuild extends Build {
 	// TODO : UH ?
 	run <<= run in Runtime dependsOn nativesExtract,
 	fork := true,
-	javaOptions ++= Seq("-Djava.library.path=%s".format(file(".") / "libs" / "natives" / defineOs._1), "-DLWJGL_DISABLE_XRANDR=true"),
+	javaOptions ++= Seq("-Djava.library.path=%s".format(file(".") / "libs" / "natives"), "-DLWJGL_DISABLE_XRANDR=true"),
 	javaOptions in Test ++= Seq("-Dapp.properties=scagetest-properties.txt")
     )
 
