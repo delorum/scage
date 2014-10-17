@@ -1,11 +1,12 @@
 package com.github.dunnololda.scage.test
 
-import concurrent.ops._
 import junit.framework._
 import Assert._
 import collection.mutable.ListBuffer
 import javax.swing.JOptionPane
 import com.github.dunnololda.scage.ScageLib._
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object ScageTest {
     def suite: Test = {
@@ -79,7 +80,7 @@ class ScageTest extends TestCase("app") {
         key(KEY_W, onKeyDown = println("also, W was pressed :3"))   // test for multiple functions on one key
 
         private var input_text = ""
-        key(KEY_F1, onKeyDown = spawn {
+        key(KEY_F1, onKeyDown = Future {
           input_text = JOptionPane.showInputDialog("Input text here")
         })
 
@@ -108,7 +109,7 @@ class ScageTest extends TestCase("app") {
         def period = {
           x += 0.01f
           if(x > 2*math.Pi) x = 0
-          (125 * 0.25f*(math.sin(x)) + 1).toLong
+          (125 * 0.25f* math.sin(x) + 1).toLong
         }
         actionDynamicPeriod(period) {  // test actions with non-static period defined as function
           physics.step()
@@ -125,7 +126,7 @@ class ScageTest extends TestCase("app") {
               }*/
             }
 
-            velocity = (target_point).n*10
+            velocity = target_point.n*10
             render {
               /*if(physics.containsPhysical(this)) */drawFilledCircle(coord, 2, YELLOW)
             }

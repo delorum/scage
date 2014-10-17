@@ -43,11 +43,11 @@
       <url>http://slick.cokeandcode.com/mavenrepo</url>
     </repository>-->
 
-    <repository>
+    <!--<repository>
       <id>lwjgl</id>
       <name>lwjgl</name>
       <url>http://adterrasperaspera.com/lwjgl</url>
-    </repository>
+    </repository>-->
   </repositories>
 
   <pluginRepositories>
@@ -121,20 +121,10 @@
       <scope>test</scope>
     </dependency>
       <dependency>
-            <groupId>org.lwjgl</groupId>
-            <artifactId>lwjgl</artifactId>
-            <version>${lwjgl.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.lwjgl</groupId>
-            <artifactId>lwjgl-util</artifactId>
-            <version>${lwjgl.version}</version>
-          </dependency>
-      <dependency>
-            <groupId>org.lwjgl</groupId>
-            <artifactId>lwjgl-jinput</artifactId>
-            <version>${lwjgl.version}</version>
-          </dependency>
+          <groupId>org.lwjgl.lwjgl</groupId>
+          <artifactId>lwjgl</artifactId>
+          <version>${lwjgl.version}</version>
+      </dependency>
       <dependency>
           <groupId>slick</groupId>
           <artifactId>slick</artifactId>
@@ -231,7 +221,11 @@
         <configuration>
           <scalaVersion>${scala.version}</scalaVersion>
           <args>
-            <arg>-optimise</arg>
+              <!--<arg>-optimise</arg>-->
+              <arg>-unchecked</arg>
+              <arg>-deprecation</arg>
+              <arg>-feature</arg>
+              <arg>-Yinline-warnings</arg>
           </args>
           <!--<jvmArgs>
               <jvmArg>-Xmx1536m</jvmArg>
@@ -256,7 +250,7 @@
           </classpathContainers>
         </configuration>
       </plugin>
-        <plugin>
+        <!--<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <configuration>
@@ -280,14 +274,28 @@
                     </goals>
                   </execution>
                 </executions>
-              </plugin>
+              </plugin>-->
+        <plugin>
+            <groupId>com.googlecode.mavennatives</groupId>
+            <artifactId>maven-nativedependencies-plugin</artifactId>
+            <version>0.0.5</version>
+            <executions>
+                <execution>
+                    <id>unpacknatives</id>
+                    <phase>generate-resources</phase>
+                    <goals>
+                        <goal>copy</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
             <version>2.7.2</version>
             <configuration>
                 <argLine>
-                  -Dapp.properties=scagetest-properties.txt -Djava.library.path=${project.build.directory}/libs/natives/${os.type} -DLWJGL_DISABLE_XRANDR=true
+                  -Dapp.properties=scagetest-properties.txt -Djava.library.path=${project.build.directory}/natives -DLWJGL_DISABLE_XRANDR=true
                 </argLine>
             </configuration>
         </plugin>

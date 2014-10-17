@@ -18,13 +18,11 @@ class State(args:Any*) extends mutable.HashMap[String, Any] {
   }
   
   def add(args:Any*):this.type = {
-    args.foreach(arg => {
-      arg match {
-        case elem:(String, Any) => this += (elem)
-        case elem:State => this ++= elem
-        case elem:Any => this += ((elem.toString -> true))
-      }
-    })
+    args.foreach {
+      case elem: (String, Any) => this += (elem)
+      case elem: State => this ++= elem
+      case elem: Any => this += ((elem.toString -> true))
+    }
     this
   }  
   def addJson(json:String) {this ++= State.fromJsonStringOrDefault(json)}
@@ -71,26 +69,100 @@ class State(args:Any*) extends mutable.HashMap[String, Any] {
     sb.append("}")
     sb.toString()
   }
-  
-  def value[A](key:String):A = this(key).asInstanceOf[A]
-  
+
+  def value[A : Manifest](key:String):Option[A] = this.get(key) match {
+    case Some(value) =>
+      manifest[A] match {
+        case Manifest.Long    => value match {
+          case number: Number => Some(number.longValue().asInstanceOf[A])
+          case _ => None
+        }
+        case Manifest.Float   => value match {
+          case number: Number => Some(number.floatValue().asInstanceOf[A])
+          case _ => None
+        }
+        case Manifest.Double  => value match {
+          case number: Number => Some(number.doubleValue().asInstanceOf[A])
+          case _ => None
+        }
+        case Manifest.Int     => value match {
+          case number: Number => Some(number.intValue().asInstanceOf[A])
+          case _ => None
+        }
+        case Manifest.Short   => value match {
+          case number: Number => Some(number.shortValue().asInstanceOf[A])
+          case _ => None
+        }
+        case Manifest.Byte    => value match {
+          case number: Number => Some(number.byteValue().asInstanceOf[A])
+          case _ => None
+        }
+        case Manifest.Char    => value match {
+          case c: Char => Some(c.asInstanceOf[A])
+          case _ => None
+        }
+        case Manifest.Boolean =>
+          value.toString match {
+            case "true"  => Some(true.asInstanceOf[A])
+            case "yes"   => Some(true.asInstanceOf[A])
+            case "on"    => Some(true.asInstanceOf[A])
+            case "1"     => Some(true.asInstanceOf[A])
+            case "false" => Some(false.asInstanceOf[A])
+            case "no"    => Some(false.asInstanceOf[A])
+            case "off"   => Some(false.asInstanceOf[A])
+            case "0"     => Some(false.asInstanceOf[A])
+            case _       => None
+          }
+        case m => if(m.runtimeClass.isInstance(value)) Some(value.asInstanceOf[A]) else None
+      }
+    case None => None
+  }
+
   def valueOrDefault[A : Manifest](key:String, default:A):A = {
     get(key) match {
       case Some(value) =>
-        val erasure = manifest[A] match {
-          case Manifest.Byte => classOf[java.lang.Byte]
-          case Manifest.Short => classOf[java.lang.Short]
-          case Manifest.Char => classOf[java.lang.Character]
-          case Manifest.Long => classOf[java.lang.Long]
-          case Manifest.Float => classOf[java.lang.Float]
-          case Manifest.Double => classOf[java.lang.Double]
-          case Manifest.Boolean => classOf[java.lang.Boolean]
-          case Manifest.Int => classOf[java.lang.Integer]
-          case m => m.erasure
-        }
-        if(erasure.isInstance(value)) value.asInstanceOf[A] else {
-          log.error("failed to use ("+key+" : "+value+") as "+erasure)
-          default
+        manifest[A] match {
+          case Manifest.Long    => value match {
+            case number: Number => number.longValue().asInstanceOf[A]
+            case _ => default
+          }
+          case Manifest.Float   => value match {
+            case number: Number => number.floatValue().asInstanceOf[A]
+            case _ => default
+          }
+          case Manifest.Double  => value match {
+            case number: Number => number.doubleValue().asInstanceOf[A]
+            case _ => default
+          }
+          case Manifest.Int     => value match {
+            case number: Number => number.intValue().asInstanceOf[A]
+            case _ => default
+          }
+          case Manifest.Short   => value match {
+            case number: Number => number.shortValue().asInstanceOf[A]
+            case _ => default
+          }
+          case Manifest.Byte    => value match {
+            case number: Number => number.byteValue().asInstanceOf[A]
+            case _ => default
+          }
+          case Manifest.Char    => value match {
+            case c: Char => c.asInstanceOf[A]
+            case _ => default
+          }
+          case Manifest.Boolean =>
+            value.toString match {
+              case "true"  => true.asInstanceOf[A]
+              case "yes"   => true.asInstanceOf[A]
+              case "on"    => true.asInstanceOf[A]
+              case "1"     => true.asInstanceOf[A]
+              case "false" => false.asInstanceOf[A]
+              case "no"    => false.asInstanceOf[A]
+              case "off"   => false.asInstanceOf[A]
+              case "0"     => false.asInstanceOf[A]
+              case _       => default
+            }
+          case m => if(m.runtimeClass.isInstance(value)) value.asInstanceOf[A] else default
         }
       case None => default
     }

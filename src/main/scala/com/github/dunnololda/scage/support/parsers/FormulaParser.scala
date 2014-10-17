@@ -5,6 +5,7 @@ import scala.util.parsing.combinator._
 import scala.util.Random
 import com.github.dunnololda.cli.MySimpleLogger
 import scala.collection.mutable
+import scala.language.implicitConversions
 
 /**
  * Simple parser for arithmetic expressions based on Scala's Combinator Parsers framework

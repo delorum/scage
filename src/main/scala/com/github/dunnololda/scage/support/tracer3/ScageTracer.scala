@@ -6,6 +6,7 @@ import com.github.dunnololda.cli.MySimpleLogger
 import com.github.dunnololda.scage.handlers.RendererLib
 import collection.mutable.ArrayBuffer
 import collection.mutable
+import scala.language.implicitConversions
 
 class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x", 0),
                               val field_to_x:Int        = property("field.to.x", try {RendererLib.windowWidth} catch {case e:Exception => 800}),
