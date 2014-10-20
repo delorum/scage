@@ -126,6 +126,11 @@
           <version>${lwjgl.version}</version>
       </dependency>
       <dependency>
+          <groupId>org.lwjgl.lwjgl</groupId>
+          <artifactId>lwjgl_util</artifactId>
+          <version>${lwjgl.version}</version>
+      </dependency>
+      <!--<dependency>
           <groupId>slick</groupId>
           <artifactId>slick</artifactId>
           <version>274</version>
@@ -135,6 +140,16 @@
                   <artifactId>lwjgl-native</artifactId>
               </exclusion>
           </exclusions>
+      </dependency>-->
+      <dependency>
+        <groupId>org.slick2d</groupId>
+        <artifactId>slick2d-core</artifactId>
+        <version>1.0.1</version>
+      </dependency>
+      <dependency>
+          <groupId>phys2d</groupId>
+          <artifactId>phys2d</artifactId>
+          <version>060408</version>
       </dependency>
       <!--<dependency>
           <groupId>org.scalaz</groupId>
@@ -352,7 +367,7 @@
         <plugin>
             <groupId>com.github.github</groupId>
             <artifactId>site-maven-plugin</artifactId>
-            <version>0.8</version>
+            <version>0.10</version>
             <configuration>
                 <message>Maven artifacts for ${project.artifactId} ${project.version}</message>  <!-- git commit message -->
                 <noJekyll>true</noJekyll>                                  <!-- disable webpage processing -->
