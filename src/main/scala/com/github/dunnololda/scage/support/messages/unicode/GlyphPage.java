@@ -84,7 +84,7 @@ public class GlyphPage {
 	/** True if the glyphs are ordered */
 	private boolean orderAscending;
 	/** The list of glyphs on this page */
-	private final List pageGlyphs = new ArrayList(32);
+	private final List<Glyph> pageGlyphs = new ArrayList<Glyph>(32);
 
 	/**
 	 * Create a new page of glyphs
@@ -196,8 +196,7 @@ public class GlyphPage {
 		scratchGraphics.fillRect(0, 0, MAX_GLYPH_SIZE, MAX_GLYPH_SIZE);
 		scratchGraphics.setComposite(AlphaComposite.SrcOver);
 		scratchGraphics.setColor(java.awt.Color.white);
-		for (Iterator iter = unicodeFont.getEffects().iterator(); iter.hasNext();)
-			((Effect)iter.next()).draw(scratchImage, scratchGraphics, unicodeFont, glyph);
+        for (Object o : unicodeFont.getEffects()) ((Effect) o).draw(scratchImage, scratchGraphics, unicodeFont, glyph);
 		glyph.setShape(null); // The shape will never be needed again.
 
 		WritableRaster raster = scratchImage.getRaster();

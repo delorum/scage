@@ -80,12 +80,24 @@ class Vec(val x:Float = 0, val y:Float = 0) {
   override val hashCode:Int = (41*(41 + x) + y).toInt
   def canEqual(other: Any)  = other.isInstanceOf[Vec]
 
-  def deg(v:Vec):Float      = math.acos(n * v.n).toFloat/math.Pi.toFloat*180f
-  def rad(v:Vec)            = math.acos(n * v.n).toFloat
-  def rotateRad(ang:Double) = new Vec((x * math.cos(ang) - y * math.sin(ang)).toFloat,
-                                      (x * math.sin(ang) + y * math.cos(ang)).toFloat)
-  def rotate(ang:Double)    = rotateRad(ang)
-  def rotateDeg(ang:Double) = rotateRad(ang/180*math.Pi)
+  def absDeg(v:Vec):Float    = math.acos(n * v.n).toFloat/math.Pi.toFloat*180f
+  def deg(v:Vec):Float       = absDeg(v)
+  def signedDeg(v:Vec):Float = {
+    val scalar = perpendicular*v
+    if(scalar >= 0) absDeg(v) else -absDeg(v)
+  }
+
+  def absRad(v:Vec)          = math.acos(n * v.n).toFloat
+  def rad(v:Vec)             = absRad(v)
+  def signedRad(v:Vec):Float = {
+    val scalar = perpendicular*v
+    if(scalar >= 0) absRad(v) else -absRad(v)
+  }
+
+  def rotateRad(ang_rad:Double) = new Vec((x * math.cos(ang_rad) - y * math.sin(ang_rad)).toFloat,
+                                          (x * math.sin(ang_rad) + y * math.cos(ang_rad)).toFloat)
+  def rotate(ang_rad:Double)    = rotateRad(ang_rad)
+  def rotateDeg(ang_deg:Double) = rotateRad(ang_deg/180*math.Pi)
 
   def copy = new Vec(x, y)
   def copy(x:Float = x, y:Float = y) = new Vec(x, y)
@@ -165,12 +177,24 @@ class DVec(val x:Double = 0, val y:Double = 0) {
   override val hashCode:Int = (41*(41 + x) + y).toInt
   def canEqual(other: Any) = other.isInstanceOf[DVec]
 
-  def deg(dv:DVec) = 180 / math.Pi * math.acos(n * dv.n)
-  def rad(dv:DVec) = math.acos(n * dv.n)
-  def rotateRad(ang:Double) = new DVec(x * math.cos(ang) - y * math.sin(ang),
-                                       x * math.sin(ang) + y * math.cos(ang))
-  def rotate(ang:Double)    = rotateRad(ang)
-  def rotateDeg(ang:Double) = rotateRad(ang/180*math.Pi)
+  def absDeg(dv:DVec)    = 180 / math.Pi * math.acos(n * dv.n)
+  def deg(dv:DVec)       = absDeg(dv)
+  def signedDeg(dv:DVec) = {
+    val scalar = perpendicular*dv
+    if(scalar >= 0) absDeg(dv) else -absDeg(dv)
+  }
+
+  def absRad(dv:DVec)    = math.acos(n * dv.n)
+  def rad(dv:DVec)       = absRad(dv)
+  def signedRad(dv:DVec) = {
+    val scalar = perpendicular*dv
+    if(scalar >= 0) absRad(dv) else -absRad(dv)
+  }
+
+  def rotateRad(ang_rad:Double) = new DVec(x * math.cos(ang_rad) - y * math.sin(ang_rad),
+                                           x * math.sin(ang_rad) + y * math.cos(ang_rad))
+  def rotate(ang_rad:Double)    = rotateRad(ang_rad)
+  def rotateDeg(ang_deg:Double) = rotateRad(ang_deg/180*math.Pi)
 
   def copy = new DVec(x, y)
   def copy(x:Double = x, y:Double = y) = new DVec(x, y)

@@ -1,11 +1,9 @@
 package com.github.dunnololda.scage.support.messages.unicode;
 
 import org.newdawn.slick.font.effects.EffectUtil;
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -70,7 +68,7 @@ public class ColorEffect implements ConfigurableEffect {
 	 * @see org.newdawn.slick.font.effects.ConfigurableEffect#getValues()
 	 */
 	public List getValues() {
-		List values = new ArrayList();
+		List<org.newdawn.slick.font.effects.ConfigurableEffect.Value> values = new ArrayList<org.newdawn.slick.font.effects.ConfigurableEffect.Value>();
 		values.add(EffectUtil.colorValue("Color", color));
 		return values;
 	}
@@ -79,12 +77,12 @@ public class ColorEffect implements ConfigurableEffect {
 	 * @see org.newdawn.slick.font.effects.ConfigurableEffect#setValues(java.util.List)
 	 */
 	public void setValues(List values) {
-		for (Iterator iter = values.iterator(); iter.hasNext();) {
-			Value value = (Value)iter.next();
-			if (value.getName().equals("Color")) {
-				setColor((Color)value.getObject());
-			}
-		}
+        for (Object value1 : values) {
+            Value value = (Value) value1;
+            if (value.getName().equals("Color")) {
+                setColor((Color) value.getObject());
+            }
+        }
 	}
 }
 
