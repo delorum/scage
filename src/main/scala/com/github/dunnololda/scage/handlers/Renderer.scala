@@ -551,8 +551,12 @@ trait Renderer extends Scage {
     rotation_point = () => new_rotation_params._1
     rotation_angle = () => new_rotation_params._2
   }
-  def rotationPoint = rotation_point()
-  def rotationPoint_=(new_rotation_point: => Vec) {
+  @deprecated("use rotationCenter", "2.0") def rotationPoint = rotation_point()
+  @deprecated("use rotationCenter", "2.0") def rotationPoint_=(new_rotation_point: => Vec) {
+    rotation_point = () => new_rotation_point
+  }
+  def rotationCenter = rotation_point()
+  def rotationCenter_=(new_rotation_point: => Vec) {
     rotation_point = () => new_rotation_point
   }
   def rotationDeg = (rotation_point(), rotation_angle())
@@ -578,8 +582,19 @@ trait Renderer extends Scage {
     rotation_angle = () => new_rotation_angle_rad*180/math.Pi.toFloat
   }
 
-  def scaledCoord(coord:Vec) = {
+  @deprecated("use absCoord", "2.0") def scaledCoord(coord:Vec) = {
     (coord / globalScale) + (center - windowCenter/globalScale)
+  }
+
+  def absCoord(coord:Vec) = {
+    val x = (coord / globalScale) + (center - windowCenter/globalScale)
+    val a = rotation_angle()
+    if(a != 0) {
+      val p = rotation_point()
+      (x - p).rotateDeg(-a) + p
+    } else {
+      x
+    }
   }
 
   case class RenderOperation(render_id:Int, render_func:() => Any, position:Int) extends ScageOperation(render_id, render_func) with Ordered[RenderOperation] {
