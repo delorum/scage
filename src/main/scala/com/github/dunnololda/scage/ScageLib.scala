@@ -49,57 +49,57 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
 
   // implicits
 
-  implicit def Int2Vecrich(i:Int) = new {
+  implicit def Int2Vecrich(i:Int): Object {def /(v: Vec): Vec; def *(v: Vec): Vec} = new {
     def *(v:Vec) = v*i
     def /(v:Vec) = v/i
   }
 
-  implicit def Long2Vecrich(i:Long) = new {
+  implicit def Long2Vecrich(i:Long): Object {def /(v: Vec): Vec; def *(v: Vec): Vec} = new {
     def *(v:Vec) = v*i
     def /(v:Vec) = v/i
   }
 
-  implicit def Float2Vecrich(f:Float) = new {
+  implicit def Float2Vecrich(f:Float): Object {def toRad: Float; def /(v: Vec): Vec; def toDeg: Float; def *(v: Vec): Vec} = new {
     def *(v:Vec) = v * f
     def /(v:Vec) = v/f
     def toRad:Float = f/180f*math.Pi.toFloat
     def toDeg:Float = f/math.Pi.toFloat*180f
   }
 
-  implicit def Double2Vecrich(d:Double) = new {
+  implicit def Double2Vecrich(d:Double): Object {def toRad: Double; def /(v: Vec): Vec; def toDeg: Double; def *(v: Vec): Vec} = new {
     def *(v:Vec) = v*d
     def /(v:Vec) = v/d
     def toRad:Double = d/180.0*math.Pi
     def toDeg:Double = d/math.Pi*180.0
   }
 
-  implicit def Int2DVecrich(i:Int) = new {
+  implicit def Int2DVecrich(i:Int): Object {def /(v: DVec): DVec; def *(v: DVec): DVec} = new {
     def *(v:DVec) = v*i
     def /(v:DVec) = v/i
   }
 
-  implicit def Long2DVecrich(i:Long) = new {
+  implicit def Long2DVecrich(i:Long): Object {def /(v: DVec): DVec; def *(v: DVec): DVec} = new {
     def *(v:DVec) = v*i
     def /(v:DVec) = v/i
   }
 
-  implicit def Float2DVecrich(f:Float) = new {
+  implicit def Float2DVecrich(f:Float): Object {def /(v: DVec): DVec; def *(v: DVec): DVec} = new {
     def *(v:DVec) = v * f
     def /(v:DVec) = v/f
   }
 
-  implicit def Double2DVecrich(d:Double) = new {
+  implicit def Double2DVecrich(d:Double): Object {def /(v: DVec): DVec; def *(v: DVec): DVec} = new {
     def *(v:DVec) = v*d
     def /(v:DVec) = v/d
   }
 
-  implicit def Phys2dVec2Vec(pv:ROVector2f) = new {
+  implicit def Phys2dVec2Vec(pv:ROVector2f): Object {def toVec: Vec; def toDVec: DVec} = new {
     def toVec:Vec = Vec(pv.getX, pv.getY)
     def toDVec:DVec = DVec(pv.getX, pv.getY)
   }
 
-  implicit def Vec2dvec(v:Vec)  = v.toDVec
-  implicit def DVec2Vec(dv:Vec) = dv.toVec
+  implicit def Vec2dvec(v:Vec): DVec = v.toDVec
+  implicit def DVec2Vec(dv:Vec): Vec = dv.toVec
 
   implicit val NumericVec = new Numeric[Vec] {
     def plus(x: ScageLib.Vec, y: ScageLib.Vec): ScageLib.Vec = x + y
@@ -121,6 +121,28 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
     def toDouble(x: ScageLib.Vec): Double = x.x
 
     def compare(x: ScageLib.Vec, y: ScageLib.Vec): Int = ???
+  }
+
+  implicit val NumericDVec = new Numeric[DVec] {
+    def plus(x: ScageLib.DVec, y: ScageLib.DVec): ScageLib.DVec = x + y
+
+    def minus(x: ScageLib.DVec, y: ScageLib.DVec): ScageLib.DVec = x - y
+
+    def times(x: ScageLib.DVec, y: ScageLib.DVec): ScageLib.DVec = ???
+
+    def negate(x: ScageLib.DVec): ScageLib.DVec = x*(-1)
+
+    def fromInt(x: Int): ScageLib.DVec = DVec(x, x)
+
+    def toInt(x: ScageLib.DVec): Int = x.ix
+
+    def toLong(x: ScageLib.DVec): Long = x.ix
+
+    def toFloat(x: ScageLib.DVec): Float = x.x.toFloat
+
+    def toDouble(x: ScageLib.DVec): Double = x.x
+
+    def compare(x: ScageLib.DVec, y: ScageLib.DVec): Int = ???
   }
 
   // support
