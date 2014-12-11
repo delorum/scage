@@ -113,6 +113,17 @@ trait RendererLib {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
+  def drawEllipse(coord:Vec, radius1:Float, radius2:Float, color:ScageColor = DEFAULT_COLOR): Unit = {
+    if(color != DEFAULT_COLOR) currentColor = color
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+      GL11.glPushMatrix()
+      GL11.glTranslatef(coord.x, coord.y, 0.0f)
+      GL11.glScalef(radius1, radius2, 1)
+        GL11.glCallList(CIRCLE)
+      GL11.glPopMatrix()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
+  }
+
   def drawFilledCircle(coord:Vec, radius:Float, color:ScageColor = DEFAULT_COLOR) {
     if(color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
@@ -121,6 +132,17 @@ trait RendererLib {
       GL11.glScalef(radius,radius,1)
      	  GL11.glCallList(FILLED_CIRCLE)
       GL11.glPopMatrix()
+    GL11.glEnable(GL11.GL_TEXTURE_2D)
+  }
+
+  def drawFilledEllipse(coord:Vec, radius1:Float, radius2:Float, color:ScageColor = DEFAULT_COLOR) {
+    if(color != DEFAULT_COLOR) currentColor = color
+    GL11.glDisable(GL11.GL_TEXTURE_2D)
+    GL11.glPushMatrix()
+      GL11.glTranslatef(coord.x, coord.y, 0.0f)
+      GL11.glScalef(radius1,radius2,1)
+      GL11.glCallList(FILLED_CIRCLE)
+    GL11.glPopMatrix()
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
@@ -521,6 +543,15 @@ trait Renderer extends Scage {
   private var _fps:Int = 0
   def fps = _fps
 
+  private var _ticks:Int = 0
+  def ticks = {
+    if(_ticks != 0) {
+      _ticks
+    } else {
+      TICKS_PER_SECOND
+    }
+  }
+
   private var msek = System.currentTimeMillis
   private var frames:Int = 0
   private def countFPS() {
@@ -529,6 +560,17 @@ trait Renderer extends Scage {
       _fps = frames
       frames = 0
       msek = System.currentTimeMillis
+    }
+  }
+
+  private var msek2 = System.currentTimeMillis
+  private var frames2:Int = 0
+  private def countTicks() {
+    frames2 += 1
+    if(System.currentTimeMillis - msek2 >= 1000) {
+      _ticks = frames2
+      frames2 = 0
+      msek2 = System.currentTimeMillis
     }
   }
 
@@ -677,6 +719,7 @@ trait Renderer extends Scage {
       restart_toggled = false
       if(actions.operations.nonEmpty) {
         _execute(actions.operations)
+        countTicks()
       }
       next_game_tick += SKIP_TICKS
       loops += 1
