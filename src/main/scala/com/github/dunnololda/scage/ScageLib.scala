@@ -145,6 +145,11 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
     def compare(x: ScageLib.DVec, y: ScageLib.DVec): Int = ???
   }
 
+  implicit class MinOption[A](s:Seq[A]) {
+    def minOption(implicit o:Ordering[A]):Option[A] = if(s.isEmpty) None else Some(s.min(o))
+    def minOptionBy[B](f: A => B)(implicit o:Ordering[B]):Option[A] = if(s.isEmpty) None else Some(s.minBy(f)(o))
+  }
+
   // support
 
   def msecs                  = System.currentTimeMillis()
