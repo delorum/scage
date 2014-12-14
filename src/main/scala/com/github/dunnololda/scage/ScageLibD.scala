@@ -1,13 +1,13 @@
 package com.github.dunnololda.scage
 
-import handlers.RendererLib
+import com.github.dunnololda.scage.handlers.RendererLibD
 import support._
 import support.messages._
 import com.github.dunnololda.cli.AppProperties
 import net.phys2d.math.ROVector2f
 import scala.language.implicitConversions
 
-object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib with LWJGLKeyboard with ScageColorTrait with ScageIdTrait with EventsTrait {
+object ScageLibD extends ScageMessageTrait with ScageXMLTrait with RendererLibD with LWJGLKeyboard with ScageColorTrait with ScageIdTrait with EventsTrait {
   def property[A : Manifest](key:String, default: => A):A                                      = AppProperties.property(key, default)
   def optProperty[A : Manifest](key:String):Option[A]                                          = AppProperties.optProperty(key)
   def reqProperty[A : Manifest](key:String):A                                                  = AppProperties.reqProperty(key)
@@ -200,9 +200,9 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
         val (min_x, max_x, min_y, max_y) = area.foldLeft((Float.MaxValue, 0f, Float.MaxValue, 0f)) {
           case ((minx, maxx, miny, maxy), Vec(x, y)) =>
             (if(x < minx) x else minx,
-             if(x > maxx) x else maxx,
-             if(y < miny) y else miny,
-             if(y > maxy) y else maxy)
+              if(x > maxx) x else maxx,
+              if(y < miny) y else miny,
+              if(y > maxy) y else maxy)
         }
         val l = Vec(min_x, max_y)
         val w =  max_x - min_x
@@ -238,9 +238,9 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
         val (min_x, max_x, min_y, max_y) = area.foldLeft((Double.MaxValue, 0.0, Double.MaxValue, 0.0)) {
           case ((minx, maxx, miny, maxy), DVec(x, y)) =>
             (if(x < minx) x else minx,
-             if(x > maxx) x else maxx,
-             if(y < miny) y else miny,
-             if(y > maxy) y else maxy)
+              if(x > maxx) x else maxx,
+              if(y < miny) y else miny,
+              if(y > maxy) y else maxy)
         }
         val l = DVec(min_x, max_y)
         val w =  max_x - min_x
