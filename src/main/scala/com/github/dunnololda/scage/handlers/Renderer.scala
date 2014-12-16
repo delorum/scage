@@ -552,8 +552,21 @@ trait Renderer extends Scage {
     }
   }
 
+  private var _action_time_msec:Long = 0l
+  private var _average_action_time_msec:Float = 0f
+  private var _action_time_measures_count:Long = 0l
+  def currentActionTimeMsec = _action_time_msec
+  def averageActionTimeMsec = _average_action_time_msec
+
+  private var _render_time_msec:Long = 0l
+  private var _average_render_time_msec:Float = 0f
+  private var _render_time_measures_count:Long = 0l
+  def currentRenderTimeMsec = _render_time_msec
+  def averageRenderTimeMsec = _average_render_time_msec
+
   private var msek = System.currentTimeMillis
   private var frames:Int = 0
+  private var msek4 = System.currentTimeMillis
   private def countFPS() {
     frames += 1
     if(System.currentTimeMillis - msek >= 1000) {
@@ -561,10 +574,15 @@ trait Renderer extends Scage {
       frames = 0
       msek = System.currentTimeMillis
     }
+    _render_time_msec = System.currentTimeMillis() - msek4
+    _render_time_measures_count += 1
+    _average_render_time_msec = 1f*(_average_render_time_msec*(_render_time_measures_count-1) + _render_time_msec)/_render_time_measures_count
+    msek4 = System.currentTimeMillis()
   }
 
   private var msek2 = System.currentTimeMillis
   private var frames2:Int = 0
+  private var msek3 = System.currentTimeMillis
   private def countTicks() {
     frames2 += 1
     if(System.currentTimeMillis - msek2 >= 1000) {
@@ -572,6 +590,10 @@ trait Renderer extends Scage {
       frames2 = 0
       msek2 = System.currentTimeMillis
     }
+    _action_time_msec = System.currentTimeMillis() - msek3
+    _action_time_measures_count += 1
+    _average_action_time_msec =1f*(_average_action_time_msec*(_action_time_measures_count-1) + _action_time_msec)/_action_time_measures_count
+    msek3 = System.currentTimeMillis()
   }
 
   private var _global_scale:Float = 1.0f
