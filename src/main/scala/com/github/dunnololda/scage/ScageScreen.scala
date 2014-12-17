@@ -2,7 +2,7 @@ package com.github.dunnololda.scage
 
 import handlers.controller2.{ScageController, SingleController}
 import com.github.dunnololda.scage.handlers.{RendererD, Renderer}
-import handlers.RendererLib._
+import handlers.{RendererLib, RendererLibD}
 
 import java.awt.{BorderLayout, Canvas}
 import org.lwjgl.opengl.Display
@@ -71,18 +71,18 @@ abstract class ScreenApp(
       executeActions()
       performRendering()
     }
-    renderExitMessage()
+    RendererLib.renderExitMessage()
     executeClears()
     executeDisposes()
   }
 
   override def main(args:Array[String]) {
     scage_log.info("starting main screen "+title+"...")
-    initgl(width, height, title)
-    drawWelcomeMessages()
+    RendererLib.initgl(width, height, title)
+    RendererLib.drawWelcomeMessages()
     super.main(args)
     run()
-    destroygl()
+    RendererLib.destroygl()
     scage_log.info(title+" was stopped")
     System.exit(0)  // need explicit exit for the app's utilizing NetServer/NetClient as they have actors
   }
@@ -107,18 +107,18 @@ abstract class ScreenAppD(
       executeActions()
       performRendering()
     }
-    renderExitMessage()
+    RendererLibD.renderExitMessage()
     executeClears()
     executeDisposes()
   }
 
   override def main(args:Array[String]) {
     scage_log.info("starting main screen "+title+"...")
-    initgl(width, height, title)
-    drawWelcomeMessages()
+    RendererLibD.initgl(width, height, title)
+    RendererLibD.drawWelcomeMessages()
     super.main(args)
     run()
-    destroygl()
+    RendererLibD.destroygl()
     scage_log.info(title+" was stopped")
     System.exit(0)  // need explicit exit for the app's utilizing NetServer/NetClient as they have actors
   }

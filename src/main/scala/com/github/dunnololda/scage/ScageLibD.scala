@@ -7,7 +7,7 @@ import com.github.dunnololda.cli.AppProperties
 import net.phys2d.math.ROVector2f
 import scala.language.implicitConversions
 
-object ScageLibD extends ScageMessageTrait with ScageXMLTrait with RendererLibD with LWJGLKeyboard with ScageColorTrait with ScageIdTrait with EventsTrait {
+object ScageLibD extends ScageMessageTraitD with ScageXMLTrait with RendererLibD with LWJGLKeyboard with ScageColorTrait with ScageIdTrait with EventsTrait {
   def property[A : Manifest](key:String, default: => A):A                                      = AppProperties.property(key, default)
   def optProperty[A : Manifest](key:String):Option[A]                                          = AppProperties.optProperty(key)
   def reqProperty[A : Manifest](key:String):A                                                  = AppProperties.reqProperty(key)
@@ -16,9 +16,9 @@ object ScageLibD extends ScageMessageTrait with ScageXMLTrait with RendererLibD 
   def appName = AppProperties.appName
   def appVersion = AppProperties.appVersion
 
-  def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor, align:String) {ScageMessage.print(message, x, y, size, color, align)}
-  def messageBounds(message:Any, size:Float = max_font_size):Vec                                           = ScageMessage.messageBounds(message, size)
-  def areaForMessage(message:Any, coord:Vec, size:Float = max_font_size, align:String = "center"):Seq[Vec] = ScageMessage.areaForMessage(message, coord, size, align)
+  def print(message:Any, x:Double, y:Double, size:Double, color:ScageColor, align:String) {ScageMessageD.print(message, x, y, size, color, align)}
+  def messageBounds(message:Any, size:Double = max_font_size):DVec                                            = ScageMessageD.messageBounds(message, size)
+  def areaForMessage(message:Any, coord:DVec, size:Double = max_font_size, align:String = "center"):Seq[DVec] = ScageMessageD.areaForMessage(message, coord, size, align)
 
   def lang = ScageXML.lang
   def lang_=(new_lang:String) {ScageXML.lang = new_lang}
@@ -262,13 +262,9 @@ object ScageLibD extends ScageMessageTrait with ScageXMLTrait with RendererLibD 
   // types
   type ScageApp        = com.github.dunnololda.scage.ScageApp
   type Scage           = com.github.dunnololda.scage.Scage
-  type ScageScreenApp  = com.github.dunnololda.scage.ScageScreenApp
   type ScageScreenAppD  = com.github.dunnololda.scage.ScageScreenAppD
-  type ScageScreen     = com.github.dunnololda.scage.ScageScreen
   type ScageScreenD     = com.github.dunnololda.scage.ScageScreenD
-  type ScreenApp       = com.github.dunnololda.scage.ScreenApp
   type ScreenAppD       = com.github.dunnololda.scage.ScreenAppD
-  type Screen          = com.github.dunnololda.scage.Screen
   type ScreenD          = com.github.dunnololda.scage.ScreenD
   type Vec             = com.github.dunnololda.scage.support.Vec
   type DVec            = com.github.dunnololda.scage.support.DVec
@@ -279,6 +275,7 @@ object ScageLibD extends ScageMessageTrait with ScageXMLTrait with RendererLibD 
   type Trace           = com.github.dunnololda.scage.support.tracer3.Trace
   type TraceTrait      = com.github.dunnololda.scage.support.tracer3.TraceTrait
   type ScageMessage    = com.github.dunnololda.scage.support.messages.ScageMessage
+  type ScageMessageD    = com.github.dunnololda.scage.support.messages.ScageMessageD
   type PathFinder       = com.github.dunnololda.scage.support.PathFinder
 
   type CoordTracer[A <: com.github.dunnololda.scage.support.tracer3.TraceTrait] = com.github.dunnololda.scage.support.tracer3.CoordTracer[A]
@@ -302,7 +299,7 @@ object ScageLibD extends ScageMessageTrait with ScageXMLTrait with RendererLibD 
   val State            = com.github.dunnololda.scage.support.State
   val Trace            = com.github.dunnololda.scage.support.tracer3.Trace
   val ScageColor       = com.github.dunnololda.scage.support.ScageColor
-  val ScageMessage     = com.github.dunnololda.scage.support.messages.ScageMessage
-  val max_font_size    = ScageMessage.max_font_size
+  val ScageMessageD    = com.github.dunnololda.scage.support.messages.ScageMessageD
+  val max_font_size    = ScageMessageD.max_font_size
   val PathFinder       = com.github.dunnololda.scage.support.PathFinder
 }

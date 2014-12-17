@@ -596,6 +596,10 @@ trait Renderer extends Scage {
     msek3 = System.currentTimeMillis()
   }
 
+  private var _base:() => Vec = () => Vec.zero
+  def base = _base()
+  def base_= (coord: => Vec) {_base = () => coord}
+
   private var _global_scale:Float = 1.0f
   def globalScale = _global_scale
   def globalScale_= (new_global_scale:Float) {_global_scale = new_global_scale}
@@ -777,12 +781,12 @@ trait Renderer extends Scage {
     else {
       clearScreen()
       GL11.glPushMatrix()
-        val coord = window_center() - central_coord()*_global_scale
+        val coord = window_center() - (central_coord() - _base())*_global_scale
         if(coord.notZero) GL11.glTranslatef(coord.x , coord.y, 0.0f)
         if(_global_scale != 1) GL11.glScalef(_global_scale, _global_scale, 1)
         val rot_ang = rotation_angle()
         if(rot_ang != 0) {
-          val point = rotation_point()
+          val point = rotation_point() - _base()
           GL11.glTranslatef(point.x , point.y, 0.0f)
           GL11.glRotatef(rot_ang, 0, 0, 1)
           GL11.glTranslatef(-point.x , -point.y, 0.0f)

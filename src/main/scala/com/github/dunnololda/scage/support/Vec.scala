@@ -129,6 +129,7 @@ object DVec {
   }
 
   lazy val dzero = new DVec(0, 0)
+  lazy val zero = new DVec(0, 0)
 }
 
 class DVec(val x:Double = 0, val y:Double = 0) {
