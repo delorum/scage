@@ -1,6 +1,6 @@
 package com.github.dunnololda.scage.support.messages
 
-import com.github.dunnololda.scage.handlers.RendererLibD._
+import com.github.dunnololda.scage.handlers.RendererLibD.currentColor
 import com.github.dunnololda.cli.AppProperties._
 import com.github.dunnololda.scage.support.messages.unicode.UnicodeFont
 import com.github.dunnololda.cli.MySimpleLogger

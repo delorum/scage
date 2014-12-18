@@ -1,6 +1,6 @@
 package com.github.dunnololda.scage.support.messages
 
-import com.github.dunnololda.scage.handlers.RendererLib._
+import com.github.dunnololda.scage.handlers.RendererLib.currentColor
 import com.github.dunnololda.cli.AppProperties._
 import com.github.dunnololda.scage.support.messages.unicode.UnicodeFont
 import com.github.dunnololda.cli.MySimpleLogger
@@ -85,12 +85,11 @@ class ScageMessage(
       log.debug("loading font "+fonts_base+font_file+"...")
       new UnicodeFont(fonts_base+font_file, max_font_size, glyph_from, glyph_to)
     } catch {
-      case e:Exception => {
+      case e:Exception =>
         log.error("failed to create font: "+e.getLocalizedMessage)
         log.error("please provide the path to some unicode ttf font")
         System.exit(1)
         null
-      }
     }
   }
 
