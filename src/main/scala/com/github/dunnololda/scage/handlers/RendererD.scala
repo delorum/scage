@@ -547,36 +547,70 @@ trait RendererD extends Scage {
   def currentRenderTimeMsec = _render_time_msec
   def averageRenderTimeMsec = _average_render_time_msec
 
-  private var msek = System.currentTimeMillis
+  private var msec = System.currentTimeMillis
   private var frames:Int = 0
-  private var msek4 = System.currentTimeMillis
+  private var msec4 = System.currentTimeMillis
   private def countFPS() {
     frames += 1
-    if(System.currentTimeMillis - msek >= 1000) {
+    if(System.currentTimeMillis - msec >= 1000) {
       _fps = frames
       frames = 0
-      msek = System.currentTimeMillis
+      msec = System.currentTimeMillis
     }
-    _render_time_msec = System.currentTimeMillis() - msek4
+    _render_time_msec = System.currentTimeMillis() - msec4
     _render_time_measures_count += 1
     _average_render_time_msec = 1.0*(_average_render_time_msec*(_render_time_measures_count-1) + _render_time_msec)/_render_time_measures_count
-    msek4 = System.currentTimeMillis()
+    msec4 = System.currentTimeMillis()
   }
 
-  private var msek2 = System.currentTimeMillis
+  private var msec2 = System.currentTimeMillis
   private var frames2:Int = 0
-  private var msek3 = System.currentTimeMillis
+  private var msec3 = System.currentTimeMillis
   private def countTicks() {
     frames2 += 1
-    if(System.currentTimeMillis - msek2 >= 1000) {
+    if(System.currentTimeMillis - msec2 >= 1000) {
       _ticks = frames2
       frames2 = 0
-      msek2 = System.currentTimeMillis
+      msec2 = System.currentTimeMillis
     }
-    _action_time_msec = System.currentTimeMillis() - msek3
+    _action_time_msec = System.currentTimeMillis() - msec3
     _action_time_measures_count += 1
     _average_action_time_msec =1.0*(_average_action_time_msec*(_action_time_measures_count-1) + _action_time_msec)/_action_time_measures_count
-    msek3 = System.currentTimeMillis()
+    msec3 = System.currentTimeMillis()
+  }
+
+  private var next_game_tick_diff_save = 0l
+  private var msec_diff_save = 0l
+  private var msec2_diff_save = 0l
+  private var msec3_diff_save = 0l
+  private var msec4_diff_save = 0l
+  def saveCounters() {
+    next_game_tick_diff_save = System.currentTimeMillis() - next_game_tick
+    msec_diff_save = System.currentTimeMillis() - msec_diff_save
+    msec2_diff_save = System.currentTimeMillis() - msec2_diff_save
+    msec3_diff_save = System.currentTimeMillis() - msec3_diff_save
+    msec4_diff_save = System.currentTimeMillis() - msec4_diff_save
+  }
+  def restoreCounters() {
+    next_game_tick = next_game_tick + next_game_tick_diff_save
+    next_game_tick_diff_save = 0l
+
+    msec = msec + msec_diff_save
+    msec_diff_save = 0l
+
+    msec2 = msec2 + msec2_diff_save
+    msec2_diff_save = 0l
+
+    msec3 = msec3 + msec3_diff_save
+    msec3_diff_save = 0l
+
+    msec4 = msec4 + msec4_diff_save
+    msec4_diff_save = 0l
+  }
+  def holdCounters(func: => Any) {
+    saveCounters()
+    func
+    restoreCounters()
   }
 
   private var _base:() => DVec = () => DVec.zero
