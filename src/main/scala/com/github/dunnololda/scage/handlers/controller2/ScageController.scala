@@ -7,8 +7,14 @@ import com.github.dunnololda.scage.ScageLib.coordOnArea
 import collection.mutable
 import com.github.dunnololda.cli.MySimpleLogger
 
-case class KeyPress(key_code:Int, var was_pressed:Boolean, var last_pressed_time:Long)
-case class MouseButtonPress(button_code:Int, var was_pressed:Boolean, var last_pressed_time:Long)
+case class KeyPress(key_code:Int, var was_pressed:Boolean, var pressed_start_time:Long, var last_pressed_time:Long) {
+  def immutable:ImmutableKeyPress = ImmutableKeyPress(key_code, was_pressed, pressed_start_time, last_pressed_time)
+}
+case class ImmutableKeyPress(key_code:Int, was_pressed:Boolean, pressed_start_time:Long, last_pressed_time:Long)
+case class MouseButtonPress(button_code:Int, var was_pressed:Boolean, var pressed_start_time:Long, var last_pressed_time:Long) {
+  def immutable:ImmutableMouseButtonPress = ImmutableMouseButtonPress(button_code, was_pressed, pressed_start_time, last_pressed_time)
+}
+case class ImmutableMouseButtonPress(button_code:Int, was_pressed:Boolean, pressed_start_time:Long, last_pressed_time:Long)
 
 object ScageController {
   private val key_presses = mutable.HashMap[Int, KeyPress]()
@@ -18,25 +24,34 @@ object ScageController {
 trait ScageController extends Scage {
   private val log = MySimpleLogger(this.getClass.getName)
 
-  protected def keyPress(key_code:Int):KeyPress = {
+  protected def mappedKeyboardKeys:scala.collection.Set[Int]
+  protected def mappedMouseButtons:scala.collection.Set[Int]
+
+  protected def innerKeyPress(key_code:Int):Option[KeyPress] = {
     ScageController.key_presses.get(key_code) match {
-      case Some(kp:KeyPress) => kp
-      case None =>
-        val kp = KeyPress(key_code, was_pressed = false, 0L)
+      case skp @ Some(kp:KeyPress) => skp
+      case None if mappedKeyboardKeys.contains(key_code)=>
+        val kp = KeyPress(key_code, was_pressed = false, 0L, 0L)
         ScageController.key_presses += (key_code -> kp)
-        kp
+        Some(kp)
+      case _ => None
     }
   }
 
-  protected def mouseButtonPress(mouse_button:Int):MouseButtonPress = {
+  def keyPress(key_code:Int):Option[ImmutableKeyPress] = innerKeyPress(key_code).map(_.immutable)
+
+  protected def innerMouseButtonPress(mouse_button:Int):Option[MouseButtonPress] = {
     ScageController.mouse_button_presses.get(mouse_button) match {
-      case Some(mbp:MouseButtonPress) => mbp
-      case None =>
-        val mbp = MouseButtonPress(mouse_button, was_pressed = false, 0L)
+      case smbp @ Some(mbp:MouseButtonPress) => smbp
+      case None if mappedMouseButtons.contains(mouse_button) =>
+        val mbp = MouseButtonPress(mouse_button, was_pressed = false, 0L, 0L)
         ScageController.mouse_button_presses += (mouse_button -> mbp)
-        mbp
+        Some(mbp)
+      case _ => None
     }
   }
+
+  def mouseButtonPress(key_code:Int):Option[ImmutableMouseButtonPress] = innerMouseButtonPress(key_code).map(_.immutable)
 
   def keyPressed(key_code:Int):Boolean = {
     /*val KeyPress(_, was_pressed, _) = keyPress(key_code)

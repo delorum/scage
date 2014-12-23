@@ -10,31 +10,34 @@ case class MultiKeyEvent(var was_pressed:Boolean, var last_pressed_time:Long, re
 case class MultiMouseButtonEvent(var was_pressed:Boolean, var last_pressed_time:Long, repeat_time: () => Long, onButtonDown: Vec => Any, onButtonUp: Vec => Any)
 
 trait MultiController extends ScageController {
-  private val keyboard_keys = mutable.HashMap[Int, ArrayBuffer[MultiKeyEvent]]()
+  private val keyboard_key_events = mutable.HashMap[Int, ArrayBuffer[MultiKeyEvent]]()
   private val anykeys = ArrayBuffer[() => Any]()
-  private val mouse_buttons = mutable.HashMap[Int, ArrayBuffer[MultiMouseButtonEvent]]()
+  private val mouse_button_events = mutable.HashMap[Int, ArrayBuffer[MultiMouseButtonEvent]]()
   private val mouse_motions = ArrayBuffer[Vec => Any]()
   private val mouse_drag_motions = mutable.HashMap[Int, ArrayBuffer[Vec => Any]]()
   private val mouse_wheel_ups = ArrayBuffer[Vec => Any]()
   private val mouse_wheel_downs = ArrayBuffer[Vec => Any]()
 
+  protected def mappedKeyboardKeys:scala.collection.Set[Int] = keyboard_key_events.keySet
+  protected def mappedMouseButtons:scala.collection.Set[Int] = mouse_button_events.keySet
+
   def key(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) = {
     val event = MultiKeyEvent(was_pressed = false, 0, () => repeat_time, () => if(!on_pause) onKeyDown, () => if(!on_pause) onKeyUp)
-    if(keyboard_keys.contains(key_code)) keyboard_keys(key_code) += event
-    else keyboard_keys(key_code) = ArrayBuffer(event)
-    deletion_operations.addOp(() => keyboard_keys(key_code) -= event)
+    if(keyboard_key_events.contains(key_code)) keyboard_key_events(key_code) += event
+    else keyboard_key_events(key_code) = ArrayBuffer(event)
+    deletion_operations.addOp(() => keyboard_key_events(key_code) -= event)
   }
   def keyIgnorePause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) = {
     val event = MultiKeyEvent(was_pressed = false, 0, () => repeat_time, () => onKeyDown, () => onKeyUp)
-    if(keyboard_keys.contains(key_code)) keyboard_keys(key_code) += event
-    else keyboard_keys(key_code) = ArrayBuffer(event)
-    deletion_operations.addOp(() => keyboard_keys(key_code) -= event)
+    if(keyboard_key_events.contains(key_code)) keyboard_key_events(key_code) += event
+    else keyboard_key_events(key_code) = ArrayBuffer(event)
+    deletion_operations.addOp(() => keyboard_key_events(key_code) -= event)
   }
   def keyOnPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) = {
     val event = MultiKeyEvent(was_pressed = false, 0, () => repeat_time, () => if(on_pause) onKeyDown, () => if(on_pause) onKeyUp)
-    if(keyboard_keys.contains(key_code)) keyboard_keys(key_code) += event
-    else keyboard_keys(key_code) = ArrayBuffer(event)
-    deletion_operations.addOp(() => keyboard_keys(key_code) -= event)
+    if(keyboard_key_events.contains(key_code)) keyboard_key_events(key_code) += event
+    else keyboard_key_events(key_code) = ArrayBuffer(event)
+    deletion_operations.addOp(() => keyboard_key_events(key_code) -= event)
   }
 
   def anykey(onKeyDown: => Any) = {
@@ -57,9 +60,9 @@ trait MultiController extends ScageController {
   def isMouseMoved = Mouse.getDX != 0 || Mouse.getDY != 0
   private def mouseButton(button_code:Int, repeat_time: => Long = 0, onButtonDown: Vec => Any, onButtonUp: Vec => Any = Vec => {}) = {
     val event = MultiMouseButtonEvent(was_pressed = false, 0, () => repeat_time, onButtonDown, onButtonUp)
-    if(mouse_buttons.contains(button_code)) mouse_buttons(button_code) += event
-    else mouse_buttons(button_code) = ArrayBuffer(event)
-    deletion_operations.addOp(() => mouse_buttons(button_code) -= event)
+    if(mouse_button_events.contains(button_code)) mouse_button_events(button_code) += event
+    else mouse_button_events(button_code) = ArrayBuffer(event)
+    deletion_operations.addOp(() => mouse_button_events(button_code) -= event)
   }
 
   def leftMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
@@ -233,12 +236,13 @@ trait MultiController extends ScageController {
 
   def checkControls() {
     for {
-      (key, events_for_key) <- keyboard_keys
-      key_press @ KeyPress(_, was_pressed, _) = keyPress(key)
+      (key, events_for_key) <- keyboard_key_events
+      key_press @ KeyPress(_, was_pressed, _, _) <- innerKeyPress(key)
     } {
       if(Keyboard.isKeyDown(key)) {
         if(!was_pressed) {
           key_press.was_pressed = true
+          key_press.pressed_start_time = System.currentTimeMillis()
         }
         for {
           key_data <- events_for_key
@@ -272,12 +276,13 @@ trait MultiController extends ScageController {
     }
 
     for {
-      (button, events_for_button) <- mouse_buttons
-      mouse_button_press @ MouseButtonPress(_, was_pressed, _) = mouseButtonPress(button)
+      (button, events_for_button) <- mouse_button_events
+      mouse_button_press @ MouseButtonPress(_, was_pressed, _, _) <- innerMouseButtonPress(button)
     } {
       if(Mouse.isButtonDown(button)) {
         if(!was_pressed) {
           mouse_button_press.was_pressed = true
+          mouse_button_press.pressed_start_time = System.currentTimeMillis()
         }
         for {
           button_data <- events_for_button
@@ -311,8 +316,8 @@ trait MultiController extends ScageController {
     }
 
     Mouse.getDWheel match {
-      case x if(x > 0) => mouse_wheel_ups.foreach(onWheelUp => onWheelUp(mouse_coord))
-      case x if(x < 0) => mouse_wheel_downs.foreach(onWheelDown => onWheelDown(mouse_coord))
+      case x if x > 0 => mouse_wheel_ups.foreach(onWheelUp => onWheelUp(mouse_coord))
+      case x if x < 0 => mouse_wheel_downs.foreach(onWheelDown => onWheelDown(mouse_coord))
       case _ =>
     }
   }
