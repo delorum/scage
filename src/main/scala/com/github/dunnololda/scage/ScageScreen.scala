@@ -21,8 +21,7 @@ abstract class Screen(val unit_name:String = "Scage Screen") extends Scage with 
     prepareRendering()
     log.info(unit_name+": run")
     while(is_running && Scage.isAppRunning) {
-      checkControls()
-      executeActions()
+      checkControlsAndExecuteActions()
       performRendering()
     }
     executeClears()
@@ -42,8 +41,7 @@ abstract class ScreenD(val unit_name:String = "Scage Screen") extends Scage with
     prepareRendering()
     log.info(unit_name+": run")
     while(is_running && Scage.isAppRunning) {
-      checkControls()
-      executeActions()
+      checkControlsAndExecuteActions()
       performRendering()
     }
     executeClears()
@@ -67,8 +65,7 @@ abstract class ScreenApp(
     prepareRendering()
     scage_log.info(unit_name+": run")
     while(is_running && Scage.isAppRunning) {
-      checkControls()
-      executeActions()
+      checkControlsAndExecuteActions()
       performRendering()
     }
     RendererLib.renderExitMessage()
@@ -103,8 +100,7 @@ abstract class ScreenAppD(
     prepareRendering()
     scage_log.info(unit_name+": run")
     while(is_running && Scage.isAppRunning) {
-      checkControls()
-      executeActions()
+      checkControlsAndExecuteActions()
       performRendering()
     }
     RendererLibD.renderExitMessage()

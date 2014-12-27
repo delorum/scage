@@ -17,6 +17,7 @@ import com.github.dunnololda.scage.{ScageOperation, Scage}
 import collection.mutable.ArrayBuffer
 import com.github.dunnololda.scage.support.{SortedBuffer, ScageColor, Vec}
 import com.github.dunnololda.cli.MySimpleLogger
+import com.github.dunnololda.scage.handlers.controller2.ScageController
 
 object DisplayListsHolder {
   private val log = MySimpleLogger(this.getClass.getName)
@@ -537,7 +538,7 @@ trait RendererLib {
 object RendererLib extends RendererLib
 import RendererLib._
 
-trait Renderer extends Scage {
+trait Renderer extends Scage with ScageController {
   //private val log = MySimpleLogger(this.getClass.getName)
 
   private var _fps:Int = 0
@@ -574,10 +575,6 @@ trait Renderer extends Scage {
       frames = 0
       msec = System.currentTimeMillis
     }
-    _render_time_msec = System.currentTimeMillis() - msec4
-    _render_time_measures_count += 1
-    _average_render_time_msec = 1f*(_average_render_time_msec*(_render_time_measures_count-1) + _render_time_msec)/_render_time_measures_count
-    msec4 = System.currentTimeMillis()
   }
 
   private var msec2 = System.currentTimeMillis
@@ -590,10 +587,6 @@ trait Renderer extends Scage {
       frames2 = 0
       msec2 = System.currentTimeMillis
     }
-    _action_time_msec = System.currentTimeMillis() - msec3
-    _action_time_measures_count += 1
-    _average_action_time_msec =1f*(_average_action_time_msec*(_action_time_measures_count-1) + _action_time_msec)/_action_time_measures_count
-    msec3 = System.currentTimeMillis()
   }
 
   private var next_game_tick_diff_save = 0l
@@ -628,6 +621,16 @@ trait Renderer extends Scage {
     saveCounters()
     func
     restoreCounters()
+  }
+
+  def resetCounters() {
+    next_game_tick = System.currentTimeMillis()
+    msec = System.currentTimeMillis()
+    frames = 0
+    msec2 = System.currentTimeMillis()
+    frames2 = 0
+    msec3 = System.currentTimeMillis()
+    msec4 = System.currentTimeMillis()
   }
 
   private var _base:() => Vec = () => Vec.zero
@@ -773,23 +776,24 @@ trait Renderer extends Scage {
     action_operation()
     if(_actions.nonEmpty && _actions.tail.nonEmpty && !restart_toggled) _execute(_actions.tail)
   }
-  override private[scage] def executeActions() {  // maybe rename it to not confuse clients
+  private[scage] def checkControlsAndExecuteActions() {  // maybe rename it to not confuse clients
+    if(System.currentTimeMillis() - next_game_tick > 60000) {
+      resetCounters()
+    }
     loops = 0
     while(System.currentTimeMillis() > next_game_tick && loops < MAX_FRAMESKIP) {
+      checkControls()
       restart_toggled = false
+      msec3 = System.currentTimeMillis()
       if(actions.operations.nonEmpty) {
         _execute(actions.operations)
-        countTicks()
       }
+      _action_time_msec = System.currentTimeMillis() - msec3
+      _action_time_measures_count += 1
+      _average_action_time_msec =1f*(_average_action_time_msec*(_action_time_measures_count-1) + _action_time_msec)/_action_time_measures_count
+      countTicks()
       next_game_tick += SKIP_TICKS
       loops += 1
-
-      /*actions_run_count += 1
-      if(System.currentTimeMillis() - actions_run_moment >= 1000) {
-        println(actions_run_count)
-        actions_run_count = 0
-        actions_run_moment = System.currentTimeMillis()
-      }*/
     }
     _interpolation = (System.currentTimeMillis() + SKIP_TICKS - next_game_tick).toFloat/SKIP_TICKS
   }
@@ -813,6 +817,7 @@ trait Renderer extends Scage {
   private[scage] def performRendering() {
     if(Display.isCloseRequested) Scage.stopApp()
     else {
+      msec4 = System.currentTimeMillis()
       clearScreen()
       GL11.glPushMatrix()
         val coord = window_center() - (central_coord() - _base())*_global_scale
@@ -836,6 +841,9 @@ trait Renderer extends Scage {
 
       if(framerate != 0) Display.sync(framerate)
       Display.update()
+      _render_time_msec = System.currentTimeMillis() - msec4
+      _render_time_measures_count += 1
+      _average_render_time_msec = 1f*(_average_render_time_msec*(_render_time_measures_count-1) + _render_time_msec)/_render_time_measures_count
       countFPS()
     }
   }
