@@ -106,11 +106,11 @@ class ScageMessage(
         val y_offset = y - line_height
         (x_offset, y_offset)
       case "top-center" =>
-        val x_offset = x - bounds.ix/2
+        val x_offset = x - bounds.x/2
         val y_offset = y - line_height
         (x_offset, y_offset)
       case "top-right" =>
-        val x_offset = x - bounds.ix
+        val x_offset = x - bounds.x
         val y_offset = y - line_height
         (x_offset, y_offset)
       case "center-left" =>
@@ -118,23 +118,23 @@ class ScageMessage(
         val y_offset = y + (bounds.y/2 - line_height)
         (x_offset, y_offset)
       case "center" =>
-        val x_offset = x - bounds.ix/2
-        val y_offset = y - bounds.iy/2 + (bounds.y - line_height)
+        val x_offset = x - bounds.x/2
+        val y_offset = y - bounds.y/2 + (bounds.y - line_height)
         (x_offset, y_offset)
       case "center-right" =>
-        val x_offset = x - bounds.ix
-        val y_offset = y - bounds.iy/2 + (bounds.y - line_height)
+        val x_offset = x - bounds.x
+        val y_offset = y - bounds.y/2 + (bounds.y - line_height)
         (x_offset, y_offset)
       case "bottom-left" =>
         val x_offset = x
         val y_offset = y + (bounds.y - line_height)
         (x_offset, y_offset)
       case "bottom-center" =>
-        val x_offset = x - bounds.ix/2
+        val x_offset = x - bounds.x/2
         val y_offset = y + (bounds.y - line_height)
         (x_offset, y_offset)
       case "bottom-right" =>
-        val x_offset = x - bounds.ix
+        val x_offset = x - bounds.x
         val y_offset = y + (bounds.y - line_height)
         (x_offset, y_offset)
       case "default" => (x, y)
