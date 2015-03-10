@@ -1,13 +1,13 @@
 package com.github.dunnololda.scage.support.messages
 
 import com.github.dunnololda.cli.AppProperties._
-import com.github.dunnololda.cli.MySimpleLogger
-import collection.mutable.HashMap
-import xml.XML
-import org.newdawn.slick.util.ResourceLoader
-import com.github.dunnololda.scage.support.ScageColor._
+import com.github.dunnololda.cli.{FormulaParser, MySimpleLogger}
 import com.github.dunnololda.scage.support.ScageColor
-import com.github.dunnololda.scage.support.parsers.FormulaParser
+import com.github.dunnololda.scage.support.ScageColor._
+import org.newdawn.slick.util.ResourceLoader
+
+import scala.collection.mutable
+import scala.xml.XML
 
 case class InterfaceData(interface_id:String, x:Int = -1, y:Int = -1, xinterval:Int = 0, yinterval:Int = 0, rows:Array[RowData], color:ScageColor = DEFAULT_COLOR)
 case class RowData(message_id:String, x:Int = -1, y:Int = -1, placeholders_before:Int = 0, placeholders_in_row:Int = 0, color:ScageColor = DEFAULT_COLOR)
@@ -57,14 +57,14 @@ class ScageXML(private var _lang:String   = property("xml.lang", "en"),
   private var messages_file = messages_base + "_" + _lang + ".xml"
   def messagesFile = messages_file
 
-  private var xml_messages:HashMap[String, String] = null
+  private var xml_messages:mutable.HashMap[String, String] = _
   private def xmlMessages = xml_messages match {
     case null =>
       xml_messages = try {
         log.debug("parsing xml messages from file "+messages_file)
         XML.load(ResourceLoader.getResourceAsStream(messages_file)) match {
-          case <messages>{messages_list @ _*}</messages> => {
-            HashMap((for {
+          case <messages>{messages_list @ _*}</messages> =>
+            mutable.HashMap((for {
               message @ <message>{_*}</message> <- messages_list
               message_id = (message \ "@id").text
               if message_id != ""
@@ -73,11 +73,10 @@ class ScageXML(private var _lang:String   = property("xml.lang", "en"),
               log.debug("added message "+message_id)
               (message_id, message_text)
             }):_*)
-          }
-          case _ => HashMap[String, String]()  // TODO: log messages
+          case _ => mutable.HashMap[String, String]()  // TODO: log messages
         }
       } catch {
-        case ex:Exception => HashMap[String, String]()  // TODO: log messages
+        case ex:Exception => mutable.HashMap[String, String]()  // TODO: log messages
       }
       xml_messages
     case _ => xml_messages
@@ -94,11 +93,10 @@ class ScageXML(private var _lang:String   = property("xml.lang", "en"),
     else {
       xmlMessages.get(message_id) match {
         case Some(message) => mergeMessage(message, parameters:_*)
-        case None => {
+        case None =>
           log.warn("failed to find string with id "+message_id)
           xmlMessages += (message_id -> message_id)
           message_id
-        }
       }
     }
   }
@@ -106,18 +104,16 @@ class ScageXML(private var _lang:String   = property("xml.lang", "en"),
   def xmlOrDefault(message_id:String, parameters:Any*):String = {
     xmlMessages.get(message_id) match {
       case Some(message) => mergeMessage(message, parameters.tail:_*)
-      case None if parameters.size > 0 => {
+      case None if parameters.size > 0 =>
         log.info("default value for string id "+message_id+" is "+{
           if("" == parameters.head) "empty string" else parameters.head
         })
         xmlMessages += (message_id -> parameters.head.toString)
         mergeMessage(parameters.head.toString, parameters.tail:_*)
-      }
-      case _ => {
+      case _ =>
         log.warn("failed to find default message for the id "+message_id)
         xmlMessages += (message_id -> message_id)
         message_id
-      }
     }
   }
   
@@ -126,21 +122,21 @@ class ScageXML(private var _lang:String   = property("xml.lang", "en"),
   }
 
   private lazy val formula_parser = new FormulaParser(  // maybe use formula_parser from ScageProperties
-      constants = HashMap("window_width"  -> property("screen.width", 800),
+      constants = mutable.HashMap("window_width"  -> property("screen.width", 800),
                           "window_height" -> property("screen.height", 600))
   )
 
   private var interfaces_file = interfaces_base + "_" + _lang + ".xml"
   def interfacesFile = interfaces_file
 
-  private var xml_interfaces:HashMap[String, InterfaceData] = null
+  private var xml_interfaces:mutable.HashMap[String, InterfaceData] = null
   private def xmlInterfaces = xml_interfaces match {
     case null =>
       xml_interfaces = try {
         log.debug("parsing xml interfaces from file "+interfaces_file)
         XML.load(ResourceLoader.getResourceAsStream(interfaces_file)) match {
-          case <interfaces>{interfaces_list @ _*}</interfaces> => {
-            HashMap((for {
+          case <interfaces>{interfaces_list @ _*}</interfaces> =>
+            mutable.HashMap((for {
               interface @ <interface>{rows_list @ _*}</interface> <- interfaces_list
               interface_id = (interface \ "@id").text
               if interface_id != ""
@@ -179,11 +175,10 @@ class ScageXML(private var _lang:String   = property("xml.lang", "en"),
               log.debug("added interface "+interface_id)
               (interface_id, InterfaceData(interface_id, interface_x, interface_y, interface_xinterval, interface_yinterval, messages, interface_color))
             }):_*)
-          }
-          case _ => HashMap[String, InterfaceData]()  // TODO: log messages
+          case _ => mutable.HashMap[String, InterfaceData]()  // TODO: log messages
         }
       } catch {
-        case ex:Exception => HashMap[String, InterfaceData]()  // TODO: log messages
+        case ex:Exception => mutable.HashMap[String, InterfaceData]()  // TODO: log messages
       }
       xml_interfaces
     case _ => xml_interfaces
@@ -191,36 +186,32 @@ class ScageXML(private var _lang:String   = property("xml.lang", "en"),
   
   def xmlInterface(interface_id:String, parameters:Any*):Array[MessageData] = {
     xmlInterfaces.get(interface_id) match {
-      case Some(InterfaceData(_, interface_x, interface_y, interface_xinterval, interface_yinterval, rows, interface_color)) => {
+      case Some(InterfaceData(_, interface_x, interface_y, interface_xinterval, interface_yinterval, rows, interface_color)) =>
         (for {
           RowData(message_id, message_x, message_y, params_from, params_take, message_color) <- rows
         } yield {
-          val to_yield = MessageData(xml(message_id, (parameters.drop(params_from).take(params_take)):_*), message_x, message_y, message_color)
+          val to_yield = MessageData(xml(message_id, parameters.drop(params_from).take(params_take):_*), message_x, message_y, message_color)
           to_yield
         }).toArray
-      }
-      case None => {
+      case None =>
         log.warn("failed to find interface with id "+interface_id)
         xmlInterfaces += (interface_id -> InterfaceData(interface_id, rows = Array(/*RowData(interface_id)*/)))
         xmlMessages += (interface_id -> interface_id)
         Array(MessageData(interface_id))
-      }
     }  
   }
 
   def xmlInterfaceStrings(interface_id:String, parameters:Any*):Array[String] = {
     xmlInterfaces.get(interface_id) match {
-      case Some(InterfaceData(_, _, _, _, _, rows, _)) => {
+      case Some(InterfaceData(_, _, _, _, _, rows, _)) =>
         (for {
           RowData(message_id, _, _, params_from, params_take, _) <- rows
-        } yield xml(message_id, (parameters.drop(params_from).take(params_take)):_*)).toArray
-      }
-      case None => {
+        } yield xml(message_id, parameters.drop(params_from).take(params_take):_*)).toArray
+      case None =>
         log.warn("failed to find interface with id "+interface_id)
         xmlInterfaces += (interface_id -> InterfaceData(interface_id, rows = Array(RowData(interface_id))))
         xmlMessages += (interface_id -> interface_id)
         Array(interface_id)
-      }
     }
   }
 }

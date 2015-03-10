@@ -4,8 +4,15 @@
   <groupId>com.github.dunnololda</groupId>
   <artifactId>scage_${publish.scala.version}</artifactId>
   <packaging>jar</packaging>
-  <version>10.1</version>
+  <version>10.2</version>
   <inceptionYear>2011</inceptionYear>
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://github.com/dunnololda/state/blob/master/LICENSE</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
   <name>Scage</name>
   <description>Game Engine written in Scala</description>
@@ -96,8 +103,13 @@
 	</dependency>-->
       <dependency>
           <groupId>com.github.dunnololda</groupId>
-          <artifactId>cli_${scala.version}</artifactId>
-          <version>1.2</version>
+          <artifactId>cli_${publish.scala.version}</artifactId>
+          <version>1.4</version>
+      </dependency>
+      <dependency>
+          <groupId>com.github.dunnololda</groupId>
+          <artifactId>state_${publish.scala.version}</artifactId>
+          <version>1.1</version>
       </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

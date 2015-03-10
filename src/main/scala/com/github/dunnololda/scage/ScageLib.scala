@@ -271,7 +271,7 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
   type MultiController = com.github.dunnololda.scage.handlers.controller2.MultiController
   type ScageColor      = com.github.dunnololda.scage.support.ScageColor
   type DefaultTrace    = com.github.dunnololda.scage.support.tracer3.DefaultTrace
-  type State           = com.github.dunnololda.scage.support.State
+  type State           = com.github.dunnololda.state.State
   type Trace           = com.github.dunnololda.scage.support.tracer3.Trace
   type TraceTrait      = com.github.dunnololda.scage.support.tracer3.TraceTrait
   type ScageMessage    = com.github.dunnololda.scage.support.messages.ScageMessage
@@ -295,7 +295,7 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
   val CoordTracer      = com.github.dunnololda.scage.support.tracer3.CoordTracer
   val ScageTracer      = com.github.dunnololda.scage.support.tracer3.ScageTracer
   val ScagePhysics     = com.github.dunnololda.scage.support.physics.ScagePhysics
-  val State            = com.github.dunnololda.scage.support.State
+  val State            = com.github.dunnololda.state.State
   val Trace            = com.github.dunnololda.scage.support.tracer3.Trace
   val ScageColor       = com.github.dunnololda.scage.support.ScageColor
   val ScageMessage     = com.github.dunnololda.scage.support.messages.ScageMessage

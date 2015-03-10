@@ -1,7 +1,8 @@
 package com.github.dunnololda.scage.support.tracer3
 
 import com.github.dunnololda.scage.support.ScageId._
-import com.github.dunnololda.scage.support.{State, Vec}
+import com.github.dunnololda.scage.support.Vec
+import com.github.dunnololda.state.State
 
 trait TraceTrait {
   type ChangerType <: TraceTrait // changer type must be the type of actual Trace's child in client code

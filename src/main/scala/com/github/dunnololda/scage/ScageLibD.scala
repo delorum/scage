@@ -1,13 +1,12 @@
 package com.github.dunnololda.scage
 
-import com.github.dunnololda.scage.handlers.RendererLibD
-import support._
-import com.github.dunnololda.scage.support.messages._
 import com.github.dunnololda.cli.AppProperties
+import com.github.dunnololda.scage.handlers.RendererLibD
+import com.github.dunnololda.scage.support._
+import com.github.dunnololda.scage.support.messages.{MessageData, _}
 import net.phys2d.math.ROVector2f
+
 import scala.language.implicitConversions
-import scala.Some
-import com.github.dunnololda.scage.support.messages.MessageData
 
 object ScageLibD extends ScageMessageTrait with ScageXMLTrait with RendererLibD with LWJGLKeyboard with ScageColorTrait with ScageIdTrait with EventsTrait {
   def property[A : Manifest](key:String, default: => A):A                                      = AppProperties.property(key, default)
@@ -273,7 +272,7 @@ object ScageLibD extends ScageMessageTrait with ScageXMLTrait with RendererLibD 
   type MultiController = com.github.dunnololda.scage.handlers.controller2.MultiController
   type ScageColor      = com.github.dunnololda.scage.support.ScageColor
   type DefaultTrace    = com.github.dunnololda.scage.support.tracer3.DefaultTrace
-  type State           = com.github.dunnololda.scage.support.State
+  type State           = com.github.dunnololda.state.State
   type Trace           = com.github.dunnololda.scage.support.tracer3.Trace
   type TraceTrait      = com.github.dunnololda.scage.support.tracer3.TraceTrait
   type ScageMessage    = com.github.dunnololda.scage.support.messages.ScageMessage
@@ -297,7 +296,7 @@ object ScageLibD extends ScageMessageTrait with ScageXMLTrait with RendererLibD 
   val CoordTracer      = com.github.dunnololda.scage.support.tracer3.CoordTracer
   val ScageTracer      = com.github.dunnololda.scage.support.tracer3.ScageTracer
   val ScagePhysics     = com.github.dunnololda.scage.support.physics.ScagePhysics
-  val State            = com.github.dunnololda.scage.support.State
+  val State            = com.github.dunnololda.state.State
   val Trace            = com.github.dunnololda.scage.support.tracer3.Trace
   val ScageColor       = com.github.dunnololda.scage.support.ScageColor
   val ScageMessage    = com.github.dunnololda.scage.support.messages.ScageMessage
