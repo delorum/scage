@@ -94,6 +94,12 @@ This command will create "jnlp" folder in "target". Then you can upload this fol
 
 You also can use some IDE with good Maven and Scala support (for example, [IntelliJ IDEA](http://www.jetbrains.com/idea/)). In Idea choose "Import Project", point to the created folder from the previous step and then choose: "Import project from external model" - "Maven". Then type "Next" a few times. Idea project will be created.
 
+To launch your application from Idea open main object (usually it is an object which extends ScageScreenApp) and press ctrl-shift-F10 to create a launch configuration. Idea will try to compile and execute it, but most likely fail with error "Exception in thread "main" java.lang.UnsatisfiedLinkError: no lwjgl in java.library.path". To fix this Select "Edit Configurations" and in the field "VM options" add: 
+
+    -Djava.library.path=target/natives -DLWJGL_DISABLE_XRANDR=true -Dfile.encoding=UTF-8
+    
+Then try to launch again.
+
 ###For non-Maven users.
 
 You can both :
