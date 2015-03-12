@@ -8,6 +8,7 @@ Scage is a framework to write simple 2D opengl games. It is written in [Scala](h
  - [phys2d](https://code.google.com/p/phys2d/) as a physics engine
  - [lwjgl](http://lwjgl.org) as an opengl wrapper
  - [slick](https://code.google.com/p/phys2d/) as a resource and texture loader
+ - 
 
 The main purpose of this project is to give a convenient tool for game-developers to write a code of pure functionality without any boilerplate.
 
@@ -19,12 +20,12 @@ Features
  - Loading and utilizing fonts from ttf-files (based on 'Slick2D' api but with improvements).
  - i18n: loading strings and even the whole interfaces from xml files. Runtime language change.
  - Framework to build in-game interfaces from xml files of simple structure.
- - App settings can be specified in a text files as a key-value pairs. Lots of engine options are set that way (alongside with the standard possibility to set them as parameters) allowing fine-tuning without app rebuilding.
+ - App settings can be specified in a text files as a key-value pairs (moved to the external project: [scala-cli](https://github.com/dunnololda/scala-cli)). Lots of engine options are set that way (alongside with the standard possibility to set them as parameters) allowing fine-tuning without app rebuilding.
  - Tracers framework: easy game objects tracking and interacting on a two-dimensional game map.
  - Lightweight wrapper upon phys2d engine.
  - Easy app building/deploing (as a standalone or via webstart) using maven infrastructure.
  - Multiple platforms support: Windows, Linux, Mac, Solaris (thanks to Java and lwjgl actually). Similar build process for any platform (with maven).
- - Client/server network api upon actors with simple text protocol based on json format.
+ - Client/server network api upon actors with simple text protocol based on json format (moved to the external project: [simple-net](https://github.com/dunnololda/simple-net)).
  
 Please read the project wiki and especially see [Examples](https://github.com/dunnololda/scage/wiki/Examples) page to learn more!
 
@@ -53,57 +54,6 @@ Hello World Example
 
 !['rotating "Hello World!" demo'](http://dl.dropbox.com/u/11297078/public_pics/rotating_hello.png)
 
-###Network api example
-
-Scage's network api represents an asynchronous (in general) client-server model (using Scala's actors framework) and is based on 
-simple text protocol over TCP/IP. Clients and server are send messages to each other in JSON format. 
-
-In the example below client sends to server random 2d vectors and server sends back corresponded normalized values.
-
-    import net.scage.ScageApp
-    import net.scage.support.net.{NetClient, NetServer}
-    import net.scage.support.{Vec, State}
-
-    object EchoExample extends ScageApp("Echo") {
-      NetServer.startServer(
-        port = 9800,
-        onNewConnection = {
-          client => client.send(State("hello" -> "send me vec and I send you back its n!"))
-          (true, "")
-        },
-        onClientDataReceived = {
-          (client, received_data) => received_data.neededKeys {
-            case ("vec", vec:Vec) => client.send(State(("n" -> vec.n)))
-          }
-        }
-      )
-
-      NetClient.startClient(
-        server_url = "localhost",
-        port = 9800,
-        onServerDataReceived = {
-          received_data => received_data.neededKeys {
-            case ("hello", hello_msg) =>
-              val random_vec = Vec((math.random*100).toInt, (math.random*100).toInt)
-              println("sending vec: "+random_vec)
-              NetClient.send(State(("vec" -> random_vec)))
-            case ("n", n:Vec) =>
-              println("received n: "+n)
-              println("waiting 5 sec...")
-              Thread.sleep(5000)
-              val random_vec = Vec((math.random*100).toInt, (math.random*100).toInt)
-              println("sending vec: "+random_vec)
-              NetClient.send(State("vec" -> random_vec))
-          }
-        }
-      )
-
-      dispose {
-        NetServer.stopServer()
-        NetClient.stopClient()
-      }
-    }
-    
 More examples
 -------------
 
@@ -114,30 +64,11 @@ Usage
 
 ###For Maven users
 
-Add to your pom.xml the following:
+You can use the scage archetype to create a new scage project stub:
 
-      <repositories>
-      ...
-          <repository>
-            <id>scage</id>
-            <name>Scage Maven Repo</name>
-            <url>http://scage.googlecode.com/svn/maven-repository</url>
-          </repository>
-      </repositories>
-      ...
-      <dependencies>
-      ...
-          <dependency>
-              <groupId>su.msk.dunno</groupId>
-              <artifactId>scage</artifactId>
-              <version>0.9</version>
-              <scope>compile</scope>
-          </dependency>
-      </dependencies>
-
-You can use archetype to create new scage project stub:
-
-    $ mvn archetype:generate -DgroupId=my.company -DartifactId=app -Dversion=0.1 -Dpackage=my.company.app -DarchetypeGroupId=scage -DarchetypeArtifactId=project-archetype -DarchetypeVersion=0.9 -DarchetypeRepository=http://scage.googlecode.com/svn/maven-repository
+    $ mvn archetype:generate -DarchetypeGroupId=scage -DarchetypeArtifactId=project-archetype -DarchetypeVersion=10.2 -DarchetypeRepository=https://raw.github.com/dunnololda/mvn-repo/master
+    
+Answer questions about groupId, artifactId, version and default package and a new folder named as {artifactId} will be created. Inside will be ready to run and deploy small application - simple light cycles game based on the Tron movie.
     
 To launch app from the project stub you can type:
 
@@ -145,21 +76,29 @@ To launch app from the project stub you can type:
     
 This project stub has two profiles in its pom.xml for app building. To build a standalone app type in your console:
 
-    $ mvn clean package -Pbuild
+    $ mvn clean package -Pbuild -Dmaven.test.skip
     
 Or just:
 
-    $ mvn clean package
+    $ mvn clean package -Dmaven.test.skip
 
 as "build" is a default profile.
 
 To build a webstart app type:
 
-    $ mvn clean package -Pwebstart 
+    $ mvn clean package -Pwebstart -Dmaven.test.skip 
    
 This command will create "jnlp" folder in "target". Then you can upload this folder to your host.
 
-You also can use some IDE with good Maven and Scala support (for example, [IntelliJ IDEA](http://www.jetbrains.com/idea/)).
+###Intellij IDEA
+
+You also can use some IDE with good Maven and Scala support (for example, [IntelliJ IDEA](http://www.jetbrains.com/idea/)). In Idea choose "Import Project", point to the created folder from the previous step and then choose: "Import project from external model" - "Maven". Then type "Next" a few times. Idea project will be created.
+
+To launch your application from Idea open main object (usually it is an object which extends ScageScreenApp) and press ctrl-shift-F10 to create a launch configuration. Idea will try to compile and execute it, but most likely fail with error "Exception in thread "main" java.lang.UnsatisfiedLinkError: no lwjgl in java.library.path". To fix this Select "Edit Configurations" and in the field "VM options" add: 
+
+    -Djava.library.path=target/natives -DLWJGL_DISABLE_XRANDR=true -Dfile.encoding=UTF-8
+    
+Then try to launch again.
 
 ###For non-Maven users.
 
