@@ -16,7 +16,7 @@ import java.awt.GraphicsEnvironment
 import com.github.dunnololda.scage.{ScageOperation, Scage}
 import collection.mutable.ArrayBuffer
 import com.github.dunnololda.scage.support.{SortedBuffer, ScageColor, Vec}
-import com.github.dunnololda.cli.MySimpleLogger
+import com.github.dunnololda.mysimplelogger.MySimpleLogger
 import com.github.dunnololda.scage.handlers.controller2.ScageController
 
 object DisplayListsHolder {

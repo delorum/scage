@@ -2,7 +2,7 @@ package com.github.dunnololda.scage.support.tracer3
 
 import com.github.dunnololda.scage.support.Vec
 import com.github.dunnololda.cli.AppProperties._
-import com.github.dunnololda.cli.MySimpleLogger
+import com.github.dunnololda.mysimplelogger.MySimpleLogger
 import com.github.dunnololda.scage.handlers.RendererLib
 
 class CoordTracer[T <: TraceTrait](field_from_x:Int   = property("field.from.x", 0),
@@ -54,7 +54,7 @@ extends ScageTracer[T](field_from_x,field_to_x,field_from_y,field_to_y,init_h_x,
 
   override def updateLocation(trace_id:Int, new_coord:Vec):Int = { // TODO: maybe return tuple (new_location, operation_status)
     traces_by_ids.get(trace_id) match {
-      case Some(trace) => {
+      case Some(trace) =>
         val old_coord = trace.location
         val old_point = point(old_coord)
         val new_coord_edges_affected = outsideCoord(new_coord)
@@ -73,11 +73,9 @@ extends ScageTracer[T](field_from_x,field_to_x,field_from_y,field_to_y,init_h_x,
           log.debug("failed to update trace "+trace_id+": new point is out of area")
           OUT_OF_AREA
         }
-      }
-      case None => {
+      case None =>
         log.warn("trace with id "+trace_id+" not found")
         TRACE_NOT_FOUND
-      }
     }
   }
 

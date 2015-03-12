@@ -5,7 +5,7 @@ import com.github.dunnololda.scage.{ScageOperation, Scage}
 import org.lwjgl.input.{Mouse, Keyboard}
 import com.github.dunnololda.scage.ScageLib.coordOnArea
 import collection.mutable
-import com.github.dunnololda.cli.MySimpleLogger
+import com.github.dunnololda.mysimplelogger.MySimpleLogger
 
 case class KeyPress(key_code:Int, var was_pressed:Boolean, var pressed_start_time:Long, var last_pressed_time:Long) {
   def immutable:ImmutableKeyPress = ImmutableKeyPress(key_code, was_pressed, pressed_start_time, last_pressed_time)

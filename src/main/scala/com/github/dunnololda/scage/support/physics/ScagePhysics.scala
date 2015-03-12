@@ -5,7 +5,7 @@ import com.github.dunnololda.cli.AppProperties._
 import net.phys2d.math.Vector2f
 import net.phys2d.raw.strategies.QuadSpaceStrategy
 import com.github.dunnololda.scage.support.Vec
-import com.github.dunnololda.cli.MySimpleLogger
+import com.github.dunnololda.mysimplelogger.MySimpleLogger
 import collection.mutable
 
 object ScagePhysics {
@@ -49,7 +49,7 @@ class ScagePhysics(
     physical
   }
   def addPhysicals(physicals:Physical*) {
-    physicals.foreach(addPhysical(_))
+    physicals.foreach(addPhysical)
   }
 
   // TODO: мб запилить по аналогии removePhysical, возвращающий, кого удалил.

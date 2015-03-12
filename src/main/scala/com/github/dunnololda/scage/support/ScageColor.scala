@@ -1,6 +1,7 @@
 package com.github.dunnololda.scage.support
 
-import com.github.dunnololda.cli.MySimpleLogger
+import com.github.dunnololda.mysimplelogger.MySimpleLogger
+
 import collection.mutable
 
 
@@ -143,10 +144,9 @@ trait ScageColorTrait {
     field.setAccessible(true)
     val color = try{field.get(ScageColor).asInstanceOf[ScageColor]}
     catch {
-      case ex:Exception => {
+      case ex:Exception =>
         //log.error("failed to create color with name "+field.getName+": "+ex.getLocalizedMessage)
         DEFAULT_COLOR
-      }
     }
     colors += (field.getName.toUpperCase -> color)
     field.setAccessible(false)

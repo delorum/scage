@@ -1,6 +1,6 @@
 package com.github.dunnololda.scage.handlers
 
-import com.github.dunnololda.cli.MySimpleLogger
+import com.github.dunnololda.mysimplelogger.MySimpleLogger
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.{DisplayMode, Display, GL11}
 import com.github.dunnololda.scage.support.{SortedBuffer, DVec, ScageColor}

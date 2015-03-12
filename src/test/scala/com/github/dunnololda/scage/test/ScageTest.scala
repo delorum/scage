@@ -103,7 +103,7 @@ class ScageTest extends TestCase("app") {
         private var target_point = trace.location
         mouseMotion {   // test mouse motion event
           mouse_coord =>
-            target_point = (scaledCoord(mouse_coord) - trace.location).n * 20
+            target_point = (absCoord(mouse_coord) - trace.location).n * 20
         }
         private var x = 0.0f
         def period = {

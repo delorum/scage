@@ -2,7 +2,7 @@ package com.github.dunnololda.scage.support.tracer3
 
 import com.github.dunnololda.scage.support.Vec
 import com.github.dunnololda.cli.AppProperties._
-import com.github.dunnololda.cli.MySimpleLogger
+import com.github.dunnololda.mysimplelogger.MySimpleLogger
 import com.github.dunnololda.scage.handlers.RendererLib
 import collection.mutable.ArrayBuffer
 import collection.mutable
@@ -32,7 +32,7 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x
 
   // for client classes - children of ScageTracer
   protected def setTraceLocation(trace:T, new_location:Vec) {trace._location = new_location}
-  protected implicit def trace2updateable(trace:T) = new {
+  protected implicit def trace2updateable(trace:T): Object {def __location_=(new_location: Vec): Unit; def __location: Vec} = new {
     def __location = trace._location
     def __location_=(new_location:Vec) {trace._location = new_location}
   }
@@ -171,7 +171,7 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x
   val TRACE_NOT_FOUND  = 3
   def updateLocation(trace_id:Int, new_point:Vec):Int = { // TODO: maybe return tuple (new_location, operation_status), maybe rename
     traces_by_ids.get(trace_id) match {
-      case Some(updateable_trace) => {
+      case Some(updateable_trace) =>
         val old_point = updateable_trace.location
         val new_point_edges_affected = outsidePoint(new_point)
         if(isPointOnArea(new_point_edges_affected)) {
@@ -188,11 +188,9 @@ class ScageTracer[T <: TraceTrait](val field_from_x:Int = property("field.from.x
           log.debug("failed to update trace "+trace_id+": new point is out of area")
           OUT_OF_AREA
         }
-      }
-      case None => {
+      case None =>
         log.warn("trace with id "+trace_id+" not found")
         TRACE_NOT_FOUND
-      }
     }
   }
   def updateLocation(trace:T, new_point:Vec):Int = updateLocation(trace.id, new_point)  // TODO: maybe rename

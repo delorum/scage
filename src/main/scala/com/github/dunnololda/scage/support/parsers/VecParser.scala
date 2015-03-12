@@ -2,7 +2,7 @@ package com.github.dunnololda.scage.support.parsers
 
 import util.parsing.combinator.JavaTokenParsers
 import com.github.dunnololda.scage.support.{DVec, Vec}
-import com.github.dunnololda.cli.MySimpleLogger
+import com.github.dunnololda.mysimplelogger.MySimpleLogger
 
 class VecParser extends JavaTokenParsers {
   private val log = MySimpleLogger(this.getClass.getName)

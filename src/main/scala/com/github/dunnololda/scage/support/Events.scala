@@ -1,9 +1,9 @@
 package com.github.dunnololda.scage.support
 
+import com.github.dunnololda.mysimplelogger.MySimpleLogger
 import com.github.dunnololda.scage.support.ScageId._
-import com.github.dunnololda.cli.MySimpleLogger
-import collection.mutable
-import scala.Some
+
+import scala.collection.mutable
 
 trait EventsTrait {
   def onEventWithArguments(event_name: String)(event_action: PartialFunction[Any, Unit]):(String, Int)

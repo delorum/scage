@@ -4,7 +4,7 @@
   <groupId>com.github.dunnololda</groupId>
   <artifactId>scage_${publish.scala.version}</artifactId>
   <packaging>jar</packaging>
-  <version>10.2</version>
+  <version>10.3</version>
   <inceptionYear>2011</inceptionYear>
     <licenses>
         <license>
@@ -104,12 +104,17 @@
       <dependency>
           <groupId>com.github.dunnololda</groupId>
           <artifactId>cli_${publish.scala.version}</artifactId>
-          <version>1.4</version>
+          <version>1.5</version>
       </dependency>
       <dependency>
           <groupId>com.github.dunnololda</groupId>
           <artifactId>state_${publish.scala.version}</artifactId>
-          <version>1.1</version>
+          <version>1.2</version>
+      </dependency>
+      <dependency>
+          <groupId>com.github.dunnololda</groupId>
+          <artifactId>mysimplelogger_${publish.scala.version}</artifactId>
+          <version>1.2</version>
       </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

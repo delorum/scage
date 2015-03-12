@@ -3,7 +3,7 @@ package com.github.dunnololda.scage.support.messages
 import com.github.dunnololda.scage.handlers.RendererLibD.currentColor
 import com.github.dunnololda.cli.AppProperties._
 import com.github.dunnololda.scage.support.messages.unicode.UnicodeFont
-import com.github.dunnololda.cli.MySimpleLogger
+import com.github.dunnololda.mysimplelogger.MySimpleLogger
 import com.github.dunnololda.scage.support.{DVec, ScageColor}
 import com.github.dunnololda.scage.support.ScageColor._
 import org.lwjgl.opengl.GL11

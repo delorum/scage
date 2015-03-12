@@ -1,7 +1,8 @@
 package com.github.dunnololda.scage.support.messages
 
 import com.github.dunnololda.cli.AppProperties._
-import com.github.dunnololda.cli.{FormulaParser, MySimpleLogger}
+import com.github.dunnololda.cli.FormulaParser
+import com.github.dunnololda.mysimplelogger.MySimpleLogger
 import com.github.dunnololda.scage.support.ScageColor
 import com.github.dunnololda.scage.support.ScageColor._
 import org.newdawn.slick.util.ResourceLoader
@@ -68,7 +69,7 @@ class ScageXML(private var _lang:String   = property("xml.lang", "en"),
               message @ <message>{_*}</message> <- messages_list
               message_id = (message \ "@id").text
               if message_id != ""
-              message_text = (message.text).trim
+              message_text = message.text.trim
             } yield {
               log.debug("added message "+message_id)
               (message_id, message_text)
