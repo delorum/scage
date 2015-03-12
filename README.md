@@ -1,5 +1,10 @@
 ![Scage Logo](http://dl.dropbox.com/u/11297078/public_pics/scage-logo.png)
 
+Latest Stable Version
+---------------------
+
+10.3
+
 Introduction
 ------------
 
