@@ -19,7 +19,7 @@ class ScageColor(val name:String, r:Float, g:Float, b:Float) {
   override val hashCode:Int = (41*(41*(41 + red) + green) + blue).toInt
   def canEqual(other: Any) = other.isInstanceOf[ScageColor]
 
-  def toSlickColor = new org.newdawn.slick.Color(r, g, b)
+  def toSlickColor = new org.newdawn.slick.Color(red, green, blue)
 
   override def toString = name+"(red="+red+" green="+green+" blue="+blue+")"
 }
