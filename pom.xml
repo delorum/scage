@@ -4,7 +4,7 @@
   <groupId>com.github.dunnololda</groupId>
   <artifactId>scage_${publish.scala.version}</artifactId>
   <packaging>jar</packaging>
-  <version>10.4</version>
+  <version>10.5</version>
   <inceptionYear>2011</inceptionYear>
     <licenses>
         <license>

@@ -149,7 +149,7 @@ class ScageMessage(
   }
 
   def messageBounds(message:Any, size:Float = max_font_size) = {
-    val msg_str = new ColoredString(message.toString, DEFAULT_COLOR).text()
+    val msg_str = new ColoredString(message.toString, DEFAULT_COLOR).text
     Vec(font.getWidth(msg_str), font.getHeight(msg_str))*(size/max_font_size)
   }
 
