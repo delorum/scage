@@ -148,6 +148,7 @@ class DVec(val x:Double = 0, val y:Double = 0) {
 
   def *(dv:DVec)   = x*dv.x + y*dv.y
   def */(v:DVec) = x*v.y - y*v.x
+  def */(k:Double):DVec = DVec(y*k, -x*k)
 
   def *(k:Double) = new DVec(x*k, y*k)
   def *(k:Float)  = new DVec(x*k, y*k)

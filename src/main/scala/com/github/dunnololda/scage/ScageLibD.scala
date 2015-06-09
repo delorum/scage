@@ -92,6 +92,7 @@ object ScageLibD extends ScageMessageTrait with ScageXMLTrait with RendererLibD 
   implicit class Double2DVecrich(d:Double) {
     def *(v:DVec) = v*d
     def /(v:DVec) = v/d
+    def */(v:DVec) = DVec(-v.y*d, v.x*d)
   }
 
   implicit class Phys2dVec2Vec(pv:ROVector2f) {
