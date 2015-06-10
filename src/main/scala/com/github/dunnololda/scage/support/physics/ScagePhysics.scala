@@ -37,7 +37,7 @@ class ScagePhysics(
   }*/
 
   val world = new World(new Vector2f(gravity.x, gravity.y), 10, new QuadSpaceStrategy(20,10))
-  world.enableRestingBodyDetection(0.01f, 0.000001f, 0.01f)
+  world.enableRestingBodyDetection(0.01f, 0.2f, 0.2f)
   
   private val _physicals = mutable.HashSet[Physical]()
   def physicals = _physicals.toList

@@ -50,6 +50,7 @@ class Vec(val x:Float = 0, val y:Float = 0) {
 
   def *(v:Vec):Float = x*v.x + y*v.y
   def */(v:Vec):Float = x*v.y - y*v.x // maybe another symbol as it is a closing comment symbol
+  def */(k:Float):Vec = Vec(y*k, -x*k)
 
   def *(k:Double) = new Vec(x*k, y*k)
   def *(k:Float)  = new Vec(x*k, y*k)

@@ -50,49 +50,60 @@ object ScageLibD extends ScageMessageTrait with ScageXMLTrait with RendererLibD 
 
   // implicits
 
-  implicit class Int2Vecrich(i:Int) {
-    def *(v:Vec) = v*i
-    def /(v:Vec) = v/i
+  implicit class Int2Vecrich(k:Int) {
+    def *(v:Vec) = v*k
+    def /(v:Vec) = v/k
+    def */(v:Vec) = Vec(-v.y*k, v.x*k)
+    def toRad:Double = k/180.0*math.Pi
+    def toDeg:Double = k/math.Pi*180.0
   }
 
-  implicit class Long2Vecrich(i:Long) {
-    def *(v:Vec) = v*i
-    def /(v:Vec) = v/i
+  implicit class Long2Vecrich(k:Long) {
+    def *(v:Vec) = v*k
+    def /(v:Vec) = v/k
+    def */(v:Vec) = Vec(-v.y*k, v.x*k)
+    def toRad:Double = k/180.0*math.Pi
+    def toDeg:Double = k/math.Pi*180.0
   }
 
-  implicit class Float2Vecrich(f:Float) {
-    def *(v:Vec) = v * f
-    def /(v:Vec) = v/f
-    def toRad:Float = f/180f*math.Pi.toFloat
-    def toDeg:Float = f/math.Pi.toFloat*180f
+  implicit class Float2Vecrich(k:Float) {
+    def *(v:Vec) = v * k
+    def /(v:Vec) = v/k
+    def */(v:Vec) = Vec(-v.y*k, v.x*k)
+    def toRad:Double = k/180.0*math.Pi
+    def toDeg:Double = k/math.Pi*180.0
   }
 
-  implicit class Double2Vecrich(d:Double) {
-    def *(v:Vec) = v*d
-    def /(v:Vec) = v/d
-    def toRad:Double = d/180.0*math.Pi
-    def toDeg:Double = d/math.Pi*180.0
+  implicit class Double2Vecrich(k:Double) {
+    def *(v:Vec) = v*k
+    def /(v:Vec) = v/k
+    def */(v:Vec) = Vec(-v.y*k, v.x*k)
+    def toRad:Double = k/180.0*math.Pi
+    def toDeg:Double = k/math.Pi*180.0
   }
 
-  implicit class Int2DVecrich(i:Int) {
-    def *(v:DVec) = v*i
-    def /(v:DVec) = v/i
+  implicit class Int2DVecrich(k:Int) {
+    def *(v:DVec) = v*k
+    def /(v:DVec) = v/k
+    def */(v:DVec) = DVec(-v.y*k, v.x*k)
   }
 
-  implicit class Long2DVecrich(i:Long) {
-    def *(v:DVec) = v*i
-    def /(v:DVec) = v/i
+  implicit class Long2DVecrich(k:Long) {
+    def *(v:DVec) = v*k
+    def /(v:DVec) = v/k
+    def */(v:DVec) = DVec(-v.y*k, v.x*k)
   }
 
-  implicit class Float2DVecrich(f:Float) {
-    def *(v:DVec) = v * f
-    def /(v:DVec) = v/f
+  implicit class Float2DVecrich(k:Float) {
+    def *(v:DVec) = v * k
+    def /(v:DVec) = v/k
+    def */(v:DVec) = DVec(-v.y*k, v.x*k)
   }
 
-  implicit class Double2DVecrich(d:Double) {
-    def *(v:DVec) = v*d
-    def /(v:DVec) = v/d
-    def */(v:DVec) = DVec(-v.y*d, v.x*d)
+  implicit class Double2DVecrich(k:Double) {
+    def *(v:DVec) = v*k
+    def /(v:DVec) = v/k
+    def */(v:DVec) = DVec(-v.y*k, v.x*k)
   }
 
   implicit class Phys2dVec2Vec(pv:ROVector2f) {
