@@ -54,24 +54,24 @@ object ScageLibD extends ScageMessageTrait with ScageXMLTrait with RendererLibD 
     def *(v:Vec) = v*k
     def /(v:Vec) = v/k
     def */(v:Vec) = Vec(-v.y*k, v.x*k)
-    def toRad:Double = k/180.0*math.Pi
-    def toDeg:Double = k/math.Pi*180.0
+    def toRad:Float = k/180f*math.Pi.toFloat
+    def toDeg:Float = k/math.Pi.toFloat*180f
   }
 
   implicit class Long2Vecrich(k:Long) {
     def *(v:Vec) = v*k
     def /(v:Vec) = v/k
     def */(v:Vec) = Vec(-v.y*k, v.x*k)
-    def toRad:Double = k/180.0*math.Pi
-    def toDeg:Double = k/math.Pi*180.0
+    def toRad:Float = k/180f*math.Pi.toFloat
+    def toDeg:Float = k/math.Pi.toFloat*180f
   }
 
   implicit class Float2Vecrich(k:Float) {
     def *(v:Vec) = v * k
     def /(v:Vec) = v/k
     def */(v:Vec) = Vec(-v.y*k, v.x*k)
-    def toRad:Double = k/180.0*math.Pi
-    def toDeg:Double = k/math.Pi*180.0
+    def toRad:Float = k/180f*math.Pi.toFloat
+    def toDeg:Float = k/math.Pi.toFloat*180f
   }
 
   implicit class Double2Vecrich(k:Double) {
