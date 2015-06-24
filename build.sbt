@@ -12,7 +12,9 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-	"com.github.dunnololda" % "cli_2.10.1" % "1.2",
+	"com.github.dunnololda" % "cli_2.10" % "1.5",
+	"com.github.dunnololda" % "state_2.10" % "1.2",
+  "com.github.dunnololda" % "mysimplelogger_2.10" % "1.2",
 	"org.lwjgl.lwjgl" % "lwjgl" % "2.9.1",
 	"org.lwjgl.lwjgl" % "lwjgl_util" % "2.9.1",
 	"org.lwjgl.lwjgl" % "lwjgl-platform" % "2.9.1",
