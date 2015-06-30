@@ -4,7 +4,7 @@
   <groupId>com.github.dunnololda</groupId>
   <artifactId>scage_${publish.scala.version}</artifactId>
   <packaging>jar</packaging>
-  <version>10.6</version>
+  <version>10.7</version>
   <inceptionYear>2011</inceptionYear>
     <licenses>
         <license>
@@ -21,7 +21,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <scala.version>2.10.1</scala.version>
     <publish.scala.version>2.10</publish.scala.version>
-    <lwjgl.version>2.8.2</lwjgl.version>
+    <lwjgl.version>2.9.3</lwjgl.version>
 
     <!-- github server corresponds to entry in ~/.m2/settings.xml -->
     <github.global.server>github</github.global.server>
@@ -185,11 +185,16 @@
 
   <build>
       <extensions>
-        <extension>
-         <groupId>org.apache.maven.wagon</groupId>
-         <artifactId>wagon-webdav</artifactId>
-         <version>1.0-beta-2</version>
-        </extension>
+          <extension>
+            <groupId>org.apache.maven.wagon</groupId>
+            <artifactId>wagon-webdav</artifactId>
+            <version>1.0-beta-2</version>
+          </extension>
+          <extension>
+              <groupId>org.apache.maven.wagon</groupId>
+              <artifactId>wagon-ssh</artifactId>
+              <version>2.4</version>
+          </extension>
        </extensions>
 
     <sourceDirectory>src/main/scala</sourceDirectory>
@@ -408,6 +413,21 @@
         </plugin>
     </plugins>
   </build>
+
+    <profiles>
+        <profile>
+            <id>openjdk</id>
+            <dependencies>
+                <dependency>
+                    <groupId>javax.jnlp</groupId>
+                    <artifactId>jnlp-api</artifactId>
+                    <version>5.0</version>
+                    <scope>system</scope>
+                    <systemPath>/usr/bin/javaws</systemPath>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 
   <reporting>
     <plugins>
