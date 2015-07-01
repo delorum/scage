@@ -3,7 +3,7 @@
 Latest Stable Version
 ---------------------
 
-10.3
+10.8
 
 Introduction
 ------------
@@ -71,7 +71,7 @@ Usage
 
 You can use the scage archetype to create a new scage project stub:
 
-    $ mvn archetype:generate -DarchetypeGroupId=scage -DarchetypeArtifactId=project-archetype -DarchetypeVersion=10.3 -DarchetypeRepository=https://raw.github.com/dunnololda/mvn-repo/master
+    $ mvn archetype:generate -DarchetypeGroupId=scage -DarchetypeArtifactId=project-archetype -DarchetypeVersion=10.8 -DarchetypeRepository=https://raw.github.com/dunnololda/mvn-repo/master
     
 Answer questions about groupId, artifactId, version and default package and a new folder named as {artifactId} will be created. Inside will be ready to run and deploy small application - simple light cycles game based on the Tron movie.
     
