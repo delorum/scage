@@ -119,7 +119,7 @@ trait ScageController extends Scage {
   class ControlDeletionsContainer extends DefaultOperationContainer("control_deleters") {
     override protected def _delOperation(op_id:Int, show_warnings:Boolean) = {
       removeOperation(op_id) match {
-        case some_operation @ Some(ScageOperation(_, op)) =>
+        case some_operation @ Some(ScageOperation(_, op, _)) =>
           log.debug("deleted operation with id "+op_id+" from the container "+name)
           operation_mapping -= op_id
           op()

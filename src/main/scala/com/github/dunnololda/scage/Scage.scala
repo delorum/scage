@@ -1,23 +1,26 @@
 package com.github.dunnololda.scage
 
+import com.github.dunnololda.scage.support.SortedBuffer
 import support.ScageId._
 import collection.mutable.ArrayBuffer
 import collection.mutable
 import com.github.dunnololda.cli.Imports._
 
 // extracted case class to this definition because we want to extend it!
-class ScageOperation(val op_id: Int, val op: () => Any) {
+class ScageOperation(val op_id: Int, val op: () => Any, val position:Int) extends Ordered[ScageOperation] {
   override def equals(other:Any):Boolean = other match {
     case that:ScageOperation => (that canEqual this) && this.op_id == that.op_id
     case _ => false
   }
   override val hashCode:Int = op_id
   def canEqual(other: Any)  = other.isInstanceOf[ScageOperation]
+
+  override def compare(that: ScageOperation): Int = position - that.position
 }
 object ScageOperation {
-  def apply(op_id: Int, op: () => Any) = new ScageOperation(op_id, op)
-  def unapply(data:Any):Option[(Int, () => Any)] = data match {
-    case v:ScageOperation => Some(v.op_id, v.op)
+  def apply(op_id: Int, op: () => Any, pos:Int) = new ScageOperation(op_id, op, pos)
+  def unapply(data:Any):Option[(Int, () => Any, Int)] = data match {
+    case v:ScageOperation => Some(v.op_id, v.op, v.position)
     case _ => None
   }
 }
@@ -101,7 +104,7 @@ trait OperationMapping {
   }
 
   class DefaultOperationContainer(val name: String) extends OperationContainer[ScageOperation] {
-    protected val _operations = ArrayBuffer[ScageOperation]()
+    protected val _operations = SortedBuffer[ScageOperation]()
 
     protected def addOperation(operation: ScageOperation) {
       _operations += operation
@@ -116,12 +119,12 @@ trait OperationMapping {
 
     def length: Int = _operations.length
 
-    def addOp(op_id: Int, op: () => Any): Int = {
-      addOperationWithMapping(ScageOperation(op_id, op))
+    def addOp(op_id: Int, op: () => Any, position:Int): Int = {
+      addOperationWithMapping(ScageOperation(op_id, op, position))
     }
 
-    def addOp(op: () => Any): Int = {
-      addOp(nextId, op)
+    def addOp(op: () => Any, position:Int): Int = {
+      addOp(nextId, op, position)
     }
   }
 
@@ -239,7 +242,11 @@ trait Scage extends OperationMapping {
 
   def preinit(preinit_func: => Any) = {
     if (is_running) preinit_func
-    preinits.addOp(() => preinit_func)
+    preinits.addOp(() => preinit_func, 0)
+  }
+  def preinit(position:Int)(preinit_func: => Any) = {
+    if (is_running) preinit_func
+    preinits.addOp(() => preinit_func, position)
   }
 
   private var preinit_moment = System.currentTimeMillis()
@@ -254,7 +261,7 @@ trait Scage extends OperationMapping {
   // 'preinits' suppose to run only once during unit's first run(). No public method exists to run them inside run-loop
   private[scage] def executePreinits() {
     scage_log.info(unit_name + ": preinit")
-    for (ScageOperation(preinit_id, preinit_operation) <- preinits.operations) {
+    for (ScageOperation(preinit_id, preinit_operation, _) <- preinits.operations) {
       current_operation_id = preinit_id
       preinit_operation()
     }
@@ -282,7 +289,11 @@ trait Scage extends OperationMapping {
 
   def init(init_func: => Any) = {
     if (is_running) init_func
-    inits.addOp(() => init_func)
+    inits.addOp(() => init_func, 0)
+  }
+  def init(position:Int)(init_func: => Any) = {
+    if (is_running) init_func
+    inits.addOp(() => init_func, position)
   }
 
   private var init_moment = System.currentTimeMillis()
@@ -296,7 +307,7 @@ trait Scage extends OperationMapping {
 
   private[scage] def executeInits() {
     scage_log.info(unit_name + ": init")
-    for (ScageOperation(init_id, init_operation) <- inits.operations) {
+    for (ScageOperation(init_id, init_operation, _) <- inits.operations) {
       current_operation_id = init_id
       init_operation()
     }
@@ -324,13 +335,16 @@ trait Scage extends OperationMapping {
   private[scage] val actions = defaultContainer("actions")
 
   def actionIgnorePause(action_func: => Any): Int = {
-    actions.addOp(() => action_func)
+    actions.addOp(() => action_func, 0)
+  }
+  def actionIgnorePause(position:Int)(action_func: => Any): Int = {
+    actions.addOp(() => action_func, position)
   }
 
-  def actionIgnorePause(period: Long)(action_func: => Unit): Int = {
+  def actionStaticPeriodIgnorePause(period: Long, position:Int = 0)(action_func: => Unit): Int = {
     if (period > 0) {
       var last_action_time: Long = 0
-      actionIgnorePause {
+      actionIgnorePause(position) {
         if (System.currentTimeMillis - last_action_time > period) {
           action_func
           last_action_time = System.currentTimeMillis
@@ -341,9 +355,9 @@ trait Scage extends OperationMapping {
     }
   }
 
-  def actionDynamicPeriodIgnorePause(period: => Long)(action_func: => Unit): Int = {
+  def actionDynamicPeriodIgnorePause(period: => Long, position:Int = 0)(action_func: => Unit): Int = {
     var last_action_time: Long = 0
-    actionIgnorePause {
+    actionIgnorePause(position) {
       if (System.currentTimeMillis - last_action_time > period) {
         action_func
         last_action_time = System.currentTimeMillis
@@ -358,10 +372,16 @@ trait Scage extends OperationMapping {
     }
   }
 
-  def action(period: Long)(action_func: => Unit): Int = {
+  def action(position:Int)(action_func: => Any): Int = {
+    actionIgnorePause(position) {
+      if (!on_pause) action_func
+    }
+  }
+
+  def actionStaticPeriod(period: Long, position:Int = 0)(action_func: => Unit): Int = {
     if (period > 0) {
       var last_action_time: Long = 0
-      action {
+      action(position) {
         if (System.currentTimeMillis - last_action_time > period) {
           action_func
           last_action_time = System.currentTimeMillis
@@ -372,9 +392,9 @@ trait Scage extends OperationMapping {
     }
   }
 
-  def actionDynamicPeriod(period: => Long)(action_func: => Unit): Int = {
+  def actionDynamicPeriod(period: => Long, position:Int = 0)(action_func: => Unit): Int = {
     var last_action_time: Long = 0
-    action {
+    action(position) {
       if (System.currentTimeMillis - last_action_time > period) {
         action_func
         last_action_time = System.currentTimeMillis
@@ -389,10 +409,16 @@ trait Scage extends OperationMapping {
     }
   }
 
-  def actionOnPause(period: Long)(action_func: => Unit): Int = {
+  def actionOnPause(position:Int)(action_func: => Any): Int = {
+    actionIgnorePause(position) {
+      if (on_pause) action_func
+    }
+  }
+
+  def actionStaticPeriodOnPause(period: Long, position:Int = 0)(action_func: => Unit): Int = {
     if (period > 0) {
       var last_action_time: Long = 0
-      actionOnPause {
+      actionOnPause(position) {
         if (System.currentTimeMillis - last_action_time > period) {
           action_func
           last_action_time = System.currentTimeMillis
@@ -403,9 +429,9 @@ trait Scage extends OperationMapping {
     }
   }
 
-  def actionDynamicPeriodOnPause(period: => Long)(action_func: => Unit): Int = {
+  def actionDynamicPeriodOnPause(period: => Long, position:Int = 0)(action_func: => Unit): Int = {
     var last_action_time: Long = 0
-    actionOnPause {
+    actionOnPause(position) {
       if (System.currentTimeMillis - last_action_time > period) {
         action_func
         last_action_time = System.currentTimeMillis
@@ -414,7 +440,7 @@ trait Scage extends OperationMapping {
   }
 
   private def _execute(_actions: Seq[ScageOperation]) {
-    val ScageOperation(action_id, action_operation) = _actions.head
+    val ScageOperation(action_id, action_operation, _) = _actions.head
     current_operation_id = action_id
     action_operation()
     if (_actions.nonEmpty && _actions.tail.nonEmpty && !restart_toggled) _execute(_actions.tail)
@@ -446,12 +472,15 @@ trait Scage extends OperationMapping {
   private[scage] val clears = defaultContainer("clears")
 
   def clear(clear_func: => Any) = {
-    clears.addOp(() => clear_func)
+    clears.addOp(() => clear_func, 0)
+  }
+  def clear(position:Int)(clear_func: => Any) = {
+    clears.addOp(() => clear_func, position)
   }
 
   private[scage] def executeClears() {
     scage_log.info(unit_name + ": clear")
-    for (ScageOperation(clear_id, clear_operation) <- clears.operations) {
+    for (ScageOperation(clear_id, clear_operation, _) <- clears.operations) {
       current_operation_id = clear_id
       clear_operation()
     }
@@ -476,13 +505,17 @@ trait Scage extends OperationMapping {
   private[scage] val disposes = defaultContainer("disposes")
 
   def dispose(dispose_func: => Any) = {
-    disposes.addOp(() => dispose_func)
+    disposes.addOp(() => dispose_func, 0)
+  }
+
+  def dispose(position:Int)(dispose_func: => Any) = {
+    disposes.addOp(() => dispose_func, position)
   }
 
   // 'disposes' suppose to run after unit is completely finished. No public method exists to run them inside run-loop
   private[scage] def executeDisposes() {
     scage_log.info(unit_name + ": dispose")
-    for (ScageOperation(dispose_id, dispose_operation) <- disposes.operations) {
+    for (ScageOperation(dispose_id, dispose_operation, _) <- disposes.operations) {
       current_operation_id = dispose_id
       dispose_operation()
     }

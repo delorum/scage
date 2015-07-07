@@ -25,35 +25,35 @@ trait MultiController extends ScageController {
     val event = MultiKeyEvent(was_pressed = false, 0, () => repeat_time, () => if(!on_pause) onKeyDown, () => if(!on_pause) onKeyUp)
     if(keyboard_key_events.contains(key_code)) keyboard_key_events(key_code) += event
     else keyboard_key_events(key_code) = ArrayBuffer(event)
-    deletion_operations.addOp(() => keyboard_key_events(key_code) -= event)
+    deletion_operations.addOp(() => keyboard_key_events(key_code) -= event, 0)
   }
   def keyIgnorePause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) = {
     val event = MultiKeyEvent(was_pressed = false, 0, () => repeat_time, () => onKeyDown, () => onKeyUp)
     if(keyboard_key_events.contains(key_code)) keyboard_key_events(key_code) += event
     else keyboard_key_events(key_code) = ArrayBuffer(event)
-    deletion_operations.addOp(() => keyboard_key_events(key_code) -= event)
+    deletion_operations.addOp(() => keyboard_key_events(key_code) -= event, 0)
   }
   def keyOnPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) = {
     val event = MultiKeyEvent(was_pressed = false, 0, () => repeat_time, () => if(on_pause) onKeyDown, () => if(on_pause) onKeyUp)
     if(keyboard_key_events.contains(key_code)) keyboard_key_events(key_code) += event
     else keyboard_key_events(key_code) = ArrayBuffer(event)
-    deletion_operations.addOp(() => keyboard_key_events(key_code) -= event)
+    deletion_operations.addOp(() => keyboard_key_events(key_code) -= event, 0)
   }
 
   def anykey(onKeyDown: => Any) = {
     val event = () => if(!on_pause) onKeyDown
     anykeys += event
-    deletion_operations.addOp(() => anykeys -= event)
+    deletion_operations.addOp(() => anykeys -= event, 0)
   }
   def anykeyIgnorePause(onKeyDown: => Any) = {
     val event = () => onKeyDown
     anykeys += event
-    deletion_operations.addOp(() => anykeys -= event)
+    deletion_operations.addOp(() => anykeys -= event, 0)
   }
   def anykeyOnPause(onKeyDown: => Any) = {
     val event = () => if(on_pause) onKeyDown
     anykeys += event
-    deletion_operations.addOp(() => anykeys -= event)
+    deletion_operations.addOp(() => anykeys -= event, 0)
   }
 
   def mouseCoord = Vec(Mouse.getX, Mouse.getY)
@@ -62,7 +62,7 @@ trait MultiController extends ScageController {
     val event = MultiMouseButtonEvent(was_pressed = false, 0, () => repeat_time, onButtonDown, onButtonUp)
     if(mouse_button_events.contains(button_code)) mouse_button_events(button_code) += event
     else mouse_button_events(button_code) = ArrayBuffer(event)
-    deletion_operations.addOp(() => mouse_button_events(button_code) -= event)
+    deletion_operations.addOp(() => mouse_button_events(button_code) -= event, 0)
   }
 
   def leftMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
@@ -166,22 +166,22 @@ trait MultiController extends ScageController {
   def mouseMotion(onMotion: Vec => Any) = {
     val event = {mouse_coord:Vec => if(!on_pause) onMotion(mouse_coord)}
     mouse_motions += event
-    deletion_operations.addOp(() => mouse_motions -= event)
+    deletion_operations.addOp(() => mouse_motions -= event, 0)
   }
   def mouseMotionIgnorePause(onMotion: Vec => Any) = {
     mouse_motions += onMotion
-    deletion_operations.addOp(() => mouse_motions -= onMotion)
+    deletion_operations.addOp(() => mouse_motions -= onMotion, 0)
   }
   def mouseMotionOnPause(onMotion: Vec => Any) = {
     val event = {mouse_coord:Vec => if(on_pause) onMotion(mouse_coord)}
     mouse_motions += event
-    deletion_operations.addOp(() => mouse_motions -= event)
+    deletion_operations.addOp(() => mouse_motions -= event, 0)
   }
 
   private def mouseDrag(button_code:Int, onDrag: Vec => Any) = {
     if(mouse_drag_motions.contains(button_code)) mouse_drag_motions(button_code) += onDrag
     else mouse_drag_motions(button_code) = ArrayBuffer(onDrag)
-    deletion_operations.addOp(() => mouse_drag_motions(button_code) -= onDrag)
+    deletion_operations.addOp(() => mouse_drag_motions(button_code) -= onDrag, 0)
   }
 
   def leftMouseDrag(onDrag: Vec => Any) = {
@@ -207,31 +207,31 @@ trait MultiController extends ScageController {
   def mouseWheelUp(onWheelUp: Vec => Any) = {
     val event = {mouse_coord:Vec => if(!on_pause) onWheelUp(mouse_coord)}
     mouse_wheel_ups += event
-    deletion_operations.addOp(() => mouse_wheel_ups -= event)
+    deletion_operations.addOp(() => mouse_wheel_ups -= event, 0)
   }
   def mouseWheelUpIgnorePause(onWheelUp: Vec => Any) = {
     mouse_wheel_ups += onWheelUp
-    deletion_operations.addOp(() => mouse_wheel_ups -= onWheelUp)
+    deletion_operations.addOp(() => mouse_wheel_ups -= onWheelUp, 0)
   }
   def mouseWheelUpOnPause(onWheelUp: Vec => Any) = {
     val event = {mouse_coord:Vec => if(on_pause) onWheelUp(mouse_coord)}
     mouse_wheel_ups += event
-    deletion_operations.addOp(() => mouse_wheel_ups -= event)
+    deletion_operations.addOp(() => mouse_wheel_ups -= event, 0)
   }
 
   def mouseWheelDown(onWheelDown: Vec => Any) = {
     val event = {mouse_coord:Vec => if(!on_pause) onWheelDown(mouse_coord)}
     mouse_wheel_downs += event
-    deletion_operations.addOp(() => mouse_wheel_downs -= event)
+    deletion_operations.addOp(() => mouse_wheel_downs -= event, 0)
   }
   def mouseWheelDownIgnorePause(onWheelDown: Vec => Any) = {
     mouse_wheel_downs += onWheelDown
-    deletion_operations.addOp(() => mouse_wheel_downs -= onWheelDown)
+    deletion_operations.addOp(() => mouse_wheel_downs -= onWheelDown, 0)
   }
   def mouseWheelDownOnPause(onWheelDown: Vec => Any) = {
     val event = {mouse_coord:Vec => if(on_pause) onWheelDown(mouse_coord)}
     mouse_wheel_downs += event
-    deletion_operations.addOp(() => mouse_wheel_downs -= event)
+    deletion_operations.addOp(() => mouse_wheel_downs -= event, 0)
   }
 
   def checkControls() {

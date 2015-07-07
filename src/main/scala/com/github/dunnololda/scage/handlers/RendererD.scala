@@ -685,35 +685,10 @@ trait RendererD extends Scage with ScageController {
     }
   }
 
-  case class RenderOperationD(render_id:Int, render_func:() => Any, position:Int) extends ScageOperation(render_id, render_func) with Ordered[RenderOperationD] {
-    def compare(other_render:RenderOperationD) = position - other_render.position
-  }
+  private[scage] val renders = defaultContainer("renders")
 
-  class RenderOperationsContainerD extends OperationContainer[RenderOperationD] {
-    protected val _render_operations = SortedBuffer[RenderOperationD]()
-
-    def name:String = "renders"
-
-    protected def addOperation(operation:RenderOperationD) {_render_operations += operation}
-    protected def removeOperation(op_id:Int):Option[RenderOperationD] = _render_operations.indexWhere(_.render_id == op_id) match {
-      case index if index != -1 => Some(_render_operations.remove(index))
-      case _ => None
-    }
-
-    def operations:Seq[RenderOperationD] = _render_operations
-    def length:Int = _render_operations.length
-
-    def addOp(op:() => Any, position:Int = 0) = {
-      val op_id = nextId
-      addOperationWithMapping(RenderOperationD(op_id, op, position))
-    }
-  }
-  protected def rendersContainer = new RenderOperationsContainerD
-
-  private[scage] val renders = rendersContainer
-
-  def render(render_func: => Any) = renders.addOp(() => render_func)
-  def render(position:Int = 0)(render_func: => Any) = renders.addOp(() => render_func, position)
+  def render(render_func: => Any) = renders.addOp(() => render_func, 0)
+  def render(position:Int)(render_func: => Any) = renders.addOp(() => render_func, position)
 
   def delRender(operation_id:Int) = {renders.delOperation(operation_id)}
   def delRenders(operation_ids:Int*) {renders.delOperations(operation_ids:_*)}
@@ -723,7 +698,11 @@ trait RendererD extends Scage with ScageController {
   private[scage] val interfaces = defaultContainer("interfaces")
 
   def interface(interface_func: => Any):Int = {
-    interfaces.addOp(() => interface_func)
+    interfaces.addOp(() => interface_func, 0)
+  }
+
+  def interface(position:Int)(interface_func: => Any):Int = {
+    interfaces.addOp(() => interface_func, position)
   }
 
   def interfaceFromXml(interface_id:String, parameters: => Array[Any] = Array[Any]()):Int = {
@@ -754,7 +733,7 @@ trait RendererD extends Scage with ScageController {
   private var actions_run_moment = System.currentTimeMillis()*/
 
   private def _execute(_actions:Seq[ScageOperation]) {
-    val ScageOperation(action_id, action_operation) = _actions.head
+    val ScageOperation(action_id, action_operation, _) = _actions.head
     current_operation_id = action_id
     action_operation()
     if(_actions.nonEmpty && _actions.tail.nonEmpty && !restart_toggled) _execute(_actions.tail)
@@ -784,7 +763,7 @@ trait RendererD extends Scage with ScageController {
   val framerate = property("render.framerate", 0)
 
   private def _perform1(_renders:Seq[ScageOperation]) {
-    val RenderOperationD(render_id, render_operation, _) = _renders.head
+    val ScageOperation(render_id, render_operation, _) = _renders.head
     current_operation_id = render_id
     GL11.glPushMatrix()
     render_operation()
@@ -792,7 +771,7 @@ trait RendererD extends Scage with ScageController {
     if(_renders.nonEmpty && _renders.tail.nonEmpty && !restart_toggled) _perform1(_renders.tail)
   }
   private def _perform2(_interfaces:Seq[ScageOperation]) {
-    val ScageOperation(interface_id, interface_operation) = _interfaces.head
+    val ScageOperation(interface_id, interface_operation, _) = _interfaces.head
     current_operation_id = interface_id
     interface_operation()
     if(_interfaces.nonEmpty && _interfaces.tail.nonEmpty && !restart_toggled) _perform2(_interfaces.tail)
