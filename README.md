@@ -3,7 +3,7 @@
 Latest Stable Version
 ---------------------
 
-10.3
+10.8
 
 Introduction
 ------------
@@ -71,15 +71,25 @@ Usage
 
 You can use the scage archetype to create a new scage project stub:
 
-    $ mvn archetype:generate -DarchetypeGroupId=scage -DarchetypeArtifactId=project-archetype -DarchetypeVersion=10.3 -DarchetypeRepository=https://raw.github.com/dunnololda/mvn-repo/master
-    
-Answer questions about groupId, artifactId, version and default package and a new folder named as {artifactId} will be created. Inside will be ready to run and deploy small application - simple light cycles game based on the Tron movie.
+    $ mvn archetype:generate -DarchetypeGroupId=scage -DarchetypeArtifactId=project-archetype -DarchetypeVersion=10.8 -DarchetypeRepository=https://raw.github.com/dunnololda/mvn-repo/master
+
+This utilize the maven's "archetype" feature - create a simple example project with all needed stuff. Answer some questions about its name and version and you are done.
+
+For example:
+groupId: mygroup
+artifactId: myartifact
+version: 0.1
+package mygroup.myartifact
+
+(these all names are not really important, you can choose anything)
+
+In the end type Y, hit 'enter' and the folder "myartifact" will be created. Inside will be a small application, ready to compile, run and deploy - simple Light Cycles game based on the Tron movie.
     
 To launch app from the project stub you can type:
 
     $ mvn clean test
     
-This project stub has two profiles in its pom.xml for app building. To build a standalone app type in your console:
+This project stub has two profiles in its pom.xml for the app building. To build a standalone app type in your console:
 
     $ mvn clean package -Pbuild -Dmaven.test.skip
     
@@ -95,15 +105,30 @@ To build a webstart app type:
    
 This command will create "jnlp" folder in "target". Then you can upload this folder to your host.
 
+More info you can find in the readme file inside the project's root.
+
 ###Intellij IDEA
 
-You also can use some IDE with good Maven and Scala support (for example, [IntelliJ IDEA](http://www.jetbrains.com/idea/)). In Idea choose "Import Project", point to the created folder from the previous step and then choose: "Import project from external model" - "Maven". Then type "Next" a few times. Idea project will be created.
+You also can use some IDE with good Maven and Scala support (for example, [IntelliJ IDEA](http://www.jetbrains.com/idea/)). Here are the steps for IDEA:
 
-To launch your application from Idea open main object (usually it is an object which extends ScageScreenApp) and press ctrl-shift-F10 to create a launch configuration. Idea will try to compile and execute it, but most likely fail with error "Exception in thread "main" java.lang.UnsatisfiedLinkError: no lwjgl in java.library.path". To fix this Select "Edit Configurations" and in the field "VM options" add: 
+Download Intellij IDEA Community Edition from there: https://www.jetbrains.com/idea/download/ (it's free).
+
+Unzip it and run. Setup scala plugin.
+
+Then in the main menu click "Import Project" - choose the folder "myartifact".
+In the new window choose "Import project from external model" - "Maven". Then just hit "Next" several times.
+
+Then wait for a while and IDEA will setup the project for you.
+
+How to run it:
+
+In the left panel go to src/main/scala/mygroup.myartifact. There is only one file - LightCyclesOffline.scala. Open it. Place the cursor in the row second to "object LightCyclesOffline extends ScageScreenApp("Light Cycles", 640, 480) {". 
+
+Right click - Create LightCyclesOffline. In the new window in the "VM Options" type:
 
     -Djava.library.path=target/natives -DLWJGL_DISABLE_XRANDR=true -Dfile.encoding=UTF-8
-    
-Then try to launch again.
+
+Then click OK. Then for example right click again and choose Run LightCyclesOffline. IDEA will build and run the app.
 
 ###For non-Maven users.
 
