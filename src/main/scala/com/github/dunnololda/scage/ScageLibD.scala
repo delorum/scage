@@ -281,7 +281,9 @@ object ScageLibD extends ScageMessageTrait with ScageXMLTrait with RendererLibD 
   type ScreenD          = com.github.dunnololda.scage.ScreenD
   type Vec             = com.github.dunnololda.scage.support.Vec
   type DVec            = com.github.dunnololda.scage.support.DVec
+  type SingleController = com.github.dunnololda.scage.handlers.controller2.SingleController
   type MultiController = com.github.dunnololda.scage.handlers.controller2.MultiController
+  type ActorSingleController = com.github.dunnololda.scage.handlers.controller3.ActorSingleController
   type ScageColor      = com.github.dunnololda.scage.support.ScageColor
   type DefaultTrace    = com.github.dunnololda.scage.support.tracer3.DefaultTrace
   type State           = com.github.dunnololda.state.State
