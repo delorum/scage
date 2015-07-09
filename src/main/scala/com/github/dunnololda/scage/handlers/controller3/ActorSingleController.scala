@@ -9,7 +9,6 @@ import com.github.dunnololda.scage.support.Vec
 import com.typesafe.config.ConfigFactory
 import org.lwjgl.input.{Keyboard, Mouse}
 import org.lwjgl.opengl.Display
-import sun.awt.SunToolkit
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer

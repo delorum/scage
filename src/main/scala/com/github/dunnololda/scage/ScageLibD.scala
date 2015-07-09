@@ -273,24 +273,27 @@ object ScageLibD extends ScageMessageTrait with ScageXMLTrait with RendererLibD 
   }
 
   // types
-  type ScageApp        = com.github.dunnololda.scage.ScageApp
-  type Scage           = com.github.dunnololda.scage.Scage
-  type ScageScreenAppD  = com.github.dunnololda.scage.ScageScreenAppD
-  type ScageScreenD     = com.github.dunnololda.scage.ScageScreenD
-  type ScreenAppD       = com.github.dunnololda.scage.ScreenAppD
-  type ScreenD          = com.github.dunnololda.scage.ScreenD
-  type Vec             = com.github.dunnololda.scage.support.Vec
-  type DVec            = com.github.dunnololda.scage.support.DVec
-  type SingleController = com.github.dunnololda.scage.handlers.controller2.SingleController
-  type MultiController = com.github.dunnololda.scage.handlers.controller2.MultiController
+  type ScageApp          = com.github.dunnololda.scage.ScageApp
+  type Scage             = com.github.dunnololda.scage.Scage
+  type ScageScreenAppD   = com.github.dunnololda.scage.ScageScreenAppD
+  type ScageScreenD      = com.github.dunnololda.scage.ScageScreenD
+  type ScreenAppD        = com.github.dunnololda.scage.ScreenAppD
+  type ScreenD           = com.github.dunnololda.scage.ScreenD
+  type ScreenAppDMT      = com.github.dunnololda.scage.ScreenAppDMT
+  type ScageScreenDMT    = com.github.dunnololda.scage.ScageScreenDMT
+  type ScageScreenAppDMT = com.github.dunnololda.scage.ScageScreenAppDMT
+  type Vec               = com.github.dunnololda.scage.support.Vec
+  type DVec              = com.github.dunnololda.scage.support.DVec
+  type SingleController  = com.github.dunnololda.scage.handlers.controller2.SingleController
+  type MultiController   = com.github.dunnololda.scage.handlers.controller2.MultiController
   type ActorSingleController = com.github.dunnololda.scage.handlers.controller3.ActorSingleController
-  type ScageColor      = com.github.dunnololda.scage.support.ScageColor
-  type DefaultTrace    = com.github.dunnololda.scage.support.tracer3.DefaultTrace
-  type State           = com.github.dunnololda.state.State
-  type Trace           = com.github.dunnololda.scage.support.tracer3.Trace
-  type TraceTrait      = com.github.dunnololda.scage.support.tracer3.TraceTrait
-  type ScageMessage    = com.github.dunnololda.scage.support.messages.ScageMessage
-  type PathFinder       = com.github.dunnololda.scage.support.PathFinder
+  type ScageColor        = com.github.dunnololda.scage.support.ScageColor
+  type DefaultTrace      = com.github.dunnololda.scage.support.tracer3.DefaultTrace
+  type State             = com.github.dunnololda.state.State
+  type Trace             = com.github.dunnololda.scage.support.tracer3.Trace
+  type TraceTrait        = com.github.dunnololda.scage.support.tracer3.TraceTrait
+  type ScageMessage      = com.github.dunnololda.scage.support.messages.ScageMessage
+  type PathFinder        = com.github.dunnololda.scage.support.PathFinder
 
   type CoordTracer[A <: com.github.dunnololda.scage.support.tracer3.TraceTrait] = com.github.dunnololda.scage.support.tracer3.CoordTracer[A]
   type ScageTracer[A <: com.github.dunnololda.scage.support.tracer3.TraceTrait] = com.github.dunnololda.scage.support.tracer3.ScageTracer[A]

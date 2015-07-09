@@ -1,5 +1,6 @@
 package com.github.dunnololda.scage
 
+import com.github.dunnololda.scage.handlers.controller3.ActorSingleController
 import handlers.controller2.{ScageController, SingleController}
 import com.github.dunnololda.scage.handlers.{RendererD, Renderer}
 import handlers.{RendererLib, RendererLibD}
@@ -120,9 +121,92 @@ abstract class ScreenAppD(
   }
 }
 
+abstract class ScreenAppMT(
+                          title:String  = property("app.name", "Scage App"),
+                          width:Int  = property("screen.width", 800),
+                          height:Int = property("screen.height", 600)
+                          ) extends Screen(title) with Cli {
+  val app_start_moment = System.currentTimeMillis()
+  def msecsFromAppStart = System.currentTimeMillis() - app_start_moment
+
+  override def run() {
+    executePreinits()
+    executeInits()
+    is_running = true
+    prepareRendering()
+    scage_log.info(unit_name+": run")
+    while(is_running && Scage.isAppRunning) {
+      checkControlsAndExecuteActions()
+      performRendering()
+    }
+    RendererLib.renderExitMessage()
+    executeClears()
+    executeDisposes()
+  }
+
+  override def main(args:Array[String]) {
+    scage_log.info("starting main screen "+title+"...")
+    if("sun.awt.X11.XToolkit" == System.getProperty("awt.toolkit")) {
+      scage_log.info("linux detected, performing XInitThreads() call to make multi-threading work")
+      System.loadLibrary("xx")
+    }
+    RendererLib.initgl(width, height, title)
+    RendererLib.drawWelcomeMessages()
+    super.main(args)
+    run()
+    RendererLib.destroygl()
+    scage_log.info(title+" was stopped")
+    System.exit(0)  // need explicit exit for the app's utilizing NetServer/NetClient as they have actors
+  }
+}
+
+abstract class ScreenAppDMT(
+                            title:String  = property("app.name", "Scage App"),
+                            width:Int  = property("screen.width", 800),
+                            height:Int = property("screen.height", 600)
+                            ) extends ScreenD(title) with Cli {
+  val app_start_moment = System.currentTimeMillis()
+  def msecsFromAppStart = System.currentTimeMillis() - app_start_moment
+
+  override def run() {
+    executePreinits()
+    executeInits()
+    is_running = true
+    prepareRendering()
+    scage_log.info(unit_name+": run")
+    while(is_running && Scage.isAppRunning) {
+      checkControlsAndExecuteActions()
+      performRendering()
+    }
+    RendererLibD.renderExitMessage()
+    executeClears()
+    executeDisposes()
+  }
+
+  override def main(args:Array[String]) {
+    scage_log.info("starting main screen "+title+"...")
+    if("sun.awt.X11.XToolkit" == System.getProperty("awt.toolkit")) {
+      scage_log.info("linux detected, performing XInitThreads() call to make multi-threading work")
+      System.loadLibrary("xx")
+    }
+    RendererLibD.initgl(width, height, title)
+    RendererLibD.drawWelcomeMessages()
+    super.main(args)
+    run()
+    RendererLibD.destroygl()
+    scage_log.info(title+" was stopped")
+    System.exit(0)  // need explicit exit for the app's utilizing NetServer/NetClient as they have actors
+  }
+}
+
+
 class ScageScreen(unit_name:String = "Scage Screen") extends Screen(unit_name) with SingleController
 
 class ScageScreenD(unit_name:String = "Scage Screen") extends ScreenD(unit_name) with SingleController
+
+class ScageScreenMT(unit_name:String = "Scage Screen") extends Screen(unit_name) with ActorSingleController
+
+class ScageScreenDMT(unit_name:String = "Scage Screen") extends ScreenD(unit_name) with ActorSingleController
 
 class ScageScreenApp(title:String = property("app.name", "Scage App"),
                      width:Int  = property("screen.width", 800),
@@ -131,6 +215,14 @@ class ScageScreenApp(title:String = property("app.name", "Scage App"),
 class ScageScreenAppD(title:String = property("app.name", "Scage App"),
                      width:Int  = property("screen.width", 800),
                      height:Int = property("screen.height", 600)) extends ScreenAppD(title, width, height) with SingleController
+
+class ScageScreenAppMT(title:String = property("app.name", "Scage App"),
+                     width:Int  = property("screen.width", 800),
+                     height:Int = property("screen.height", 600)) extends ScreenAppMT(title, width, height) with ActorSingleController
+
+class ScageScreenAppDMT(title:String = property("app.name", "Scage App"),
+                      width:Int  = property("screen.width", 800),
+                      height:Int = property("screen.height", 600)) extends ScreenAppDMT(title, width, height) with ActorSingleController
 
 abstract class ScageApplet extends Applet {
   def screen:ScageScreenApp
