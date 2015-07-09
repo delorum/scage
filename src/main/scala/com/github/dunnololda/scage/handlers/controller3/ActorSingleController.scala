@@ -144,10 +144,12 @@ trait ActorSingleController extends ScageController {
     deletion_operations.addOp(() => anykey = () => {}, 0)
   }
 
-  private var current_mouse_coord = Vec.zero
+  /*private var current_mouse_coord = Vec.zero
   def mouseCoord = current_mouse_coord
   private var current_mouse_moved = false
-  def isMouseMoved = current_mouse_moved//Mouse.getDX != 0 || Mouse.getDY != 0
+  def isMouseMoved = current_mouse_moved//Mouse.getDX != 0 || Mouse.getDY != 0*/
+  def mouseCoord = Vec(Mouse.getX, Mouse.getY)
+  def isMouseMoved = Mouse.getDX != 0 || Mouse.getDY != 0
   private def mouseButton(button_code:Int, repeat_time: => Long = 0, onButtonDown: Vec => Any, onButtonUp: Vec => Any = Vec => {}) = {
     mouse_button_events(button_code) = SingleMouseButtonEvent(button_code, () => repeat_time, onButtonDown, onButtonUp)
     deletion_operations.addOp(() => mouse_button_events -= button_code, 0)
@@ -266,8 +268,8 @@ trait ActorSingleController extends ScageController {
     for {
       (mouse_coord, is_mouse_moved, dwheel, button_presses_history) <- Await.result(controller_actor.?(GetAllMouseButtonHistoryAndReset)(Timeout(100.millis)).mapTo[List[(Vec, Boolean, Int, Map[Int, Boolean])]], 100.millis)
     } {
-      current_mouse_coord = mouse_coord
-      current_mouse_moved = is_mouse_moved
+      /*current_mouse_coord = mouse_coord
+      current_mouse_moved = is_mouse_moved*/
       if(is_mouse_moved) on_mouse_motion(mouse_coord)
       for {
         (button, button_data) <- mouse_button_events

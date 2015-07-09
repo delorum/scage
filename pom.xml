@@ -4,7 +4,7 @@
   <groupId>com.github.dunnololda</groupId>
   <artifactId>scage_${publish.scala.version}</artifactId>
   <packaging>jar</packaging>
-  <version>11.1</version>
+  <version>11.2</version>
   <inceptionYear>2011</inceptionYear>
     <licenses>
         <license>
@@ -105,6 +105,13 @@
           <groupId>com.typesafe.akka</groupId>
           <artifactId>akka-actor_2.10</artifactId>
           <version>2.3.11</version>
+      </dependency>
+      <dependency>
+          <groupId>com.github.dunnololda</groupId>
+          <artifactId>natives-linux-xinitthreads</artifactId>
+          <classifier>natives-linux-xinitthreads</classifier>
+          <scope>runtime</scope>
+          <version>1.0</version>
       </dependency>
       <dependency>
           <groupId>com.github.dunnololda</groupId>
