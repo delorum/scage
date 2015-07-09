@@ -153,9 +153,9 @@ abstract class ScreenAppMT(
       } else if("64" == System.getProperty("sun.arch.data.model")) {
         scage_log.info("64 bit linux detected, performing XInitThreads() call to make multi-threading work by loading library libxx64.so")
         System.loadLibrary("xx64")
+      } else {
+        scage_log.warn("linux of unknown arch detected, don't now how to perform XInitThreads() call, so perform nothing. Maybe the app will crash. Sorry.")
       }
-    } else {
-      scage_log.warn("linux of unknown arch detected, don't now how to perform XInitThreads() call, so perform nothing. Maybe the app will crash. Sorry.")
     }
     RendererLib.initgl(width, height, title)
     RendererLib.drawWelcomeMessages()
@@ -199,9 +199,9 @@ abstract class ScreenAppDMT(
       } else if("64" == System.getProperty("sun.arch.data.model")) {
         scage_log.info("64 bit linux detected, performing XInitThreads() call to make multi-threading work by loading library libxx64.so")
         System.loadLibrary("xx64")
+      } else {
+        scage_log.warn("linux of unknown arch detected, don't now how to perform XInitThreads() call, so perform nothing. Maybe the app will crash. Sorry.")
       }
-    } else {
-      scage_log.warn("linux of unknown arch detected, don't now how to perform XInitThreads() call, so perform nothing. Maybe the app will crash. Sorry.")
     }
     RendererLibD.initgl(width, height, title)
     RendererLibD.drawWelcomeMessages()
