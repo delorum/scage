@@ -132,6 +132,7 @@ public class UnicodeFont/* implements org.newdawn.slick.Font */{
         this(font_path , max_size, false, false);
         addAsciiGlyphs();
         addGlyphs(glyph_from, glyph_to);     // other alphabets (cyrillic by default)
+		addGlyphs("\u21b6\u21b7");
         effects.add(new ColorEffect(java.awt.Color.WHITE));
         loadGlyphs();
     }

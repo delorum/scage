@@ -61,6 +61,9 @@ trait ScageMessageTrait {
       print(message, message_x, message_y, color = message_color)
     }
   }
+
+  def addGlyphs(from:Int, to:Int): Unit
+  def addGlyphs(text:String): Unit
 }
 
 class ScageMessage(
@@ -78,6 +81,14 @@ class ScageMessage(
       reloadFont()
     }
     _font
+  }
+
+  def addGlyphs(from:Int, to:Int) {
+    font.addGlyphs(from ,to)
+  }
+
+  def addGlyphs(text:String) {
+    font.addGlyphs(text)
   }
 
   def reloadFont() {

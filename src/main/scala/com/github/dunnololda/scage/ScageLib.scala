@@ -19,6 +19,8 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
   def print(message:Any, x:Float, y:Float, size:Float, color:ScageColor, align:String) {ScageMessage.print(message, x, y, size, color, align)}
   def messageBounds(message:Any, size:Float = max_font_size):Vec                                           = ScageMessage.messageBounds(message, size)
   def areaForMessage(message:Any, coord:Vec, size:Float = max_font_size, align:String = "center"):Seq[Vec] = ScageMessage.areaForMessage(message, coord, size, align)
+  def addGlyphs(from:Int, to:Int) {ScageMessage.addGlyphs(from, to)}
+  def addGlyphs(text:String) {ScageMessage.addGlyphs(text)}
 
   def lang = ScageXML.lang
   def lang_=(new_lang:String) {ScageXML.lang = new_lang}
