@@ -64,6 +64,11 @@ More examples
 
 See [Examples Page](https://github.com/dunnololda/scage/wiki/Examples)
 
+Engine brief description
+------------------------
+
+See [Engine mthods overview](https://github.com/dunnololda/scage/wiki/Scage-methods-overview)
+
 Usage
 ------------
 
