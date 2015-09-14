@@ -143,6 +143,8 @@ Right click - Create LightCyclesOffline. In the new window in the "VM Options" t
 
 Then click OK. Then for example right click again and choose Run LightCyclesOffline. IDEA will build and run the app.
 
+If you see "Exception in thread "main" java.lang.UnsatisfiedLinkError: no lwjgl in java.library.path" or "Exception in thread "main" java.lang.UnsatisfiedLinkError: no lwjgl64 in java.library.path", this means you have no native libraries in target/natives. In order to generate them, type some mvn command from above. For example, type "mvn clean compile". As a first step of the compilation process maven will generate those libraries in target/natives.
+
 ###For non-Maven users.
 
 You can both :
