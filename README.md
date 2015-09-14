@@ -3,7 +3,7 @@
 Latest Stable Version
 ---------------------
 
-10.8
+11.3
 
 Introduction
 ------------
@@ -39,11 +39,9 @@ Hello World Example
 
 ###Rotating 'Hello World!' label
 
-    import net.scage.ScageScreenApp
-    import net.scage.ScageLib._
-    import net.scage.support.Vec
+    import com.github.dunnololda.scage.ScageLib._
 
-    object HelloWorldExample extends ScageScreenApp("Hello World") {
+    object HelloWorldExample extends ScageScreenApp("Hello World", 640, 480) {
       private var ang = 0f
       actionStaticPeriod(100) {
         ang += 5
@@ -76,7 +74,7 @@ Usage
 
 You can use the scage archetype to create a new scage project stub:
 
-    $ mvn archetype:generate -DarchetypeGroupId=scage -DarchetypeArtifactId=project-archetype -DarchetypeVersion=10.8 -DarchetypeRepository=https://raw.github.com/dunnololda/mvn-repo/master
+    $ mvn archetype:generate -DarchetypeGroupId=scage -DarchetypeArtifactId=project-archetype -DarchetypeVersion=11.3 -DarchetypeRepository=https://raw.github.com/dunnololda/mvn-repo/master
 
 This utilize the maven's "archetype" feature - create a simple example project with all needed stuff. Answer some questions about its name and version and you are done.
 
