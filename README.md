@@ -112,6 +112,16 @@ This command will create "jnlp" folder in "target". Then you can upload this fol
 
 More info you can find in the readme file inside the project's root.
 
+###OpenJDK
+
+If you use OpenJDK (not Oracle JDK) you need to add the openjdk profile to all mvn commands above:
+
+    $ mvn clean test -Popenjdk
+    $ mvn clean package -Pbuild,openjdk
+    $ mvn clean package -Pwebstart,openjdk
+
+Additionally you need to install the package "icedtea-web" (this is the name in Archlinux, in Ubuntu it should be something similar).
+
 ###Intellij IDEA
 
 You also can use some IDE with good Maven and Scala support (for example, [IntelliJ IDEA](http://www.jetbrains.com/idea/)). Here are the steps for IDEA:
