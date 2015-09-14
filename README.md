@@ -41,7 +41,7 @@ Hello World Example
 
     import com.github.dunnololda.scage.ScageLib._
 
-    object HelloWorldExample extends ScageScreenApp("Hello World", 640, 480) {
+    object HelloWorldExample extends ScageScreenApp("Scage App", 640, 480) {
       private var ang = 0f
       actionStaticPeriod(100) {
         ang += 5
