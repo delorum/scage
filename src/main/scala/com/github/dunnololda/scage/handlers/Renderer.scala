@@ -1,23 +1,25 @@
 package com.github.dunnololda.scage.handlers
 
-import java.io.InputStream
-import org.newdawn.slick.opengl.{TextureLoader, Texture}
-import org.lwjgl.opengl.{DisplayMode, GL11, Display}
-import org.lwjgl.util.glu.GLU
-import com.github.dunnololda.cli.AppProperties._
-import com.github.dunnololda.scage.support.ScageColor._
-import com.github.dunnololda.scage.support.messages.ScageXML._
-import org.lwjgl.BufferUtils
-import com.github.dunnololda.scage.support.ScageId._
-import org.newdawn.slick.util.ResourceLoader
-import com.github.dunnololda.scage.support.messages.{ScageXML, ScageMessage}
-import com.github.dunnololda.scage.support.tracer3.{Trace, ScageTracer}
 import java.awt.GraphicsEnvironment
-import com.github.dunnololda.scage.{ScageOperation, Scage}
-import collection.mutable.ArrayBuffer
-import com.github.dunnololda.scage.support.{SortedBuffer, ScageColor, Vec}
+import java.io.InputStream
+
+import com.github.dunnololda.cli.AppProperties._
 import com.github.dunnololda.mysimplelogger.MySimpleLogger
 import com.github.dunnololda.scage.handlers.controller2.ScageController
+import com.github.dunnololda.scage.support.ScageColor._
+import com.github.dunnololda.scage.support.ScageId._
+import com.github.dunnololda.scage.support.messages.ScageXML._
+import com.github.dunnololda.scage.support.messages.{ScageMessage, ScageXML}
+import com.github.dunnololda.scage.support.tracer3.{ScageTracer, Trace}
+import com.github.dunnololda.scage.support.{ScageColor, Vec}
+import com.github.dunnololda.scage.{Scage, ScageOperation}
+import org.lwjgl.BufferUtils
+import org.lwjgl.opengl.{Display, DisplayMode, GL11}
+import org.lwjgl.util.glu.GLU
+import org.newdawn.slick.opengl.{Texture, TextureLoader}
+import org.newdawn.slick.util.ResourceLoader
+
+import scala.collection.mutable.ArrayBuffer
 
 object DisplayListsHolder {
   private val log = MySimpleLogger(this.getClass.getName)
@@ -536,7 +538,7 @@ trait RendererLib {
 }
 
 object RendererLib extends RendererLib
-import RendererLib._
+import com.github.dunnololda.scage.handlers.RendererLib._
 
 trait Renderer extends Scage with ScageController {
   //private val log = MySimpleLogger(this.getClass.getName)
@@ -767,10 +769,7 @@ trait Renderer extends Scage with ScageController {
       if(actions.operations.nonEmpty) {
         _execute(actions.operations)
       }
-      if(del_operations.nonEmpty) {
-        del_operations.foreach(delOp => delOp())
-        del_operations.clear()
-      }
+      executeDelOperationsIfExist()
       _action_time_msec = System.currentTimeMillis() - msec3
       _action_time_measures_count += 1
       _average_action_time_msec =1f*(_average_action_time_msec*(_action_time_measures_count-1) + _action_time_msec)/_action_time_measures_count

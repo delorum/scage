@@ -109,7 +109,7 @@ trait ActorSingleController extends ScageController {
   def key(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) = {
     keyboard_key_events(key_code) = SingleKeyEvent(key_code, () => repeat_time, () => if(!on_pause) onKeyDown, () => if(!on_pause) onKeyUp)
     controller_actor ! AddKey(key_code)
-    deletion_operations.addOp(() => {
+    control_deletion_operations.addOp(() => {
       keyboard_key_events -= key_code
       controller_actor ! RemoveKey(key_code)
     }, 0)
@@ -117,7 +117,7 @@ trait ActorSingleController extends ScageController {
   def keyIgnorePause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}) = {
     keyboard_key_events(key_code) = SingleKeyEvent(key_code, () => repeat_time, () => onKeyDown, () => onKeyUp)
     controller_actor ! AddKey(key_code)
-    deletion_operations.addOp(() => {
+    control_deletion_operations.addOp(() => {
       keyboard_key_events -= key_code
       controller_actor ! RemoveKey(key_code)
     }, 0)
@@ -125,7 +125,7 @@ trait ActorSingleController extends ScageController {
   def keyOnPause(key_code:Int, repeat_time: => Long = 0, onKeyDown: => Any, onKeyUp: => Any = {}):Int = {
     keyboard_key_events(key_code) = SingleKeyEvent(key_code, () => repeat_time, () => if(on_pause) onKeyDown, () => if(on_pause) onKeyUp)
     controller_actor ! AddKey(key_code)
-    deletion_operations.addOp(() => {
+    control_deletion_operations.addOp(() => {
       keyboard_key_events -= key_code
       controller_actor ! RemoveKey(key_code)
     }, 0)
@@ -133,15 +133,15 @@ trait ActorSingleController extends ScageController {
 
   def anykey(onKeyDown: => Any) = {
     anykey = () => if(!on_pause) onKeyDown
-    deletion_operations.addOp(() => anykey = () => {}, 0)
+    control_deletion_operations.addOp(() => anykey = () => {}, 0)
   }
   def anykeyIgnorePause(onKeyDown: => Any) = {
     anykey = () => onKeyDown
-    deletion_operations.addOp(() => anykey = () => {}, 0)
+    control_deletion_operations.addOp(() => anykey = () => {}, 0)
   }
   def anykeyOnPause(onKeyDown: => Any) = {
     anykey = () => if(on_pause) onKeyDown
-    deletion_operations.addOp(() => anykey = () => {}, 0)
+    control_deletion_operations.addOp(() => anykey = () => {}, 0)
   }
 
   /*private var current_mouse_coord = Vec.zero
@@ -152,7 +152,7 @@ trait ActorSingleController extends ScageController {
   def isMouseMoved = Mouse.getDX != 0 || Mouse.getDY != 0
   private def mouseButton(button_code:Int, repeat_time: => Long = 0, onButtonDown: Vec => Any, onButtonUp: Vec => Any = Vec => {}) = {
     mouse_button_events(button_code) = SingleMouseButtonEvent(button_code, () => repeat_time, onButtonDown, onButtonUp)
-    deletion_operations.addOp(() => mouse_button_events -= button_code, 0)
+    control_deletion_operations.addOp(() => mouse_button_events -= button_code, 0)
   }
 
   def leftMouse(repeat_time: => Long = 0, onBtnDown: Vec => Any, onBtnUp: Vec => Any = Vec => {}) = {
@@ -177,20 +177,20 @@ trait ActorSingleController extends ScageController {
 
   def mouseMotion(onMotion: Vec => Any) = {
     on_mouse_motion = mouse_coord => if(!on_pause) onMotion(mouse_coord)
-    deletion_operations.addOp(() => on_mouse_motion = v => {}, 0)
+    control_deletion_operations.addOp(() => on_mouse_motion = v => {}, 0)
   }
   def mouseMotionIgnorePause(onMotion: Vec => Any) = {
     on_mouse_motion = onMotion
-    deletion_operations.addOp(() => on_mouse_motion = v => {}, 0)
+    control_deletion_operations.addOp(() => on_mouse_motion = v => {}, 0)
   }
   def mouseMotionOnPause(onMotion: Vec => Any) = {
     on_mouse_motion = mouse_coord => if(on_pause) onMotion(mouse_coord)
-    deletion_operations.addOp(() => on_mouse_motion = v => {}, 0)
+    control_deletion_operations.addOp(() => on_mouse_motion = v => {}, 0)
   }
 
   private def mouseDrag(button_code:Int, onDrag: Vec => Any) = {
     on_mouse_drag_motion(button_code) = onDrag
-    deletion_operations.addOp(() => on_mouse_drag_motion -= button_code, 0)
+    control_deletion_operations.addOp(() => on_mouse_drag_motion -= button_code, 0)
   }
 
   def leftMouseDrag(onDrag: Vec => Any) = {
@@ -215,28 +215,28 @@ trait ActorSingleController extends ScageController {
 
   def mouseWheelUp(onWheelUp: Vec => Any) = {
     on_mouse_wheel_up = mouse_coord => if(!on_pause) onWheelUp(mouse_coord)
-    deletion_operations.addOp(() => on_mouse_wheel_up = v => {}, 0)
+    control_deletion_operations.addOp(() => on_mouse_wheel_up = v => {}, 0)
   }
   def mouseWheelUpIgnorePause(onWheelUp: Vec => Any) = {
     on_mouse_wheel_up = onWheelUp
-    deletion_operations.addOp(() => on_mouse_wheel_up = v => {}, 0)
+    control_deletion_operations.addOp(() => on_mouse_wheel_up = v => {}, 0)
   }
   def mouseWheelUpOnPause(onWheelUp: Vec => Any) = {
     on_mouse_wheel_up = mouse_coord => if(on_pause) onWheelUp(mouse_coord)
-    deletion_operations.addOp(() => on_mouse_wheel_up = v => {}, 0)
+    control_deletion_operations.addOp(() => on_mouse_wheel_up = v => {}, 0)
   }
 
   def mouseWheelDown(onWheelDown: Vec => Any) = {
     on_mouse_wheel_down = mouse_coord => if(!on_pause) onWheelDown(mouse_coord)
-    deletion_operations.addOp(() => on_mouse_wheel_down = v => {}, 0)
+    control_deletion_operations.addOp(() => on_mouse_wheel_down = v => {}, 0)
   }
   def mouseWheelDownIgnorePause(onWheelDown: Vec => Any) = {
     on_mouse_wheel_down = onWheelDown
-    deletion_operations.addOp(() => on_mouse_wheel_down = v => {}, 0)
+    control_deletion_operations.addOp(() => on_mouse_wheel_down = v => {}, 0)
   }
   def mouseWheelDownOnPause(onWheelDown: Vec => Any) = {
     on_mouse_wheel_down = mouse_coord => if(on_pause) onWheelDown(mouse_coord)
-    deletion_operations.addOp(() => on_mouse_wheel_down = v => {}, 0)
+    control_deletion_operations.addOp(() => on_mouse_wheel_down = v => {}, 0)
   }
 
   def checkControls() {
