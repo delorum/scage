@@ -50,7 +50,7 @@ trait OperationMapping {
       _operations += operation
     }
 
-    private[scage] def removeOperation(op_id: Int): Option[ScageOperation] = _operations.indexWhere(_.op_id == op_id) match {
+    private[OperationMapping] def removeOperation(op_id: Int): Option[ScageOperation] = _operations.indexWhere(_.op_id == op_id) match {
       case index if index != -1 => Some(_operations.remove(index))
       case _ => None
     }
