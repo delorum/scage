@@ -134,9 +134,9 @@ trait ScageController extends Scage {
 
   private[scage] val deletion_operations = controlDeletersContainer
 
-  def delControl(control_id:Int) = {deletion_operations.delOperation(control_id)}
-  def delControls(control_ids:Int*) {deletion_operations.delOperations(control_ids:_*)}
-  def delAllControls() {deletion_operations.delAllOperations()}
-  def delAllControlsExcept(except_control_ids:Int*) {deletion_operations.delAllOperationsExcept(except_control_ids:_*)}
+  def delControl(control_id:Int) = {deletion_operations.delOperationImmediately(control_id)}
+  def delControls(control_ids:Int*) {deletion_operations.delOperationsImmediately(control_ids:_*)}
+  def delAllControls() {deletion_operations.delAllOperationsImmediately()}
+  def delAllControlsExcept(except_control_ids:Int*) {deletion_operations.delAllOperationsExceptImmediately(except_control_ids:_*)}
 }
 
