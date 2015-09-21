@@ -153,13 +153,13 @@ trait ScageController extends Scage {
   }
 
   def delAllControls() {
-    control_deletion_operations.operations.map(_.op_id).foreach(control_id => {
+    control_deletion_operations.operations.operationIdsIterable.foreach(control_id => {
       _delOperation(control_id, show_warnings = true).foreach(op => op.op())
     })
   }
 
   def delAllControlsExcept(except_control_ids: Int*) {
-    control_deletion_operations.operations.map(_.op_id).filterNot(op_id => {
+    control_deletion_operations.operations.operationIdsIterable.filterNot(op_id => {
       except_control_ids.contains(op_id)
     }).foreach(control_id => {
       _delOperation(control_id, show_warnings = true).foreach(op => op.op())

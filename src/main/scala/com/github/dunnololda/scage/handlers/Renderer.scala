@@ -751,11 +751,12 @@ trait Renderer extends Scage with ScageController {
   /*private var actions_run_count = 0
   private var actions_run_moment = System.currentTimeMillis()*/
 
-  private def _execute(_actions:Seq[ScageOperation]) {
-    val ScageOperation(action_id, action_operation, _) = _actions.head
-    current_operation_id = action_id
-    action_operation()
-    if(_actions.nonEmpty && _actions.tail.nonEmpty && !restart_toggled) _execute(_actions.tail)
+  private def _execute(_actions_iterator:Iterator[ScageOperation]) {
+    while(!restart_toggled && _actions_iterator.hasNext) {
+      val ScageOperation(action_id, action_operation, _) = _actions_iterator.next()
+      current_operation_id = action_id
+      action_operation()
+    }
   }
   private[scage] def checkControlsAndExecuteActions() {  // maybe rename it to not confuse clients
     if(System.currentTimeMillis() - next_game_tick > 60000) {
@@ -767,7 +768,7 @@ trait Renderer extends Scage with ScageController {
       restart_toggled = false
       msec3 = System.currentTimeMillis()
       if(actions.operations.nonEmpty) {
-        _execute(actions.operations)
+        _execute(actions.operations.iterator)
       }
       executeDelOperationsIfExist()
       _action_time_msec = System.currentTimeMillis() - msec3
@@ -782,19 +783,21 @@ trait Renderer extends Scage with ScageController {
 
   val framerate = property("render.framerate", 0)
 
-  private def _perform1(_renders:Seq[ScageOperation]) {
-    val ScageOperation(render_id, render_operation, _) = _renders.head
-    current_operation_id = render_id
-    GL11.glPushMatrix()
-    render_operation()
-    GL11.glPopMatrix()
-    if(_renders.nonEmpty && _renders.tail.nonEmpty && !restart_toggled) _perform1(_renders.tail)
+  private def _perform1(_renders_iterator:Iterator[ScageOperation]) {
+    while(!restart_toggled && _renders_iterator.hasNext) {
+      val ScageOperation(render_id, render_operation, _) = _renders_iterator.next()
+      current_operation_id = render_id
+      GL11.glPushMatrix()
+      render_operation()
+      GL11.glPopMatrix()
+    }
   }
-  private def _perform2(_interfaces:Seq[ScageOperation]) {
-    val ScageOperation(interface_id, interface_operation, _) = _interfaces.head
-    current_operation_id = interface_id
-    interface_operation()
-    if(_interfaces.nonEmpty && _interfaces.tail.nonEmpty && !restart_toggled) _perform2(_interfaces.tail)
+  private def _perform2(_interfaces_iterator:Iterator[ScageOperation]) {
+    while(!restart_toggled && _interfaces_iterator.hasNext) {
+      val ScageOperation(interface_id, interface_operation, _) = _interfaces_iterator.next()
+      current_operation_id = interface_id
+      interface_operation()
+    }
   }
   private[scage] def performRendering() {
     if(Display.isCloseRequested) Scage.stopApp()
@@ -813,12 +816,12 @@ trait Renderer extends Scage with ScageController {
           GL11.glTranslatef(-point.x , -point.y, 0.0f)
         }
         if(renders.operations.nonEmpty) {
-          _perform1(renders.operations)
+          _perform1(renders.operations.iterator)
         }
       GL11.glPopMatrix()
 
       if(interfaces.operations.nonEmpty) {
-        _perform2(interfaces.operations)
+        _perform2(interfaces.operations.iterator)
       }
 
       if(framerate != 0) Display.sync(framerate)

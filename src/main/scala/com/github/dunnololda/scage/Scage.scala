@@ -44,23 +44,22 @@ trait OperationMapping {
   }
 
   class OperationContainer(val name: String) {
-    protected val _operations = SortedBuffer[ScageOperation]()
+    private[scage] val operations = SortedBuffer()
+
+    def length: Int = operations.length
+    
+    def isEmpty = operations.isEmpty
+    def nonEmpty = operations.nonEmpty
 
     protected def addOperation(operation: ScageOperation) {
-      _operations += operation
+      operations += operation
     }
 
-    private[OperationMapping] def removeOperation(op_id: Int): Option[ScageOperation] = _operations.indexWhere(_.op_id == op_id) match {
-      case index if index != -1 => Some(_operations.remove(index))
-      case _ => None
+    protected def addOperationWithMapping(operation: ScageOperation) = {
+      addOperation(operation)
+      mapping += (operation.op_id -> this)
+      operation.op_id
     }
-
-    def operations: Seq[ScageOperation] = _operations
-
-    def length: Int = _operations.length
-    
-    def isEmpty = _operations.isEmpty
-    def nonEmpty = _operations.nonEmpty
 
     private def addOp(op_id: Int, op: () => Any, position:Int): Int = {
       addOperationWithMapping(ScageOperation(op_id, op, position))
@@ -68,12 +67,6 @@ trait OperationMapping {
 
     def addOp(op: () => Any, position:Int): Int = {
       addOp(nextId, op, position)
-    }
-
-    protected def addOperationWithMapping(operation: ScageOperation) = {
-      addOperation(operation)
-      mapping += (operation.op_id -> this)
-      operation.op_id
     }
 
     def delOperation(op_id: Int) = {
@@ -101,15 +94,15 @@ trait OperationMapping {
     }
 
     def delAllOperations() {
-      del_operations ++= operations.map(x => DelOperation(x.op_id, show_warnings = true))
+      del_operations ++= operations.operationIdsIterable.map(x => DelOperation(x, show_warnings = true))
     }
 
     def delAllOperationsExcept(except_op_ids: Int*) {
-      del_operations ++= operations.view.map(_.op_id).filter(!except_op_ids.contains(_)).map(x => DelOperation(x, show_warnings = true))
+      del_operations ++= operations.operationIdsIterable.filter(!except_op_ids.contains(_)).map(x => DelOperation(x, show_warnings = true))
     }
 
     def delAllOperationsExceptNoWarn(except_op_ids: Int*) {
-      del_operations ++= operations.view.map(_.op_id).filter(!except_op_ids.contains(_)).map(x => DelOperation(x, show_warnings = false))
+      del_operations ++= operations.operationIdsIterable.filter(!except_op_ids.contains(_)).map(x => DelOperation(x, show_warnings = false))
     }
   }
 
@@ -117,10 +110,10 @@ trait OperationMapping {
 
   private[scage] val mapping = mutable.HashMap[Int, OperationContainer]() // maybe make this protected
 
-  private[scage] def _delOperation(op_id: Int, show_warnings: Boolean) = {
+  private[scage] def _delOperation(op_id: Int, show_warnings: Boolean):Option[ScageOperation] = {
     mapping.remove(op_id) match {
       case Some(container) =>
-        container.removeOperation(op_id) match {
+        container.operations.remove(op_id) match {
           case some_op@Some(_) =>
             log.debug("deleted operation with id " + op_id + " from the container " + container.name)
             if(container.isEmpty) {
@@ -150,6 +143,10 @@ trait OperationMapping {
 
   def deleteSelf() {
     delOperation(current_operation_id)
+  }
+
+  def deleteSelfNoWarn() {
+    delOperationNoWarn(current_operation_id)
   }
 
   def delOperations(op_ids: Int*) {
@@ -431,17 +428,18 @@ trait Scage extends OperationMapping {
     }
   }
 
-  private def _execute(_actions: Seq[ScageOperation]) {
-    val ScageOperation(action_id, action_operation, _) = _actions.head
-    current_operation_id = action_id
-    action_operation()
-    if (_actions.nonEmpty && _actions.tail.nonEmpty && !restart_toggled) _execute(_actions.tail)
+  private def _execute(_actions_iterator: Iterator[ScageOperation]) {
+    while(!restart_toggled && _actions_iterator.hasNext) {
+      val ScageOperation(action_id, action_operation, _) = _actions_iterator.next()
+      current_operation_id = action_id
+      action_operation()
+    }
   }
   private[scage] def executeActions() {
     // assuming to run in cycle, so we leave off any log messages
     restart_toggled = false
     if (actions.operations.nonEmpty) {
-      _execute(actions.operations)
+      _execute(actions.operations.iterator)
     }
     executeDelOperationsIfExist()
   }

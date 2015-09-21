@@ -284,6 +284,7 @@ object ScageLibD extends ScageMessageTrait with ScageXMLTrait with RendererLibD 
   type ScreenAppDMT      = com.github.dunnololda.scage.ScreenAppDMT
   type ScageScreenDMT    = com.github.dunnololda.scage.ScageScreenDMT
   type ScageScreenAppDMT = com.github.dunnololda.scage.ScageScreenAppDMT
+  type ScageAppletD      = com.github.dunnololda.scage.ScageAppletD
   type Vec               = com.github.dunnololda.scage.support.Vec
   type DVec              = com.github.dunnololda.scage.support.DVec
   type SingleController  = com.github.dunnololda.scage.handlers.controller2.SingleController

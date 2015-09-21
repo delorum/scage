@@ -1,22 +1,23 @@
 package com.github.dunnololda.scage.handlers
 
-import com.github.dunnololda.mysimplelogger.MySimpleLogger
-import org.lwjgl.BufferUtils
-import org.lwjgl.opengl.{DisplayMode, Display, GL11}
-import com.github.dunnololda.scage.support.{SortedBuffer, DVec, ScageColor}
-import com.github.dunnololda.scage.support.ScageId._
-import com.github.dunnololda.scage.support.ScageColor._
-import com.github.dunnololda.scage.support.tracer3.{Trace, ScageTracer}
-import java.io.InputStream
-import org.newdawn.slick.opengl.{TextureLoader, Texture}
-import org.newdawn.slick.util.ResourceLoader
-import com.github.dunnololda.cli.AppProperties._
-import com.github.dunnololda.scage.support.messages.{ScageXML, ScageMessage}
 import java.awt.GraphicsEnvironment
-import org.lwjgl.util.glu.GLU
-import com.github.dunnololda.scage.support.messages.ScageXML._
-import com.github.dunnololda.scage.{ScageOperation, Scage}
+import java.io.InputStream
+
+import com.github.dunnololda.cli.AppProperties._
+import com.github.dunnololda.mysimplelogger.MySimpleLogger
 import com.github.dunnololda.scage.handlers.controller2.ScageController
+import com.github.dunnololda.scage.support.ScageColor._
+import com.github.dunnololda.scage.support.ScageId._
+import com.github.dunnololda.scage.support.messages.ScageXML._
+import com.github.dunnololda.scage.support.messages.{ScageMessage, ScageXML}
+import com.github.dunnololda.scage.support.tracer3.{ScageTracer, Trace}
+import com.github.dunnololda.scage.support.{DVec, ScageColor}
+import com.github.dunnololda.scage.{Scage, ScageOperation}
+import org.lwjgl.BufferUtils
+import org.lwjgl.opengl.{Display, DisplayMode, GL11}
+import org.lwjgl.util.glu.GLU
+import org.newdawn.slick.opengl.{Texture, TextureLoader}
+import org.newdawn.slick.util.ResourceLoader
 
 /**
  * All the same stuff as Renderer but using double instead of Double and DDVec instead of DVec (which is again using double not Double)
@@ -519,7 +520,7 @@ trait RendererLibD {
 }
 
 object RendererLibD extends RendererLibD
-import RendererLibD._
+import com.github.dunnololda.scage.handlers.RendererLibD._
 
 trait RendererD extends Scage with ScageController {
   //private val log = MySimpleLogger(this.getClass.getName)
@@ -732,11 +733,12 @@ trait RendererD extends Scage with ScageController {
   /*private var actions_run_count = 0
   private var actions_run_moment = System.currentTimeMillis()*/
 
-  private def _execute(_actions:Seq[ScageOperation]) {
-    val ScageOperation(action_id, action_operation, _) = _actions.head
-    current_operation_id = action_id
-    action_operation()
-    if(_actions.nonEmpty && _actions.tail.nonEmpty && !restart_toggled) _execute(_actions.tail)
+  private def _execute(_actions_iterator:Iterator[ScageOperation]) {
+    while(!restart_toggled && _actions_iterator.hasNext) {
+      val ScageOperation(action_id, action_operation, _) = _actions_iterator.next()
+      current_operation_id = action_id
+      action_operation()
+    }
   }
   private[scage] def checkControlsAndExecuteActions() {  // maybe rename it to not confuse clients
     if(System.currentTimeMillis() - next_game_tick > 60000) {
@@ -748,7 +750,7 @@ trait RendererD extends Scage with ScageController {
       restart_toggled = false
       msec3 = System.currentTimeMillis()
       if(actions.operations.nonEmpty) {
-        _execute(actions.operations)
+        _execute(actions.operations.iterator)
       }
       _action_time_msec = System.currentTimeMillis() - msec3
       _action_time_measures_count += 1
@@ -762,19 +764,21 @@ trait RendererD extends Scage with ScageController {
 
   val framerate = property("render.framerate", 0)
 
-  private def _perform1(_renders:Seq[ScageOperation]) {
-    val ScageOperation(render_id, render_operation, _) = _renders.head
-    current_operation_id = render_id
-    GL11.glPushMatrix()
-    render_operation()
-    GL11.glPopMatrix()
-    if(_renders.nonEmpty && _renders.tail.nonEmpty && !restart_toggled) _perform1(_renders.tail)
+  private def _perform1(_renders_iterator:Iterator[ScageOperation]) {
+    while(!restart_toggled && _renders_iterator.hasNext) {
+      val ScageOperation(render_id, render_operation, _) = _renders_iterator.next()
+      current_operation_id = render_id
+      GL11.glPushMatrix()
+      render_operation()
+      GL11.glPopMatrix()
+    }
   }
-  private def _perform2(_interfaces:Seq[ScageOperation]) {
-    val ScageOperation(interface_id, interface_operation, _) = _interfaces.head
-    current_operation_id = interface_id
-    interface_operation()
-    if(_interfaces.nonEmpty && _interfaces.tail.nonEmpty && !restart_toggled) _perform2(_interfaces.tail)
+  private def _perform2(_interfaces_iterator:Iterator[ScageOperation]) {
+    while(!restart_toggled && _interfaces_iterator.hasNext) {
+      val ScageOperation(interface_id, interface_operation, _) = _interfaces_iterator.next()
+      current_operation_id = interface_id
+      interface_operation()
+    }
   }
   private[scage] def performRendering() {
     if(Display.isCloseRequested) Scage.stopApp()
@@ -793,12 +797,12 @@ trait RendererD extends Scage with ScageController {
           GL11.glTranslated(-point.x , -point.y, 0.0)
         }
         if(renders.operations.nonEmpty) {
-          _perform1(renders.operations)
+          _perform1(renders.operations.iterator)
         }
       GL11.glPopMatrix()
 
       if(interfaces.operations.nonEmpty) {
-        _perform2(interfaces.operations)
+        _perform2(interfaces.operations.iterator)
       }
 
       if(framerate != 0) Display.sync(framerate)
