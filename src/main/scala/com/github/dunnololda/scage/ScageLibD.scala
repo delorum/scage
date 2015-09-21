@@ -46,6 +46,7 @@ object ScageLibD extends ScageMessageTrait with ScageXMLTrait with RendererLibD 
   def callEvent(event_name: String)           {Events.callEvent(event_name)}
   def delEvents(event_ids: (String, Int)*)    {Events.delEvents(event_ids:_*)}
 
+  def isAppRunning:Boolean = Scage.isAppRunning
   def stopApp() {Scage.stopApp()}
 
   def nextId = ScageId.nextId
@@ -311,6 +312,7 @@ object ScageLibD extends ScageMessageTrait with ScageXMLTrait with RendererLibD 
   type DynaBox          = com.github.dunnololda.scage.support.physics.objects.DynaBox
   type DynaBall         = com.github.dunnololda.scage.support.physics.objects.DynaBall
 
+  val Scage            = com.github.dunnololda.scage.Scage
   val Vec              = com.github.dunnololda.scage.support.Vec
   val DVec             = com.github.dunnololda.scage.support.DVec
   val CoordTracer      = com.github.dunnololda.scage.support.tracer3.CoordTracer
