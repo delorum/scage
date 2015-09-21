@@ -35,38 +35,43 @@ trait OperationMapping {
   //private[scage] val del_operations = ArrayBuffer[() => Unit]()
   case class DelOperation(op_id:Int, show_warnings:Boolean)
   private[scage] val del_operations = ArrayBuffer[DelOperation]()
-  def executeDelOperationsIfExist(): Unit = {
+  case class AddOperation(container:OperationContainer, operation:ScageOperation)
+  private[scage] val add_operations = ArrayBuffer[AddOperation]()
+  def executeDelAndAddOperationsIfExist(): Unit = {
     if(del_operations.nonEmpty) {
       //del_operations.foreach(delOp => delOp())
       del_operations.foreach(delOp => _delOperation(delOp.op_id, delOp.show_warnings))
       del_operations.clear()
     }
+    if(add_operations.nonEmpty) {
+      //del_operations.foreach(delOp => delOp())
+      add_operations.foreach(addOp => {
+        addOp.container.operations += addOp.operation
+        mapping += (addOp.operation.op_id -> addOp.container)
+      })
+      add_operations.clear()
+    }
   }
 
   class OperationContainer(val name: String) {
     private[scage] val operations = SortedBuffer()
-
+    
     def length: Int = operations.length
     
     def isEmpty = operations.isEmpty
-    def nonEmpty = operations.nonEmpty
 
-    protected def addOperation(operation: ScageOperation) {
-      operations += operation
+    private def addOperationWithMapping(operation: ScageOperation) {
+      add_operations += AddOperation(this, operation)
     }
 
-    protected def addOperationWithMapping(operation: ScageOperation) = {
-      addOperation(operation)
-      mapping += (operation.op_id -> this)
-      operation.op_id
-    }
-
-    private def addOp(op_id: Int, op: () => Any, position:Int): Int = {
+    private def addOp(op_id: Int, op: () => Any, position:Int) {
       addOperationWithMapping(ScageOperation(op_id, op, position))
     }
 
     def addOp(op: () => Any, position:Int): Int = {
-      addOp(nextId, op, position)
+      val op_id = nextId
+      addOp(op_id, op, position)
+      op_id
     }
 
     def delOperation(op_id: Int) = {
@@ -252,7 +257,7 @@ trait Scage extends OperationMapping {
       current_operation_id = preinit_id
       preinit_operation()
     }
-    executeDelOperationsIfExist()
+    executeDelAndAddOperationsIfExist()
     preinit_moment = System.currentTimeMillis()
     pause_period_since_preinit = 0l
   }
@@ -299,7 +304,7 @@ trait Scage extends OperationMapping {
       current_operation_id = init_id
       init_operation()
     }
-    executeDelOperationsIfExist()
+    executeDelAndAddOperationsIfExist()
     init_moment = System.currentTimeMillis()
     pause_period_since_init = 0l
     scage_log.info("inits: " + inits.length + "; actions: " + actions.length + "; clears: " + clears.length)
@@ -441,7 +446,7 @@ trait Scage extends OperationMapping {
     if (actions.operations.nonEmpty) {
       _execute(actions.operations.iterator)
     }
-    executeDelOperationsIfExist()
+    executeDelAndAddOperationsIfExist()
   }
 
   def delAction(operation_id: Int) = {
@@ -475,7 +480,7 @@ trait Scage extends OperationMapping {
       current_operation_id = clear_id
       clear_operation()
     }
-    executeDelOperationsIfExist()
+    executeDelAndAddOperationsIfExist()
   }
 
   def delClear(operation_id: Int) = {
@@ -511,7 +516,7 @@ trait Scage extends OperationMapping {
       current_operation_id = dispose_id
       dispose_operation()
     }
-    executeDelOperationsIfExist()
+    executeDelAndAddOperationsIfExist()
   }
 
   def delDispose(operation_id: Int) = {

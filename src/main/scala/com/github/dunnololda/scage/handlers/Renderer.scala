@@ -770,7 +770,7 @@ trait Renderer extends Scage with ScageController {
       if(actions.operations.nonEmpty) {
         _execute(actions.operations.iterator)
       }
-      executeDelOperationsIfExist()
+      executeDelAndAddOperationsIfExist()
       _action_time_msec = System.currentTimeMillis() - msec3
       _action_time_measures_count += 1
       _average_action_time_msec =1f*(_average_action_time_msec*(_action_time_measures_count-1) + _action_time_msec)/_action_time_measures_count
