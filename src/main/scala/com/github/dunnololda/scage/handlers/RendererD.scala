@@ -685,7 +685,7 @@ trait RendererD extends Scage with ScageController {
     }
   }
 
-  private[scage] val renders = defaultContainer("renders", ScagePhase.Render, execute_if_app_running = false)
+  private[scage] val renders = defaultContainer("renders", ScagePhase.Render, execute_if_app_running = false, execute_on_deletion = false)
 
   def render(render_func: => Any) = renders.addOp(() => render_func, 0)
   def render(position:Int)(render_func: => Any) = renders.addOp(() => render_func, position)
@@ -695,7 +695,7 @@ trait RendererD extends Scage with ScageController {
   def delAllRenders() {renders.delAllOperations()}
   def delAllRendersExcept(except_operation_ids:Int*) {renders.delAllOperationsExcept(except_operation_ids:_*)}
 
-  private[scage] val interfaces = defaultContainer("interfaces", ScagePhase.Interface, execute_if_app_running = false)
+  private[scage] val interfaces = defaultContainer("interfaces", ScagePhase.Interface, execute_if_app_running = false, execute_on_deletion = false)
 
   def interface(interface_func: => Any):Int = {
     interfaces.addOp(() => interface_func, 0)

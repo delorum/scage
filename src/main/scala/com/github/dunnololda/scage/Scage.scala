@@ -44,9 +44,9 @@ trait OperationMapping {
   def currentPhase = scage_phase
 
   //private[scage] val del_operations = ArrayBuffer[() => Unit]()
-  case class DelOperation(op_id:Int, show_warnings:Boolean, execute_on_deletion:Boolean)
+  case class DelOperation(op_id:Int, show_warnings:Boolean)
   private[scage] val del_operations = ArrayBuffer[DelOperation]()
-  case class AddOperation(container:OperationContainer, operation:ScageOperation, execute_if_app_running:Boolean)
+  case class AddOperation(container:OperationContainer, operation:ScageOperation)
   private[scage] val add_operations = ArrayBuffer[AddOperation]()
   def executeDelAndAddOperationsIfExist(): Unit = {
     if(del_operations.nonEmpty) {
@@ -56,7 +56,7 @@ trait OperationMapping {
             container.operations.remove(delOp.op_id) match {
               case Some(operation) =>
                 log.debug("deleted operation with id " + delOp.op_id + " from the container " + container.name)
-                if(delOp.execute_on_deletion) {
+                if(container.execute_on_deletion) {
                   operation.op()
                 }
                 if(container.isEmpty) {
@@ -76,7 +76,7 @@ trait OperationMapping {
     }
     if(add_operations.nonEmpty) {
       add_operations.foreach(addOp => {
-        if(addOp.execute_if_app_running && isRunning) {
+        if(addOp.container.execute_if_app_running && isRunning) {
           addOp.operation.op()
         }
         addOp.container.operations += addOp.operation
@@ -86,7 +86,7 @@ trait OperationMapping {
     }
   }
 
-  class OperationContainer(val name: String, val scage_phase:ScagePhase, execute_if_app_running:Boolean) {
+  class OperationContainer(val name: String, val scage_phase:ScagePhase, val execute_if_app_running:Boolean, val execute_on_deletion:Boolean) {
     private[scage] val operations = SortedBuffer()
     
     def length: Int = operations.length
@@ -97,7 +97,7 @@ trait OperationMapping {
       val op_id = nextId
       val operation = ScageOperation(op_id, op, position)
       if(currentPhase == scage_phase) {
-        add_operations += AddOperation(this, operation, execute_if_app_running)
+        add_operations += AddOperation(this, operation)
       } else {
         if(execute_if_app_running && isRunning) {
           op()
@@ -109,59 +109,59 @@ trait OperationMapping {
     }
 
     def delOperation(op_id: Int) = {
-      delOp(op_id, show_warnings = true, execute_on_deletion = false)
+      delOp(op_id, show_warnings = true)
     }
 
     def delOperationNoWarn(op_id: Int) = {
-      delOp(op_id, show_warnings = false, execute_on_deletion = false)
+      delOp(op_id, show_warnings = false)
     }
 
     def delOperations(op_ids: Int*) {
-      op_ids.foreach(op_id => delOp(op_id, show_warnings = true, execute_on_deletion = false))
+      op_ids.foreach(op_id => delOp(op_id, show_warnings = true))
     }
 
     def delOperationsNoWarn(op_ids: Int*) {
-      op_ids.foreach(op_id => delOp(op_id, show_warnings = false, execute_on_deletion = false))
+      op_ids.foreach(op_id => delOp(op_id, show_warnings = false))
     }
 
     def delOperations(op_ids: Traversable[Int]) {
-      op_ids.foreach(op_id => delOp(op_id, show_warnings = true, execute_on_deletion = false))
+      op_ids.foreach(op_id => delOp(op_id, show_warnings = true))
     }
 
     def delOperationsNoWarn(op_ids: Traversable[Int]) {
-      op_ids.foreach(op_id => delOp(op_id, show_warnings = false, execute_on_deletion = false))
+      op_ids.foreach(op_id => delOp(op_id, show_warnings = false))
     }
 
     def delAllOperations() {
-      operations.operationIdsIterable.foreach(op_id => delOp(op_id, show_warnings = true, execute_on_deletion = false))
+      operations.operationIdsIterable.foreach(op_id => delOp(op_id, show_warnings = true))
     }
 
     def delAllOperationsExcept(except_op_ids: Int*) {
-      operations.operationIdsIterable.filter(!except_op_ids.contains(_)).foreach(op_id => delOp(op_id, show_warnings = true, execute_on_deletion = false))
+      operations.operationIdsIterable.filter(!except_op_ids.contains(_)).foreach(op_id => delOp(op_id, show_warnings = true))
     }
 
     def delAllOperationsExceptNoWarn(except_op_ids: Int*) {
-      operations.operationIdsIterable.filter(!except_op_ids.contains(_)).foreach(op_id => delOp(op_id, show_warnings = false, execute_on_deletion = false))
+      operations.operationIdsIterable.filter(!except_op_ids.contains(_)).foreach(op_id => delOp(op_id, show_warnings = false))
     }
   }
 
-  protected def defaultContainer(container_name: String, scage_phase:ScagePhase, execute_if_app_running:Boolean) = {
-    new OperationContainer(container_name, scage_phase, execute_if_app_running)
+  protected def defaultContainer(container_name: String, scage_phase:ScagePhase, execute_if_app_running:Boolean, execute_on_deletion:Boolean) = {
+    new OperationContainer(container_name, scage_phase, execute_if_app_running, execute_on_deletion)
   }
 
   private[scage] val mapping = mutable.HashMap[Int, OperationContainer]() // maybe make this protected
 
-  private[scage] def delOp(op_id: Int, show_warnings: Boolean, execute_on_deletion:Boolean) {
+  private[scage] def delOp(op_id: Int, show_warnings: Boolean) {
     mapping.get(op_id) match {
       case Some(container) =>
         if(currentPhase == container.scage_phase) {
-          del_operations += DelOperation(op_id, show_warnings, execute_on_deletion)
+          del_operations += DelOperation(op_id, show_warnings)
         } else {
           mapping.remove(op_id)
           container.operations.remove(op_id) match {
             case Some(operation) =>
               log.debug("deleted operation with id " + op_id + " from the container " + container.name)
-              if(execute_on_deletion) {
+              if(container.execute_on_deletion) {
                 operation.op()
               }
               if(container.isEmpty) {
@@ -180,11 +180,11 @@ trait OperationMapping {
   }
 
   def delOperation(op_id: Int) = {
-    delOp(op_id, show_warnings = true, execute_on_deletion = false)
+    delOp(op_id, show_warnings = true)
   }
 
   def delOperationNoWarn(op_id: Int) = {
-    delOp(op_id, show_warnings = false, execute_on_deletion = false)
+    delOp(op_id, show_warnings = false)
   }
 
   def deleteSelf() {
@@ -196,31 +196,31 @@ trait OperationMapping {
   }
 
   def delOperations(op_ids: Int*) {
-    op_ids.foreach(op_id => delOp(op_id, show_warnings = true, execute_on_deletion = false))
+    op_ids.foreach(op_id => delOp(op_id, show_warnings = true))
   }
 
   def delOperationsNoWarn(op_ids: Int*) {
-    op_ids.foreach(op_id => delOp(op_id, show_warnings = false, execute_on_deletion = false))
+    op_ids.foreach(op_id => delOp(op_id, show_warnings = false))
   }
 
   def delOperations(op_ids: Traversable[Int]) {
-    op_ids.foreach(op_id => delOp(op_id, show_warnings = true, execute_on_deletion = false))
+    op_ids.foreach(op_id => delOp(op_id, show_warnings = true))
   }
 
   def delOperationsNoWarn(op_ids: Traversable[Int]) {
-    op_ids.foreach(op_id => delOp(op_id, show_warnings = false, execute_on_deletion = false))
+    op_ids.foreach(op_id => delOp(op_id, show_warnings = false))
   }
 
   def delAllOperations() {
-    mapping.keys.foreach(op_id => delOp(op_id, show_warnings = true, execute_on_deletion = false))
+    mapping.keys.foreach(op_id => delOp(op_id, show_warnings = true))
   }
 
   def delAllOperationsExcept(except_op_ids: Int*) {
-    mapping.keys.filter(!except_op_ids.contains(_)).foreach(op_id => delOp(op_id, show_warnings = true, execute_on_deletion = false))
+    mapping.keys.filter(!except_op_ids.contains(_)).foreach(op_id => delOp(op_id, show_warnings = true))
   }
 
   def delAllOperationsExceptNoWarn(except_op_ids: Int*) {
-    mapping.keys.filter(!except_op_ids.contains(_)).foreach(op_id => delOp(op_id, show_warnings = false, execute_on_deletion = false))
+    mapping.keys.filter(!except_op_ids.contains(_)).foreach(op_id => delOp(op_id, show_warnings = false))
   }
 
   def operationExists(op_id: Int) = mapping.contains(op_id)
@@ -268,7 +268,7 @@ trait Scage extends OperationMapping {
   protected var restart_toggled = false
 
   // don't know exactly if I need this preinits, but I keep them for symmetry (because I already have disposes and I do need them - to stop NetServer/NetClient for example)
-  private[scage] val preinits = defaultContainer("preinits", ScagePhase.Preinit, execute_if_app_running = true)
+  private[scage] val preinits = defaultContainer("preinits", ScagePhase.Preinit, execute_if_app_running = true, execute_on_deletion = false)
 
   def preinit(preinit_func: => Any) = {
     if (is_running) preinit_func
@@ -319,7 +319,7 @@ trait Scage extends OperationMapping {
     preinits.delAllOperationsExcept(except_operation_ids: _*)
   }
 
-  private[scage] val inits = defaultContainer("inits", ScagePhase.Init, execute_if_app_running = true)
+  private[scage] val inits = defaultContainer("inits", ScagePhase.Init, execute_if_app_running = true, execute_on_deletion = false)
 
   def init(init_func: => Any) = {
     inits.addOp(() => init_func, 0)
@@ -367,7 +367,7 @@ trait Scage extends OperationMapping {
     inits.delAllOperationsExcept(except_operation_ids: _*)
   }
 
-  private[scage] val actions = defaultContainer("actions", ScagePhase.Action, execute_if_app_running = false)
+  private[scage] val actions = defaultContainer("actions", ScagePhase.Action, execute_if_app_running = false, execute_on_deletion = false)
 
   def actionIgnorePause(action_func: => Any): Int = {
     actions.addOp(() => action_func, 0)
@@ -508,7 +508,7 @@ trait Scage extends OperationMapping {
     actions.delAllOperationsExcept(except_operation_ids: _*)
   }
 
-  private[scage] val clears = defaultContainer("clears", ScagePhase.Clear, execute_if_app_running = false)
+  private[scage] val clears = defaultContainer("clears", ScagePhase.Clear, execute_if_app_running = false, execute_on_deletion = false)
 
   def clear(clear_func: => Any) = {
     clears.addOp(() => clear_func, 0)
@@ -544,7 +544,7 @@ trait Scage extends OperationMapping {
     clears.delAllOperationsExcept(except_operation_ids: _*)
   }
 
-  private[scage] val disposes = defaultContainer("disposes", ScagePhase.Dispose, execute_if_app_running = false)
+  private[scage] val disposes = defaultContainer("disposes", ScagePhase.Dispose, execute_if_app_running = false, execute_on_deletion = false)
 
   def dispose(dispose_func: => Any) = {
     disposes.addOp(() => dispose_func, 0)

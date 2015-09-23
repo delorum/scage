@@ -140,21 +140,21 @@ trait ScageController extends Scage {
 
   private[scage] def checkControls()
 
-  private[scage] val control_deletion_operations = defaultContainer("control_deleters", ScagePhase.Controls, execute_if_app_running = false)
+  private[scage] val control_deletion_operations = defaultContainer("control_deleters", ScagePhase.Controls, execute_if_app_running = false, execute_on_deletion = true)
 
   def delControl(control_id: Int) = {
-    delOp(control_id, show_warnings = true, execute_on_deletion = true)
+    delOp(control_id, show_warnings = true)
   }
 
   def delControls(control_ids: Int*) {
     control_ids.foreach(control_id => {
-      delOp(control_id, show_warnings = true, execute_on_deletion = true)
+      delOp(control_id, show_warnings = true)
     })
   }
 
   def delAllControls() {
     control_deletion_operations.operations.operationIdsIterable.foreach(control_id => {
-      delOp(control_id, show_warnings = true, execute_on_deletion = true)
+      delOp(control_id, show_warnings = true)
     })
   }
 
@@ -162,7 +162,7 @@ trait ScageController extends Scage {
     control_deletion_operations.operations.operationIdsIterable.filterNot(op_id => {
       except_control_ids.contains(op_id)
     }).foreach(control_id => {
-      delOp(control_id, show_warnings = true, execute_on_deletion = true)
+      delOp(control_id, show_warnings = true)
     })
   }
 }
