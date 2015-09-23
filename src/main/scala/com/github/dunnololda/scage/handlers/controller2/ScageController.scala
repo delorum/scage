@@ -1,7 +1,7 @@
 package com.github.dunnololda.scage.handlers.controller2
 
 import com.github.dunnololda.mysimplelogger.MySimpleLogger
-import com.github.dunnololda.scage.Scage
+import com.github.dunnololda.scage.{ScagePhase, Scage}
 import com.github.dunnololda.scage.ScageLib.coordOnArea
 import com.github.dunnololda.scage.support.Vec
 import org.lwjgl.input.{Keyboard, Mouse}
@@ -140,21 +140,21 @@ trait ScageController extends Scage {
 
   private[scage] def checkControls()
 
-  private[scage] val control_deletion_operations = defaultContainer("control_deleters")
+  private[scage] val control_deletion_operations = defaultContainer("control_deleters", ScagePhase.Controls, execute_if_app_running = false)
 
   def delControl(control_id: Int) = {
-    _delOperation(control_id, show_warnings = true).foreach(op => op.op())
+    delOp(control_id, show_warnings = true, execute_on_deletion = true)
   }
 
   def delControls(control_ids: Int*) {
     control_ids.foreach(control_id => {
-      _delOperation(control_id, show_warnings = true).foreach(op => op.op())
+      delOp(control_id, show_warnings = true, execute_on_deletion = true)
     })
   }
 
   def delAllControls() {
     control_deletion_operations.operations.operationIdsIterable.foreach(control_id => {
-      _delOperation(control_id, show_warnings = true).foreach(op => op.op())
+      delOp(control_id, show_warnings = true, execute_on_deletion = true)
     })
   }
 
@@ -162,7 +162,7 @@ trait ScageController extends Scage {
     control_deletion_operations.operations.operationIdsIterable.filterNot(op_id => {
       except_control_ids.contains(op_id)
     }).foreach(control_id => {
-      _delOperation(control_id, show_warnings = true).foreach(op => op.op())
+      delOp(control_id, show_warnings = true, execute_on_deletion = true)
     })
   }
 }

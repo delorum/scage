@@ -12,7 +12,7 @@ import com.github.dunnololda.scage.support.messages.ScageXML._
 import com.github.dunnololda.scage.support.messages.{ScageMessage, ScageXML}
 import com.github.dunnololda.scage.support.tracer3.{ScageTracer, Trace}
 import com.github.dunnololda.scage.support.{ScageColor, Vec}
-import com.github.dunnololda.scage.{Scage, ScageOperation}
+import com.github.dunnololda.scage.{ScagePhase, Scage, ScageOperation}
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.{Display, DisplayMode, GL11}
 import org.lwjgl.util.glu.GLU
@@ -512,12 +512,11 @@ trait RendererLib {
           case e:Exception => log.error("failed to render splash image: "+e.getLocalizedMessage)
         }
       case _ => xmlOrDefault("app.welcome", "") match {
-        case welcome_message if "" != welcome_message => {
+        case welcome_message if "" != welcome_message =>
           GL11.glClear(GL11.GL_COLOR_BUFFER_BIT/* | GL11.GL_DEPTH_BUFFER_BIT*/)
           print(welcome_message, 20, windowHeight-25, GREEN) // TODO: custom color and position
           Display.update()
-          Thread.sleep(1000)  // TODO: custom pause
-        }
+          Thread.sleep(1000) // TODO: custom pause
         case _ =>
       }
     }
@@ -704,7 +703,7 @@ trait Renderer extends Scage with ScageController {
     }
   }
 
-  private[scage] val renders = defaultContainer("renders")
+  private[scage] val renders = defaultContainer("renders", ScagePhase.Render, execute_if_app_running = false)
 
   def render(render_func: => Any) = renders.addOp(() => render_func, 0)
   def render(position:Int)(render_func: => Any) = renders.addOp(() => render_func, position)
@@ -714,7 +713,7 @@ trait Renderer extends Scage with ScageController {
   def delAllRenders() {renders.delAllOperations()}
   def delAllRendersExcept(except_operation_ids:Int*) {renders.delAllOperationsExcept(except_operation_ids:_*)}
 
-  private[scage] val interfaces = defaultContainer("interfaces")
+  private[scage] val interfaces = defaultContainer("interfaces", ScagePhase.Interface, execute_if_app_running = false)
 
   def interface(interface_func: => Any):Int = {
     interfaces.addOp(() => interface_func, 0)
@@ -752,11 +751,14 @@ trait Renderer extends Scage with ScageController {
   private var actions_run_moment = System.currentTimeMillis()*/
 
   private def _execute(_actions_iterator:Iterator[ScageOperation]) {
+    scage_phase = ScagePhase.Action
     while(!restart_toggled && _actions_iterator.hasNext) {
       val ScageOperation(action_id, action_operation, _) = _actions_iterator.next()
       current_operation_id = action_id
       action_operation()
     }
+    executeDelAndAddOperationsIfExist()
+    scage_phase = ScagePhase.NoPhase
   }
   private[scage] def checkControlsAndExecuteActions() {  // maybe rename it to not confuse clients
     if(System.currentTimeMillis() - next_game_tick > 60000) {
@@ -764,13 +766,15 @@ trait Renderer extends Scage with ScageController {
     }
     loops = 0
     while(System.currentTimeMillis() > next_game_tick && loops < MAX_FRAMESKIP) {
+      scage_phase = ScagePhase.Controls
       checkControls()
+      executeDelAndAddOperationsIfExist()
+      scage_phase = ScagePhase.NoPhase
       restart_toggled = false
       msec3 = System.currentTimeMillis()
       if(actions.operations.nonEmpty) {
         _execute(actions.operations.iterator)
       }
-      executeDelAndAddOperationsIfExist()
       _action_time_msec = System.currentTimeMillis() - msec3
       _action_time_measures_count += 1
       _average_action_time_msec =1f*(_average_action_time_msec*(_action_time_measures_count-1) + _action_time_msec)/_action_time_measures_count
@@ -783,7 +787,8 @@ trait Renderer extends Scage with ScageController {
 
   val framerate = property("render.framerate", 0)
 
-  private def _perform1(_renders_iterator:Iterator[ScageOperation]) {
+  private def executeRenders(_renders_iterator:Iterator[ScageOperation]) {
+    scage_phase = ScagePhase.Render
     while(!restart_toggled && _renders_iterator.hasNext) {
       val ScageOperation(render_id, render_operation, _) = _renders_iterator.next()
       current_operation_id = render_id
@@ -791,13 +796,18 @@ trait Renderer extends Scage with ScageController {
       render_operation()
       GL11.glPopMatrix()
     }
+    executeDelAndAddOperationsIfExist()
+    scage_phase = ScagePhase.NoPhase
   }
-  private def _perform2(_interfaces_iterator:Iterator[ScageOperation]) {
+  private def executeInterfaces(_interfaces_iterator:Iterator[ScageOperation]) {
+    scage_phase = ScagePhase.Interface
     while(!restart_toggled && _interfaces_iterator.hasNext) {
       val ScageOperation(interface_id, interface_operation, _) = _interfaces_iterator.next()
       current_operation_id = interface_id
       interface_operation()
     }
+    executeDelAndAddOperationsIfExist()
+    scage_phase = ScagePhase.NoPhase
   }
   private[scage] def performRendering() {
     if(Display.isCloseRequested) Scage.stopApp()
@@ -816,12 +826,12 @@ trait Renderer extends Scage with ScageController {
           GL11.glTranslatef(-point.x , -point.y, 0.0f)
         }
         if(renders.operations.nonEmpty) {
-          _perform1(renders.operations.iterator)
+          executeRenders(renders.operations.iterator)
         }
       GL11.glPopMatrix()
 
       if(interfaces.operations.nonEmpty) {
-        _perform2(interfaces.operations.iterator)
+        executeInterfaces(interfaces.operations.iterator)
       }
 
       if(framerate != 0) Display.sync(framerate)
