@@ -6,7 +6,7 @@ import scala.collection.generic.{Growable, Shrinkable}
 import scala.collection.{Set, mutable}
 
 class SortedBuffer(init_arr:ScageOperation*) extends Iterable[ScageOperation] with Growable[ScageOperation] with Shrinkable[ScageOperation] {
-  private val m = new java.util.TreeMap[Int, mutable.HashMap[Int, ScageOperation]]
+  private val m = new java.util.TreeMap[Int, java.util.TreeMap[Int, ScageOperation]]
   private val position_by_op_id = mutable.HashMap[Int, Int]()
   private var _length = 0
 
@@ -22,9 +22,9 @@ class SortedBuffer(init_arr:ScageOperation*) extends Iterable[ScageOperation] wi
   def +=(elem: ScageOperation): this.type = {
     val a = m.get(elem.position)
     if(a == null) {
-      m.put(elem.position, mutable.HashMap[Int, ScageOperation](elem.op_id -> elem))
+      m.put(elem.position, new java.util.TreeMap[Int, ScageOperation] {put(elem.op_id, elem)})
     } else {
-      a += elem.op_id -> elem
+      a.put(elem.op_id, elem)
     }
     position_by_op_id += elem.op_id -> elem.position
     _length += 1
@@ -42,7 +42,7 @@ class SortedBuffer(init_arr:ScageOperation*) extends Iterable[ScageOperation] wi
       case Some(position) =>
         val a = m.get(position)
         if(a != null) {
-          val ans = a.remove(op_id)
+          val ans = Option(a.remove(op_id))
           position_by_op_id -= op_id
           if(a.isEmpty) {
             m.remove(position)
@@ -68,16 +68,16 @@ class SortedBuffer(init_arr:ScageOperation*) extends Iterable[ScageOperation] wi
   } else {
     new Iterator[ScageOperation] {
       private val buffers_iterator = m.values().iterator()
-      private var current_buffer_iterator = buffers_iterator.next().iterator
+      private var current_buffer_iterator = buffers_iterator.next().values().iterator()
 
       def hasNext: Boolean = current_buffer_iterator.hasNext || buffers_iterator.hasNext
 
       def next(): ScageOperation = {
         if(current_buffer_iterator.hasNext) {
-          current_buffer_iterator.next()._2
+          current_buffer_iterator.next()
         } else {
-          current_buffer_iterator = buffers_iterator.next().iterator
-          current_buffer_iterator.next()._2
+          current_buffer_iterator = buffers_iterator.next().values().iterator
+          current_buffer_iterator.next()
         }
       }
     }
