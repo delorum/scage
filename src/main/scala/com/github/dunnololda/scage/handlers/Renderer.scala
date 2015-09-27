@@ -810,36 +810,47 @@ trait Renderer extends Scage with ScageController {
     scage_phase = ScagePhase.NoPhase
   }
   private[scage] def performRendering() {
-    if(Display.isCloseRequested) Scage.stopApp()
-    else {
-      msec4 = System.currentTimeMillis()
-      clearScreen()
-      GL11.glPushMatrix()
-        val coord = window_center() - (central_coord() - _base())*_global_scale
-        if(coord.notZero) GL11.glTranslatef(coord.x , coord.y, 0.0f)
-        if(_global_scale != 1) GL11.glScalef(_global_scale, _global_scale, 1)
-        val rot_ang = rotation_angle()
-        if(rot_ang != 0) {
-          val point = rotation_point() - _base()
-          GL11.glTranslatef(point.x , point.y, 0.0f)
-          GL11.glRotatef(rot_ang, 0, 0, 1)
-          GL11.glTranslatef(-point.x , -point.y, 0.0f)
-        }
-        if(renders.operations.nonEmpty) {
-          executeRenders(renders.operations.iterator)
-        }
-      GL11.glPopMatrix()
+    if(Display.isCreated) {
+      if (Display.isCloseRequested) Scage.stopApp()
+      else {
+        if (!Display.isCurrent) {
+          try {
+            Display.makeCurrent()
+          } catch {
+            case e: Exception => println("Renderer failed to make current")
+          }
+        } else {
+          msec4 = System.currentTimeMillis()
+          clearScreen()
+          GL11.glPushMatrix()
+          val coord = window_center() - (central_coord() - _base()) * _global_scale
+          if (coord.notZero) GL11.glTranslatef(coord.x, coord.y, 0.0f)
+          if (_global_scale != 1) GL11.glScalef(_global_scale, _global_scale, 1)
+          val rot_ang = rotation_angle()
+          if (rot_ang != 0) {
+            val point = rotation_point() - _base()
+            GL11.glTranslatef(point.x, point.y, 0.0f)
+            GL11.glRotatef(rot_ang, 0, 0, 1)
+            GL11.glTranslatef(-point.x, -point.y, 0.0f)
+          }
+          if (renders.operations.nonEmpty) {
+            executeRenders(renders.operations.iterator)
+          }
+          GL11.glPopMatrix()
 
-      if(interfaces.operations.nonEmpty) {
-        executeInterfaces(interfaces.operations.iterator)
+          if (interfaces.operations.nonEmpty) {
+            executeInterfaces(interfaces.operations.iterator)
+          }
+
+          if (framerate != 0) Display.sync(framerate)
+
+          Display.update()
+        }
+        _render_time_msec = System.currentTimeMillis() - msec4
+        _render_time_measures_count += 1
+        _average_render_time_msec = 1f * (_average_render_time_msec * (_render_time_measures_count - 1) + _render_time_msec) / _render_time_measures_count
+        countFPS()
       }
-
-      if(framerate != 0) Display.sync(framerate)
-      Display.update()
-      _render_time_msec = System.currentTimeMillis() - msec4
-      _render_time_measures_count += 1
-      _average_render_time_msec = 1f*(_average_render_time_msec*(_render_time_measures_count-1) + _render_time_msec)/_render_time_measures_count
-      countFPS()
     }
   }
 }

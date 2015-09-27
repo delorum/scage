@@ -1,6 +1,6 @@
 package com.github.dunnololda.scage
 
-import com.github.dunnololda.scage.handlers.controller3.ActorSingleController
+import com.github.dunnololda.scage.handlers.controller3.{ControllerActorSystemHolder, ActorSingleController}
 import handlers.controller2.{ScageController, SingleController}
 import com.github.dunnololda.scage.handlers.{RendererD, Renderer}
 import handlers.{RendererLib, RendererLibD}
@@ -157,13 +157,13 @@ abstract class ScreenAppMT(
         scage_log.warn("linux of unknown arch detected, don't now how to perform XInitThreads() call, so perform nothing. Maybe the app will crash. Sorry.")
       }
     }
-    RendererLib.initgl(width, height, title)
-    RendererLib.drawWelcomeMessages()
+    ControllerActorSystemHolder.createControllerActor(width, height, title)
     super.main(args)
     run()
+    ControllerActorSystemHolder.shutDownAndAwaitTermination()
     RendererLib.destroygl()
     scage_log.info(title+" was stopped")
-    System.exit(0)  // need explicit exit for the app's utilizing NetServer/NetClient as they have actors
+    //System.exit(0)  // need explicit exit for the app's utilizing NetServer/NetClient as they have actors
   }
 }
 
