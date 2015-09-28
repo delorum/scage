@@ -6,6 +6,7 @@ import java.io.InputStream
 import com.github.dunnololda.cli.AppProperties._
 import com.github.dunnololda.mysimplelogger.MySimpleLogger
 import com.github.dunnololda.scage.handlers.controller2.ScageController
+import com.github.dunnololda.scage.handlers.controller3.ControllerActorSystem
 import com.github.dunnololda.scage.support.ScageColor._
 import com.github.dunnololda.scage.support.ScageId._
 import com.github.dunnololda.scage.support.messages.ScageXML._
@@ -436,6 +437,30 @@ trait RendererLib {
       DisplayListsHolder.reloadDisplayLists()
       currentColor = backup_current_color
       backgroundColor = backup_background_color
+    }
+  }
+
+  def windowSizeMT = Vec(Display.getDisplayMode.getWidth, Display.getDisplayMode.getHeight)
+
+  def windowSizeMT_=(new_window_resolution:(Int, Int)) {
+    val (new_window_width, new_window_height) = new_window_resolution
+    if(new_window_width != RendererLib.windowWidth || new_window_height != RendererLib.windowHeight) {
+      log.debug("changing resolution to "+new_window_width+"x"+new_window_height+"...")
+      val backup_background_color = RendererLib.backgroundColor
+      val backup_current_color = RendererLib.currentColor
+      val backup_controlled_keys = ControllerActorSystem.controlledKeysList
+      ControllerActorSystem.stopCheckControls()
+      ControllerActorSystem.shutdownControllerActor()
+      Display.destroy()
+      ControllerActorSystem.createControllerActor()
+      ControllerActorSystem.initGLAndReleaseContext(new_window_width, new_window_height, RendererLib.windowTitle)
+      Display.makeCurrent()
+      ScageMessage.reloadFont()
+      DisplayListsHolder.reloadDisplayLists()
+      ControllerActorSystem.resendAllKeysToControllerActor(backup_controlled_keys)
+      ControllerActorSystem.startCheckControls()
+      RendererLib.currentColor = backup_current_color
+      RendererLib.backgroundColor = backup_background_color
     }
   }
 

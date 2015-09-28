@@ -51,10 +51,19 @@ object ControllerActorSystem {
     controller_system.shutdown()
     controller_system.awaitTermination()
   }
+
+  def controlledKeysList:List[Int] = {
+    Await.result(controllerActorSelection.?(GetAllControlledKeys)(Timeout(10000.millis)).mapTo[List[Int]], 10000.millis)
+  }
+
+  def resendAllKeysToControllerActor(keys:List[Int]): Unit = {
+    controllerActorSelection ! AddKeys(keys)
+  }
 }
 
 case object CheckControls
 case class AddKey(key_code:Int)
+case class AddKeys(key_codes:List[Int])
 case class RemoveKey(key_code:Int)
 
 case object GetAllKeysHistoryAndReset
@@ -65,6 +74,7 @@ case object ShutdownControllerActor
 case object StartCheckControls
 case object StopCheckControls
 case class InitGLAndReleaseContext(width:Int, height:Int, title:String)
+case object GetAllControlledKeys
 
 class ControllerActor extends Actor {
   private val log = MySimpleLogger(this.getClass.getName)
@@ -90,6 +100,8 @@ class ControllerActor extends Actor {
       sender ! true
     case AddKey(key_code) =>
       key_presses_history += (key_code -> ArrayBuffer[Boolean]())
+    case AddKeys(key_codes) =>
+      key_codes.foreach(key_code => key_presses_history += (key_code -> ArrayBuffer[Boolean]()))
     case RemoveKey(key_code) =>
       key_presses_history -= key_code
     case StartCheckControls =>
@@ -138,6 +150,8 @@ class ControllerActor extends Actor {
     case ShutdownControllerActor =>
       sender ! true
       context.system.stop(self)
+    case GetAllControlledKeys =>
+      sender ! key_presses_history.keys.toList
   }
 }
 

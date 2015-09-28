@@ -1,14 +1,14 @@
 package com.github.dunnololda.scage
 
-import com.github.dunnololda.scage.handlers.controller3.{ControllerActorSystem, ActorSingleController}
-import handlers.controller2.{ScageController, SingleController}
-import com.github.dunnololda.scage.handlers.{RendererD, Renderer}
-import handlers.{RendererLib, RendererLibD}
-
-import java.awt.{BorderLayout, Canvas}
-import org.lwjgl.opengl.Display
 import java.applet.Applet
+import java.awt.{BorderLayout, Canvas}
+
 import com.github.dunnololda.cli.Imports._
+import com.github.dunnololda.mysimplelogger.MySimpleLogger
+import com.github.dunnololda.scage.handlers._
+import com.github.dunnololda.scage.handlers.controller2.{ScageController, SingleController}
+import com.github.dunnololda.scage.handlers.controller3.{ActorSingleController, ControllerActorSystem}
+import org.lwjgl.opengl.Display
 
 // abstract classes instead of traits to make it easy to use with MultiController
 abstract class Screen(val unit_name:String = "Scage Screen") extends Scage with Renderer with ScageController {
