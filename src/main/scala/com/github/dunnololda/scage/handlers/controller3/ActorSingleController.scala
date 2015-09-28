@@ -328,8 +328,9 @@ trait ActorSingleController extends ScageController {
 
     if(any_key_pressed) anykey()
 
+    val l = Await.result(controllerActorSelection.?(GetAllMouseButtonHistoryAndReset)(Timeout(100.millis)).mapTo[List[(Vec, Boolean, Int, Map[Int, Boolean])]], 100.millis)
     for {
-      (mouse_coord, is_mouse_moved, dwheel, button_presses_history) <- Await.result(controllerActorSelection.?(GetAllMouseButtonHistoryAndReset)(Timeout(100.millis)).mapTo[List[(Vec, Boolean, Int, Map[Int, Boolean])]], 100.millis)
+      ((mouse_coord, is_mouse_moved, dwheel, button_presses_history), idx) <- l.zipWithIndex
     } {
       /*current_mouse_coord = mouse_coord
       current_mouse_moved = is_mouse_moved*/
@@ -344,6 +345,7 @@ trait ActorSingleController extends ScageController {
           val repeat_time = repeat_time_func()
           val is_repeatable = repeat_time > 0
           if(!was_pressed || (is_repeatable && System.currentTimeMillis() - last_pressed_time > repeat_time)) {
+            println(s"onBtnDown: $idx ${l.map(_._4(0))} $mouse_button_press")
             if(!mouse_button_press.was_pressed) mouse_button_press.pressed_start_time = System.currentTimeMillis()
             mouse_button_press.was_pressed = true
             mouse_button_press.last_pressed_time = System.currentTimeMillis()
