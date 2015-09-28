@@ -16,15 +16,30 @@ import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-object ControllerActorSystemHolder {
-  lazy val controller_system = ActorSystem("controller", ConfigFactory.load("controller-actor-system.conf").getConfig("controller-system"))
+object ControllerActorSystem {
+  private val controller_system = ActorSystem("controller", ConfigFactory.load("controller-actor-system.conf").getConfig("controller-system"))
 
-  def createControllerActor(width:Int, height:Int, title:String): Unit = {
-    ControllerActorSystemHolder.controller_system.actorOf(Props(new ControllerActor(width, height, title)).withDispatcher("my-pinned-dispatcher"), "controller-actor")
+  private var controller_actor_created = false
+
+  def createControllerActor(): Unit = {
+    ControllerActorSystem.controller_system.actorOf(Props(new ControllerActor).withDispatcher("my-pinned-dispatcher"), "controller-actor")
+    controller_actor_created = true
   }
 
   val controllerActorSelection = {
     controller_system.actorSelection("akka://controller/user/controller-actor")
+  }
+
+  def initGLAndReleaseContext(width:Int, height:Int, title:String) {
+    Await.result(controllerActorSelection.?(InitGLAndReleaseContext(width, height, title))(Timeout(10000.millis)), 10000.millis)
+  }
+
+  def startCheckControls(): Unit = {
+    controllerActorSelection ! StartCheckControls
+  }
+
+  def stopCheckControls(): Unit = {
+    Await.result(controllerActorSelection.?(StopCheckControls)(Timeout(10000.millis)), 10000.millis)
   }
 
   def shutDownAndAwaitTermination(): Unit = {
@@ -43,64 +58,59 @@ case class GetKeyHistoryAndReset(key_code:Int)
 case object GetAllMouseButtonHistoryAndReset
 case class GetMouseButtonHistoryAndReset(key_code:Int)
 case object ShutdownControllerActor
+case object StartCheckControls
+case object StopCheckControls
+case class InitGLAndReleaseContext(width:Int, height:Int, title:String)
 
-class ControllerActor(width:Int, height:Int, title:String) extends Actor {
+class ControllerActor extends Actor {
   private val log = MySimpleLogger(this.getClass.getName)
   private val key_presses_history = mutable.HashMap[Int, ArrayBuffer[Boolean]]()
 
   // (mouse_coord, is_mouse_moved, dwheel, button presses)
   private val mouse_buttons_presses_history = mutable.ArrayBuffer[(Vec, Boolean, Int, Map[Int, Boolean])]()
 
+  private var check_controls = false
 
   override def preStart() {
     log.info(s"starting actor ${self.path}")
-    RendererLib.initgl(width, height, title)
-    RendererLib.drawWelcomeMessages()
-    Display.releaseContext()
-    self ! CheckControls
   }
 
   override def postStop() {
-    //RendererLib.destroygl()
     log.info(s"actor ${self.path} died!")
   }
 
-  private var call_make_current = false
-
   def receive = {
+    case InitGLAndReleaseContext(width, height, title) =>
+      RendererLib.initgl(width, height, title)
+      Display.releaseContext()
+      sender ! true
     case AddKey(key_code) =>
       key_presses_history += (key_code -> ArrayBuffer[Boolean]())
     case RemoveKey(key_code) =>
       key_presses_history -= key_code
+    case StartCheckControls =>
+      check_controls = true
+      self ! CheckControls
+    case StopCheckControls =>
+      check_controls = false
+      sender ! true
     case CheckControls =>
-      /*RendererLib.lock.synchronized {*/
-        /*if(!Display.isCurrent) {
-          try{
-            Display.makeCurrent()
-          } catch {
-            case e:Exception => println("ControllerActor failed to make current")
-          }
+      if(check_controls) {
+        Display.processMessages()
+        key_presses_history.foreach {
+          case (key_code, history) =>
+            if (Keyboard.isKeyDown(key_code)) {
+              history += true
+            } else {
+              history += false
+            }
         }
-        if(Display.isCurrent) {*/
-          //println("ControllerActor process messages")
-          Display.processMessages()
-          //println(Keyboard.isKeyDown(Keyboard.KEY_1))
-          /*Display.releaseContext()
-        }*/
-      /*}*/
-      key_presses_history.foreach {
-        case (key_code, history) =>
-          if(Keyboard.isKeyDown(key_code)) {
-            history += true
-          } else {
-            history += false
-          }
-      }
-      val mouse_coord = Vec(Mouse.getX, Mouse.getY)
-      val is_mouse_moved = Mouse.getDX != 0 || Mouse.getDY != 0
-      mouse_buttons_presses_history += ((mouse_coord, is_mouse_moved, Mouse.getDWheel, Map(0 -> Mouse.isButtonDown(0), 1 -> Mouse.isButtonDown(1))))
-      context.system.scheduler.scheduleOnce(10.milliseconds) {
-        self ! CheckControls
+        val mouse_coord = Vec(Mouse.getX, Mouse.getY)
+        val is_mouse_moved = Mouse.getDX != 0 || Mouse.getDY != 0
+        mouse_buttons_presses_history += ((mouse_coord, is_mouse_moved, Mouse.getDWheel, Map(0 -> Mouse.isButtonDown(0), 1 -> Mouse.isButtonDown(1))))
+        context.system.scheduler.scheduleOnce(10.milliseconds) {
+          self ! CheckControls
+        }
       }
     case GetAllKeysHistoryAndReset =>
       sender ! key_presses_history.map(kv => {
@@ -123,12 +133,10 @@ class ControllerActor(width:Int, height:Int, title:String) extends Actor {
       sender ! history
     case ShutdownControllerActor =>
       context.system.stop(self)
-      //context.system.shutdown()
-      //context.system.awaitTermination()
   }
 }
 
-import ControllerActorSystemHolder._
+import ControllerActorSystem._
 
 trait ActorSingleController extends ScageController {
   private val keyboard_key_events = mutable.HashMap[Int, SingleKeyEvent]()  // was_pressed, last_pressed_time, repeat_time, onKeyDown, onKeyUp

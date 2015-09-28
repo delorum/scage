@@ -1,6 +1,6 @@
 package com.github.dunnololda.scage
 
-import com.github.dunnololda.scage.handlers.controller3.{ControllerActorSystemHolder, ActorSingleController}
+import com.github.dunnololda.scage.handlers.controller3.{ControllerActorSystem, ActorSingleController}
 import handlers.controller2.{ScageController, SingleController}
 import com.github.dunnololda.scage.handlers.{RendererD, Renderer}
 import handlers.{RendererLib, RendererLibD}
@@ -146,7 +146,7 @@ abstract class ScreenAppMT(
 
   override def main(args:Array[String]) {
     scage_log.info("starting main screen "+title+"...")
-    if("sun.awt.X11.XToolkit" == System.getProperty("awt.toolkit")) {
+    if("sun.awt.X11.XToolkit" == System.getProperty("awt.toolkit")) {   // in Windows: sun.awt.windows.WToolkit
       if("32" == System.getProperty("sun.arch.data.model")) {
         scage_log.info("32 bit linux detected, performing XInitThreads() call to make multi-threading work by loading library libxx32.so")
         System.loadLibrary("xx32")
@@ -157,10 +157,14 @@ abstract class ScreenAppMT(
         scage_log.warn("linux of unknown arch detected, don't now how to perform XInitThreads() call, so perform nothing. Maybe the app will crash. Sorry.")
       }
     }
-    ControllerActorSystemHolder.createControllerActor(width, height, title)
+    ControllerActorSystem.createControllerActor()
+    ControllerActorSystem.initGLAndReleaseContext(width, height, title)
+    Display.makeCurrent()
+    RendererLib.drawWelcomeMessages()
+    ControllerActorSystem.startCheckControls()
     super.main(args)
     run()
-    ControllerActorSystemHolder.shutDownAndAwaitTermination()
+    ControllerActorSystem.shutDownAndAwaitTermination()
     RendererLib.destroygl()
     scage_log.info(title+" was stopped")
     //System.exit(0)  // need explicit exit for the app's utilizing NetServer/NetClient as they have actors
@@ -192,7 +196,7 @@ abstract class ScreenAppDMT(
 
   override def main(args:Array[String]) {
     scage_log.info("starting main screen "+title+"...")
-    if("sun.awt.X11.XToolkit" == System.getProperty("awt.toolkit")) {
+    if("sun.awt.X11.XToolkit" == System.getProperty("awt.toolkit")) {   // in Windows: sun.awt.windows.WToolkit
       if("32" == System.getProperty("sun.arch.data.model")) {
         scage_log.info("32 bit linux detected, performing XInitThreads() call to make multi-threading work by loading library libxx32.so")
         System.loadLibrary("xx32")
@@ -203,10 +207,14 @@ abstract class ScreenAppDMT(
         scage_log.warn("linux of unknown arch detected, don't now how to perform XInitThreads() call, so perform nothing. Maybe the app will crash. Sorry.")
       }
     }
-    RendererLibD.initgl(width, height, title)
-    RendererLibD.drawWelcomeMessages()
+    ControllerActorSystem.createControllerActor()
+    ControllerActorSystem.initGLAndReleaseContext(width, height, title)
+    Display.makeCurrent()
+    RendererLib.drawWelcomeMessages()
+    ControllerActorSystem.startCheckControls()
     super.main(args)
     run()
+    ControllerActorSystem.shutDownAndAwaitTermination()
     RendererLibD.destroygl()
     scage_log.info(title+" was stopped")
     System.exit(0)  // need explicit exit for the app's utilizing NetServer/NetClient as they have actors
