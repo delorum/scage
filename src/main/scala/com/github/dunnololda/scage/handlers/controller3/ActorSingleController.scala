@@ -42,6 +42,10 @@ object ControllerActorSystem {
     Await.result(controllerActorSelection.?(StopCheckControls)(Timeout(10000.millis)), 10000.millis)
   }
 
+  def shutdownControllerActor(): Unit = {
+    Await.result(controllerActorSelection.?(ShutdownControllerActor)(Timeout(10000.millis)), 10000.millis)
+  }
+
   def shutDownAndAwaitTermination(): Unit = {
     //controllerActorSelection ! ShutdownControllerActor
     controller_system.shutdown()
@@ -132,6 +136,7 @@ class ControllerActor extends Actor {
       mouse_buttons_presses_history.clear()
       sender ! history
     case ShutdownControllerActor =>
+      sender ! true
       context.system.stop(self)
   }
 }
