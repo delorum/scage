@@ -475,7 +475,7 @@ trait Scage extends OperationMapping {
   }
 
   private def _execute(_actions_iterator: Iterator[ScageOperation]) {
-    while(!restart_toggled && _actions_iterator.hasNext) {
+    while(is_running && Scage.isAppRunning && !restart_toggled && _actions_iterator.hasNext) {
       val ScageOperation(action_id, action_operation, _) = _actions_iterator.next()
       current_operation_id = action_id
       action_operation()
@@ -485,7 +485,7 @@ trait Scage extends OperationMapping {
     scage_phase = ScagePhase.Action
     // assuming to run in cycle, so we leave off any log messages
     restart_toggled = false
-    if (actions.operations.nonEmpty) {
+    if (is_running && Scage.isAppRunning && actions.operations.nonEmpty) {
       _execute(actions.operations.iterator)
     }
     executeDelAndAddOperationsIfExist()

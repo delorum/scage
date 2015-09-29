@@ -1,5 +1,8 @@
 package com.github.dunnololda.scage.handlers.controller2
 
+/*import java.text.SimpleDateFormat
+import java.util.Date*/
+
 import com.github.dunnololda.mysimplelogger.MySimpleLogger
 import com.github.dunnololda.scage.{ScagePhase, Scage}
 import com.github.dunnololda.scage.ScageLib.coordOnArea
@@ -16,6 +19,9 @@ case class ImmutableKeyPress(key_code: Int, was_pressed: Boolean, pressed_start_
 
 case class MouseButtonPress(button_code: Int, var was_pressed: Boolean, var pressed_start_time: Long, var last_pressed_time: Long) {
   def immutable: ImmutableMouseButtonPress = ImmutableMouseButtonPress(button_code, was_pressed, pressed_start_time, last_pressed_time)
+
+  /*private val f = new SimpleDateFormat("HH:mm:ss.S")
+  override def toString = s"MouseButtonPress($button_code, $was_pressed, ${f.format(new Date(pressed_start_time))}, ${f.format(new Date(last_pressed_time))})"*/
 }
 
 case class ImmutableMouseButtonPress(button_code: Int, was_pressed: Boolean, pressed_start_time: Long, last_pressed_time: Long)

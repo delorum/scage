@@ -4,6 +4,7 @@ import akka.actor.{Actor, ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
 import com.github.dunnololda.mysimplelogger.MySimpleLogger
+import com.github.dunnololda.scage.Scage
 import com.github.dunnololda.scage.handlers.RendererLib
 import com.github.dunnololda.scage.handlers.controller2._
 import com.github.dunnololda.scage.support.Vec
@@ -76,12 +77,14 @@ case object StopCheckControls
 case class InitGLAndReleaseContext(width:Int, height:Int, title:String)
 case object GetAllControlledKeys
 
+case class MouseButtonPressesHistoryMoment(moment:Long, mouse_coord:Vec, is_mouse_moved:Boolean, dwheel:Int, buttons:Map[Int, Boolean])
+
 class ControllerActor extends Actor {
   private val log = MySimpleLogger(this.getClass.getName)
   private val key_presses_history = mutable.HashMap[Int, ArrayBuffer[Boolean]]()
 
   // (mouse_coord, is_mouse_moved, dwheel, button presses)
-  private val mouse_buttons_presses_history = mutable.ArrayBuffer[(Vec, Boolean, Int, Map[Int, Boolean])]()
+  private val mouse_buttons_presses_history = mutable.ArrayBuffer[MouseButtonPressesHistoryMoment]()
 
   private var check_controls = false
 
@@ -123,17 +126,18 @@ class ControllerActor extends Actor {
         }
         val mouse_coord = Vec(Mouse.getX, Mouse.getY)
         val is_mouse_moved = Mouse.getDX != 0 || Mouse.getDY != 0
-        mouse_buttons_presses_history += ((mouse_coord, is_mouse_moved, Mouse.getDWheel, Map(0 -> Mouse.isButtonDown(0), 1 -> Mouse.isButtonDown(1))))
+        mouse_buttons_presses_history += MouseButtonPressesHistoryMoment(System.currentTimeMillis(), mouse_coord, is_mouse_moved, Mouse.getDWheel, Map(0 -> Mouse.isButtonDown(0), 1 -> Mouse.isButtonDown(1)))
         context.system.scheduler.scheduleOnce(10.milliseconds) {
           self ! CheckControls
         }
       }
     case GetAllKeysHistoryAndReset =>
-      sender ! key_presses_history.map(kv => {
+      val ans = key_presses_history.map(kv => {
         val kv_2_list = kv._2.toList
         kv._2.clear()
         (kv._1, kv_2_list)
       }).toMap
+      sender ! ans
     case GetKeyHistoryAndReset(key_code) =>
       val history = key_presses_history.get(key_code) match {
         case Some(h) =>
@@ -302,13 +306,18 @@ trait ActorSingleController extends ScageController {
     control_deletion_operations.addOp(() => on_mouse_wheel_down = v => {}, 0)
   }
 
+  //private val log = MySimpleLogger(this.getClass.getName)
+
   def checkControls() {
     var any_key_pressed = false
+
+    val key_presses_history = Await.result(controllerActorSelection.?(GetAllKeysHistoryAndReset)(Timeout(10000.millis)).mapTo[Map[Int, List[Boolean]]], 10000.millis)
+
     for {
       (key, key_data) <- keyboard_key_events
       SingleKeyEvent(_, repeat_time_func, onKeyDown, onKeyUp) = key_data
       key_press <- innerKeyPress(key)
-      is_key_pressed <- Await.result(controllerActorSelection.?(GetKeyHistoryAndReset(key))(Timeout(10000.millis)).mapTo[List[Boolean]], 10000.millis)
+      is_key_pressed <- key_presses_history.getOrElse(key, Nil)
     } {
       if(is_key_pressed) {
         any_key_pressed = true
@@ -328,9 +337,10 @@ trait ActorSingleController extends ScageController {
 
     if(any_key_pressed) anykey()
 
-    val l = Await.result(controllerActorSelection.?(GetAllMouseButtonHistoryAndReset)(Timeout(100.millis)).mapTo[List[(Vec, Boolean, Int, Map[Int, Boolean])]], 100.millis)
+    val l = Await.result(controllerActorSelection.?(GetAllMouseButtonHistoryAndReset)(Timeout(100.millis)).mapTo[List[MouseButtonPressesHistoryMoment]], 100.millis)
     for {
-      ((mouse_coord, is_mouse_moved, dwheel, button_presses_history), idx) <- l.zipWithIndex
+      (MouseButtonPressesHistoryMoment(moment, mouse_coord, is_mouse_moved, dwheel, button_presses_history), idx) <- l.zipWithIndex
+      if is_running && Scage.isAppRunning
     } {
       /*current_mouse_coord = mouse_coord
       current_mouse_moved = is_mouse_moved*/
@@ -339,20 +349,22 @@ trait ActorSingleController extends ScageController {
         (button, button_data) <- mouse_button_events
         SingleMouseButtonEvent(_, repeat_time_func, onButtonDown, onButtonUp) = button_data
         mouse_button_press @ MouseButtonPress(_, was_pressed, _, last_pressed_time) <- innerMouseButtonPress(button)
+        if moment > last_pressed_time
         is_button_pressed <- button_presses_history.get(button)
       } {
         if(is_button_pressed) {
           val repeat_time = repeat_time_func()
           val is_repeatable = repeat_time > 0
-          if(!was_pressed || (is_repeatable && System.currentTimeMillis() - last_pressed_time > repeat_time)) {
-            println(s"onBtnDown: $idx ${l.map(_._4(0))} $mouse_button_press")
-            if(!mouse_button_press.was_pressed) mouse_button_press.pressed_start_time = System.currentTimeMillis()
+          if(!was_pressed || (is_repeatable && moment - last_pressed_time > repeat_time)) {
+            //log.info(s"$unit_name leftMouse onBtnDown: $idx ${l.map(_.buttons(0))} $mouse_button_press")
+            if(!mouse_button_press.was_pressed) mouse_button_press.pressed_start_time = moment
             mouse_button_press.was_pressed = true
-            mouse_button_press.last_pressed_time = System.currentTimeMillis()
+            mouse_button_press.last_pressed_time = moment
             onButtonDown(mouse_coord)
           }
         } else if(was_pressed) {
           mouse_button_press.was_pressed = false
+          //log.info(s"$unit_name leftMouse onBtnUp: $idx ${l.map(_.buttons(0))} $mouse_button_press")
           onButtonUp(mouse_coord)
         }
       }
