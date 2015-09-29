@@ -448,7 +448,7 @@ trait RendererLib {
       log.debug("changing resolution to "+new_window_width+"x"+new_window_height+"...")
       val backup_background_color = RendererLib.backgroundColor
       val backup_current_color = RendererLib.currentColor
-      val backup_controlled_keys = ControllerActorSystem.controlledKeysList
+      val backup_controlled_keys = ControllerActorSystem.monitoredKeysList
       ControllerActorSystem.stopCheckControls()
       ControllerActorSystem.shutdownControllerActor()
       Display.destroy()
@@ -457,7 +457,7 @@ trait RendererLib {
       Display.makeCurrent()
       ScageMessage.reloadFont()
       DisplayListsHolder.reloadDisplayLists()
-      ControllerActorSystem.resendAllKeysToControllerActor(backup_controlled_keys)
+      ControllerActorSystem.addKeys(backup_controlled_keys)
       ControllerActorSystem.startCheckControls()
       RendererLib.currentColor = backup_current_color
       RendererLib.backgroundColor = backup_background_color
