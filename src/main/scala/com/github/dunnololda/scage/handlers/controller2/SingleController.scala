@@ -149,7 +149,7 @@ trait SingleController extends ScageController {
         if(!was_pressed || (is_repeatable && System.currentTimeMillis() - last_pressed_time > repeat_time)) {
           if(!key_press.was_pressed) key_press.pressed_start_time = System.currentTimeMillis()
           key_press.was_pressed = true
-          key_press.last_pressed_time = System.currentTimeMillis()
+          key_press.updateLastPressedTime(System.currentTimeMillis())
           onKeyDown()
         }
       } else if(was_pressed) {
@@ -175,7 +175,7 @@ trait SingleController extends ScageController {
         if(!was_pressed || (is_repeatable && System.currentTimeMillis() - last_pressed_time > repeat_time)) {
           if(!mouse_button_press.was_pressed) mouse_button_press.pressed_start_time = System.currentTimeMillis()
           mouse_button_press.was_pressed = true
-          mouse_button_press.last_pressed_time = System.currentTimeMillis()
+          mouse_button_press.updateLastPressedTime(System.currentTimeMillis())
           onButtonDown(mouse_coord)
         }
       } else if(was_pressed) {

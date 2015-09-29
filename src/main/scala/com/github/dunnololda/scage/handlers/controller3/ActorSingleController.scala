@@ -67,6 +67,10 @@ object ControllerActorSystem {
   def removeKey(key_code:Int): Unit = {
     controllerActorSelection ! RemoveKey(key_code)
   }
+  
+  def getInputsHistoryAndReset:List[InputsHistoryMoment] = {
+    Await.result(controllerActorSelection.?(GetInputsHistoryAndReset)(Timeout(10000.millis)).mapTo[List[InputsHistoryMoment]], 10000.millis)
+  }
 }
 
 case object CheckControls
@@ -74,8 +78,7 @@ case class AddKey(key_code:Int)
 case class AddKeys(key_codes:List[Int])
 case class RemoveKey(key_code:Int)
 
-case object GetAllKeysHistoryAndReset
-case object GetAllMouseButtonHistoryAndReset
+case object GetInputsHistoryAndReset
 case class GetMouseButtonHistoryAndReset(key_code:Int)
 case object ShutdownControllerActor
 case object StartCheckControls
@@ -83,17 +86,12 @@ case object StopCheckControls
 case class InitGLAndReleaseContext(width:Int, height:Int, title:String)
 case object GetAllControlledKeys
 
-case class MouseButtonPressesHistoryMoment(moment:Long, mouse_coord:Vec, is_mouse_moved:Boolean, dwheel:Int, mouse_buttons:Map[Int, Boolean])
-case class KeyboardPressesHistoryMoment(moment:Long, keys:Map[Int, Boolean])
 case class InputsHistoryMoment(moment:Long, keys:Map[Int, Boolean], mouse_coord:Vec, is_mouse_moved:Boolean, dwheel:Int, mouse_buttons:Map[Int, Boolean])
 
 class ControllerActor extends Actor {
   private val log = MySimpleLogger(this.getClass.getName)
-  private val keyboard_presses_history = mutable.ArrayBuffer[KeyboardPressesHistoryMoment]()
+  private val inputs_history = mutable.ArrayBuffer[InputsHistoryMoment]()
   private val monitored_keys = mutable.HashSet[Int]()
-
-  // (mouse_coord, is_mouse_moved, dwheel, button presses)
-  private val mouse_buttons_presses_history = mutable.ArrayBuffer[MouseButtonPressesHistoryMoment]()
 
   private var check_controls = false
 
@@ -125,24 +123,19 @@ class ControllerActor extends Actor {
     case CheckControls =>
       if(check_controls) {
         Display.processMessages()
-        keyboard_presses_history += KeyboardPressesHistoryMoment(System.currentTimeMillis(), monitored_keys.map {
-          case key_code =>
-            (key_code, Keyboard.isKeyDown(key_code))
-        }.toMap)
         val mouse_coord = Vec(Mouse.getX, Mouse.getY)
         val is_mouse_moved = Mouse.getDX != 0 || Mouse.getDY != 0
-        mouse_buttons_presses_history += MouseButtonPressesHistoryMoment(System.currentTimeMillis(), mouse_coord, is_mouse_moved, Mouse.getDWheel, Map(0 -> Mouse.isButtonDown(0), 1 -> Mouse.isButtonDown(1)))
+        inputs_history += InputsHistoryMoment(System.currentTimeMillis(), monitored_keys.map {
+          case key_code =>
+            (key_code, Keyboard.isKeyDown(key_code))
+        }.toMap, mouse_coord, is_mouse_moved, Mouse.getDWheel, Map(0 -> Mouse.isButtonDown(0), 1 -> Mouse.isButtonDown(1)))
         context.system.scheduler.scheduleOnce(10.milliseconds) {
           self ! CheckControls
         }
       }
-    case GetAllKeysHistoryAndReset =>
-      val history = keyboard_presses_history.toList
-      keyboard_presses_history.clear()
-      sender ! history
-    case GetAllMouseButtonHistoryAndReset =>
-      val history = mouse_buttons_presses_history.toList
-      mouse_buttons_presses_history.clear()
+    case GetInputsHistoryAndReset =>
+      val history = inputs_history.toList
+      inputs_history.clear()
       sender ! history
     case ShutdownControllerActor =>
       sender ! true
@@ -298,74 +291,72 @@ trait ActorSingleController extends ScageController {
   //private val log = MySimpleLogger(this.getClass.getName)
 
   def checkControls() {
-    var any_key_pressed = false
-
-    val keyboard_presses_history = Await.result(controllerActorSelection.?(GetAllKeysHistoryAndReset)(Timeout(10000.millis)).mapTo[List[KeyboardPressesHistoryMoment]], 10000.millis)
+    val inputs_history = ControllerActorSystem.getInputsHistoryAndReset
     for {
-      KeyboardPressesHistoryMoment(moment, keys) <- keyboard_presses_history
+      /*(*/InputsHistoryMoment(moment, keys, mouse_coord, is_mouse_moved, dwheel, mouse_buttons)/*, idx)*/ <- inputs_history/*.zipWithIndex*/
       if is_running && Scage.isAppRunning
     } {
+      var any_key_pressed = false
+
       for {
         (key, key_data) <- keyboard_key_events
         SingleKeyEvent(_, repeat_time_func, onKeyDown, onKeyUp) = key_data
         key_press @ KeyPress(key_code, was_pressed, pressed_start_time, last_pressed_time) <- innerKeyPress(key)
-        if moment > last_pressed_time
+        if moment > maxLastPressedTime
         is_key_pressed <- keys.get(key)
       } {
         if(is_key_pressed) {
           any_key_pressed = true
           val repeat_time = repeat_time_func()
           val is_repeatable = repeat_time > 0
-          if(!key_press.was_pressed || (is_repeatable && moment - key_press.last_pressed_time > repeat_time)) {
+          if(!key_press.was_pressed || (is_repeatable && moment - key_press.lastPressedTime > repeat_time)) {
+            //log.info(s"$unit_name $key onKeyDown: $idx ${inputs_history.map(_.keys(key))} $key_press")
             if(!key_press.was_pressed) key_press.pressed_start_time = moment
             key_press.was_pressed = true
-            key_press.last_pressed_time = moment
+            key_press.updateLastPressedTime(moment)
             onKeyDown()
           }
         } else if(key_press.was_pressed) {
           key_press.was_pressed = false
+          //log.info(s"$unit_name $key onKeyUp: $idx ${inputs_history.map(_.keys(key))} $key_press")
           onKeyUp()
         }
       }
-    }
 
-    if(any_key_pressed) anykey()
-
-    val mouse_buttons_presses_history = Await.result(controllerActorSelection.?(GetAllMouseButtonHistoryAndReset)(Timeout(100.millis)).mapTo[List[MouseButtonPressesHistoryMoment]], 100.millis)
-    for {
-      /*(*/MouseButtonPressesHistoryMoment(moment, mouse_coord, is_mouse_moved, dwheel, mouse_buttons)/*, idx)*/ <- mouse_buttons_presses_history/*.zipWithIndex*/
-      if is_running && Scage.isAppRunning
-    } {
+      if(any_key_pressed) anykey()
       if(is_mouse_moved) on_mouse_motion(mouse_coord)
+
       for {
         (button, button_data) <- mouse_button_events
         SingleMouseButtonEvent(_, repeat_time_func, onButtonDown, onButtonUp) = button_data
         mouse_button_press @ MouseButtonPress(_, was_pressed, _, last_pressed_time) <- innerMouseButtonPress(button)
-        if moment > last_pressed_time
+        if moment > maxLastPressedTime
         is_button_pressed <- mouse_buttons.get(button)
       } {
         if(is_button_pressed) {
           val repeat_time = repeat_time_func()
           val is_repeatable = repeat_time > 0
           if(!was_pressed || (is_repeatable && moment - last_pressed_time > repeat_time)) {
-            //log.info(s"$unit_name leftMouse onBtnDown: $idx ${l.map(_.buttons(0))} $mouse_button_press")
+            //log.info(s"$unit_name leftMouse onBtnDown: $idx ${inputs_history.map(_.mouse_buttons(0))} $mouse_button_press")
             if(!mouse_button_press.was_pressed) mouse_button_press.pressed_start_time = moment
             mouse_button_press.was_pressed = true
-            mouse_button_press.last_pressed_time = moment
+            mouse_button_press.updateLastPressedTime(moment)
             onButtonDown(mouse_coord)
           }
         } else if(was_pressed) {
           mouse_button_press.was_pressed = false
-          //log.info(s"$unit_name leftMouse onBtnUp: $idx ${l.map(_.buttons(0))} $mouse_button_press")
+          //log.info(s"$unit_name leftMouse onBtnUp: $idx ${inputs_history.map(_.mouse_buttons(0))} $mouse_button_press")
           onButtonUp(mouse_coord)
         }
       }
+
       if(is_mouse_moved) {
         for {
           (button, onDragMotion) <- on_mouse_drag_motion
           if mouse_buttons.getOrElse(button, false)
         } onDragMotion(mouse_coord)
       }
+
       dwheel match {
         case x if x > 0 => on_mouse_wheel_up(mouse_coord)
         case x if x < 0 => on_mouse_wheel_down(mouse_coord)
@@ -373,8 +364,4 @@ trait ActorSingleController extends ScageController {
       }
     }
   }
-
-  /*dispose {
-    controllerActorSelection ! ShutdownControllerActor
-  }*/
 }
