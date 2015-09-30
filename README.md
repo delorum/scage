@@ -3,7 +3,7 @@
 Latest Stable Version
 ---------------------
 
-10.8
+11.3
 
 Introduction
 ------------
@@ -39,11 +39,9 @@ Hello World Example
 
 ###Rotating 'Hello World!' label
 
-    import net.scage.ScageScreenApp
-    import net.scage.ScageLib._
-    import net.scage.support.Vec
+    import com.github.dunnololda.scage.ScageLib._
 
-    object HelloWorldExample extends ScageScreenApp("Hello World") {
+    object HelloWorldExample extends ScageScreenApp("Scage App", 640, 480) {
       private var ang = 0f
       actionStaticPeriod(100) {
         ang += 5
@@ -64,6 +62,11 @@ More examples
 
 See [Examples Page](https://github.com/dunnololda/scage/wiki/Examples)
 
+Engine brief description
+------------------------
+
+See [Engine methods overview](https://github.com/dunnololda/scage/wiki/Scage-methods-overview)
+
 Usage
 ------------
 
@@ -71,7 +74,7 @@ Usage
 
 You can use the scage archetype to create a new scage project stub:
 
-    $ mvn archetype:generate -DarchetypeGroupId=scage -DarchetypeArtifactId=project-archetype -DarchetypeVersion=10.8 -DarchetypeRepository=https://raw.github.com/dunnololda/mvn-repo/master
+    $ mvn archetype:generate -DarchetypeGroupId=scage -DarchetypeArtifactId=project-archetype -DarchetypeVersion=11.3 -DarchetypeRepository=https://raw.github.com/dunnololda/mvn-repo/master
 
 This utilize the maven's "archetype" feature - create a simple example project with all needed stuff. Answer some questions about its name and version and you are done.
 
@@ -107,6 +110,16 @@ This command will create "jnlp" folder in "target". Then you can upload this fol
 
 More info you can find in the readme file inside the project's root.
 
+###OpenJDK
+
+If you use OpenJDK (not Oracle JDK) you need to add the openjdk profile to all mvn commands above:
+
+    $ mvn clean test -Popenjdk
+    $ mvn clean package -Pbuild,openjdk
+    $ mvn clean package -Pwebstart,openjdk
+
+Additionally you need to install the package "icedtea-web" (this is the name in Archlinux, in Ubuntu it should be something similar).
+
 ###Intellij IDEA
 
 You also can use some IDE with good Maven and Scala support (for example, [IntelliJ IDEA](http://www.jetbrains.com/idea/)). Here are the steps for IDEA:
@@ -129,6 +142,16 @@ Right click - Create LightCyclesOffline. In the new window in the "VM Options" t
     -Djava.library.path=target/natives -DLWJGL_DISABLE_XRANDR=true -Dfile.encoding=UTF-8
 
 Then click OK. Then for example right click again and choose Run LightCyclesOffline. IDEA will build and run the app.
+
+If you see 
+
+    "Exception in thread "main" java.lang.UnsatisfiedLinkError: no lwjgl in java.library.path" 
+
+or 
+
+    "Exception in thread "main" java.lang.UnsatisfiedLinkError: no lwjgl64 in java.library.path" 
+
+this means you have no native libraries in target/natives. In order to generate them, type some mvn command from above. For example, type "mvn clean compile". As a first step of the compilation process maven will generate those libraries in target/natives.
 
 ###For non-Maven users.
 
