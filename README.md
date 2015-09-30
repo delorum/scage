@@ -20,7 +20,7 @@ The main purpose of this project is to give a convenient tool for game-developer
 Features
 --------
 
- - Architechture similar to actors framework with different kinds of tasks executing on different stages of app lifecycle. Simililar to actors these tasks are anonymous functions, and you can add and remove them in runtime in any scope of your app. Its all singlethreaded, so you dont have to mess with messages.
+ - Architecture similar to actors framework with different kinds of tasks executing on different stages of app lifecycle. Simililar to actors these tasks are anonymous functions, and you can add and remove them in runtime in any scope of your app. Its all singlethreaded, so you dont have to mess with messages.
  - Vast drawing library for any kinds of 2D opengl primitives.
  - Loading and utilizing fonts from ttf-files (based on 'Slick2D' api but with improvements).
  - i18n: loading strings and even the whole interfaces from xml files. Runtime language change.
