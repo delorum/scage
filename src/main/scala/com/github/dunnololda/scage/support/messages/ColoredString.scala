@@ -41,6 +41,9 @@ class ColoredString(original_text:String, default_color:ScageColor) {
             case 'b' => Some(BLUE)
             case 'y' => Some(YELLOW)
             case 'o' => Some(ORANGE)
+            case 'p' => Some(PURPLE)
+            case 'm' => Some(MAGENTA)
+            case 'c' => Some(CYAN)
             case _ => None
           }) match {
             case Some(color) =>
