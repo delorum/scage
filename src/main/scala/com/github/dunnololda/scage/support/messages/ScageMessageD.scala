@@ -68,7 +68,8 @@ class ScageMessageD(
                     val font_file:String     = property("font.file", "DroidSans.ttf"),
                     val max_font_size:Double  = property("font.max_size", 18),
                     val glyph_from:Int       = property("font.glyph.from", 1024),
-                    val glyph_to:Int         = property("font.glyph.to", 1279)
+                    val glyph_to:Int         = property("font.glyph.to", 1279),
+                    val glyph_symbols:String = property("font.glyph.symbols", "")
                     ) extends ScageMessageTraitD {
   private val log = MySimpleLogger(this.getClass.getName)
 
@@ -83,7 +84,7 @@ class ScageMessageD(
   def reloadFont() {
     _font = try {
       log.debug("loading font "+fonts_base+font_file+"...")
-      new UnicodeFont(fonts_base+font_file, max_font_size.toFloat, glyph_from, glyph_to)
+      new UnicodeFont(fonts_base+font_file, max_font_size.toFloat, glyph_from, glyph_to, glyph_symbols)
     } catch {
       case e:Exception =>
         log.error("failed to create font: "+e.getLocalizedMessage)
@@ -191,5 +192,6 @@ object ScageMessageD extends ScageMessageD (
   font_file     = property("font.file", "DroidSans.ttf"),
   max_font_size = property("font.max_size", 18),
   glyph_from    = property("font.glyph.from", 1024),
-  glyph_to      = property("font.glyph.to", 1279)
+  glyph_to      = property("font.glyph.to", 1279),
+  glyph_symbols = property("font.glyph.symbols", "")
 )

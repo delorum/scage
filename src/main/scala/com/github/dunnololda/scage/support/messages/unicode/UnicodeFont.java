@@ -128,11 +128,13 @@ public class UnicodeFont/* implements org.newdawn.slick.Font */{
 		}
 	};
 
-    public UnicodeFont(String font_path, float max_size, int glyph_from, int glyph_to) throws SlickException {
+    public UnicodeFont(String font_path, float max_size, int glyph_from, int glyph_to, String glyph_symbols) throws SlickException {
         this(font_path , max_size, false, false);
         addAsciiGlyphs();
         addGlyphs(glyph_from, glyph_to);     // other alphabets (cyrillic by default)
-		addGlyphs("\u21b6\u21b7");
+		if(!glyph_symbols.isEmpty()) {
+			addGlyphs(glyph_symbols);
+		}
         effects.add(new ColorEffect(java.awt.Color.WHITE));
         loadGlyphs();
     }
