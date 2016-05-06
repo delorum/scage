@@ -1,11 +1,16 @@
 <interfaces>
     <interface id="scagetest.help" x="window_width/2" y="window_height/2" yinterval="-20" color="yellow">
         <row id="help">
-Use WASD to move, 
+Use WASD to move,
 Le[rft Mo[yuse \[Butto\]n to s[ghoo]t and
-Mous]e Wheel to zo]om			
+Mous]e Wheel to zo]om
         </row>
         <row />
+        <row/>
+        <row id="special1">Special [{GREEN}gre[{RED}en-re]d] строка</row>
+        <row id="special2">Special \[{GREEN}gre[{RED}en-re]d\] строка</row>
+        <row id="special3">Special [{GREEN}gre\[{RED}en-re\]d] строка</row>
+        <row id="special4">Special \[{GREEN}gre\[{RED}en-re\]d\] строка</row>
         <row/>
         <row id="trace.location" color="green">
 Location: $0

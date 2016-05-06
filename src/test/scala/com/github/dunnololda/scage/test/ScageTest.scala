@@ -1,12 +1,14 @@
 package com.github.dunnololda.scage.test
 
-import junit.framework._
-import Assert._
-import collection.mutable.ListBuffer
 import javax.swing.JOptionPane
-import com.github.dunnololda.scage.ScageLib._
-import scala.concurrent.Future
+
+import com.github.dunnololda.scage.ScageLib.{CoordTracer, DynaBall, MultiController, ScageColor, ScageMessage, ScagePhysics, StaticPolygon, Trace, Vec, appVersion, print, property, stopApp, xml, _}
+import junit.framework.Assert._
+import junit.framework._
+
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object ScageTest {
     def suite: Test = {
@@ -28,7 +30,7 @@ class ScageTest extends TestCase("app") {
      * Rigourous Tests :-)
      */
     def testOK() {
-      new ScreenApp("Hello World") with MultiController {
+      new ScreenApp("Hello World", 1024, 768) with MultiController {
         windowTitle += " - "+appVersion
         /*scage_log.info("starting main unit "+unit_name+"...")
         ScageProperties.properties = properties*/
@@ -83,6 +85,7 @@ class ScageTest extends TestCase("app") {
         key(KEY_F1, onKeyDown = Future {
           input_text = JOptionPane.showInputDialog("Input text here")
         })
+        keyIgnorePause(KEY_Q, onKeyDown = {if(keyPressed(KEY_LCONTROL)) stopApp()})
 
         /*leftMouse(onBtnDown = {
           mouse_coord => tracer.updateLocation(trace, mouse_coord)

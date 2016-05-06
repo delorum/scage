@@ -188,12 +188,12 @@ class ScageXML(private var _lang:String   = property("xml.lang", "en"),
   def xmlInterface(interface_id:String, parameters:Any*):Array[MessageData] = {
     xmlInterfaces.get(interface_id) match {
       case Some(InterfaceData(_, interface_x, interface_y, interface_xinterval, interface_yinterval, rows, interface_color)) =>
-        (for {
+        for {
           RowData(message_id, message_x, message_y, params_from, params_take, message_color) <- rows
         } yield {
-          val to_yield = MessageData(xml(message_id, parameters.drop(params_from).take(params_take):_*), message_x, message_y, message_color)
+          val to_yield = MessageData(xml(message_id, parameters.drop(params_from).take(params_take): _*), message_x, message_y, message_color)
           to_yield
-        }).toArray
+        }
       case None =>
         log.warn("failed to find interface with id "+interface_id)
         xmlInterfaces += (interface_id -> InterfaceData(interface_id, rows = Array(/*RowData(interface_id)*/)))
