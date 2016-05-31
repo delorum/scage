@@ -108,6 +108,8 @@ class Vec(val x:Float = 0, val y:Float = 0) {
   def toPhys2dVec = new Vector2f(x, y)
 
   override def toString = s"Vec($x, $y)"
+
+  def map[A](f:(Vec) => A):A = f(this)
 }
 
 object DVec {
@@ -207,4 +209,6 @@ class DVec(val x:Double = 0, val y:Double = 0) {
   def toPhys2dVec = new Vector2f(x.toFloat, y.toFloat)
 
   override def toString = s"DVec($x, $y)"
+
+  def map[A](f:(DVec) => A):A = f(this)
 }
