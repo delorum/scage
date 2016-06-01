@@ -81,14 +81,14 @@ class Vec(val x:Float = 0, val y:Float = 0) {
   override val hashCode:Int = (41*(41 + x) + y).toInt
   def canEqual(other: Any)  = other.isInstanceOf[Vec]
 
-  def absDeg(v:Vec):Float    = math.acos(n * v.n).toFloat/math.Pi.toFloat*180f
+  def absDeg(v:Vec):Float    = math.acos(math.max(math.min(n * v.n, 1.0), -1.0)).toFloat/math.Pi.toFloat*180f
   def deg(v:Vec):Float       = absDeg(v)
   def signedDeg(v:Vec):Float = {
     val scalar = perpendicular*v
     if(scalar >= 0) absDeg(v) else -absDeg(v)
   }
 
-  def absRad(v:Vec)          = math.acos(n * v.n).toFloat
+  def absRad(v:Vec)          = math.acos(math.max(math.min(n * v.n, 1.0), -1.0)).toFloat
   def rad(v:Vec)             = absRad(v)
   def signedRad(v:Vec):Float = {
     val scalar = perpendicular*v
@@ -182,14 +182,14 @@ class DVec(val x:Double = 0, val y:Double = 0) {
   override val hashCode:Int = (41*(41 + x) + y).toInt
   def canEqual(other: Any) = other.isInstanceOf[DVec]
 
-  def absDeg(dv:DVec)    = 180 / math.Pi * math.acos(n * dv.n)
+  def absDeg(dv:DVec)    = 180 / math.Pi * math.acos(math.max(math.min(n * dv.n, 1.0), -1.0))
   def deg(dv:DVec)       = absDeg(dv)
   def signedDeg(dv:DVec) = {
     val scalar = perpendicular*dv
     if(scalar >= 0) absDeg(dv) else -absDeg(dv)
   }
 
-  def absRad(dv:DVec)    = math.acos(n * dv.n)
+  def absRad(dv:DVec)    = math.acos(math.max(math.min(n * dv.n, 1.0), -1.0))
   def rad(dv:DVec)       = absRad(dv)
   def signedRad(dv:DVec) = {
     val scalar = perpendicular*dv
