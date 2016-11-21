@@ -21,7 +21,7 @@ class ScageOperation(val op_id: Int, val op: () => Any, val position:Int) extend
 object ScageOperation {
   def apply(op_id: Int, op: () => Any, pos:Int) = new ScageOperation(op_id, op, pos)
   def unapply(data:Any):Option[(Int, () => Any, Int)] = data match {
-    case v:ScageOperation => Some(v.op_id, v.op, v.position)
+    case v:ScageOperation => Some((v.op_id, v.op, v.position))
     case _ => None
   }
 }

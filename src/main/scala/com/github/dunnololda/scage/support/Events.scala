@@ -51,7 +51,7 @@ object Events extends EventsTrait {
   def callEvent(event_name: String) {
     events.get(event_name) match {
       case Some(events_for_name) =>
-        for (event <- events_for_name.values) event() // fail-fast if not matched!
+        for (event <- events_for_name.values) event(()) // fail-fast if not matched!
       case None => //log.warn("event "+event_name+" not found")
     }
   }

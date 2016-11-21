@@ -17,7 +17,7 @@ object Vec {
   def apply()                   = new Vec(0, 0)
   
   def unapply(data:Any):Option[(Float, Float)] = data match {
-    case v:Vec => Some(v.x, v.y)
+    case v:Vec => Some((v.x, v.y))
     case _ => None
   }
   
@@ -120,7 +120,7 @@ object DVec {
   def apply()                   = new DVec(0, 0)
 
   def unapply(data:Any):Option[(Double, Double)] = data match {
-    case dv:DVec => Some(dv.x, dv.y)
+    case dv:DVec => Some((dv.x, dv.y))
     case _       => None
   }
 

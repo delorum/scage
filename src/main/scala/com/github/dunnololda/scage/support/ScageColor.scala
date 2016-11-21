@@ -31,7 +31,7 @@ object ScageColor extends ScageColorTrait {
   def apply(r:Float, g:Float, b:Float) = new ScageColor(r, g, b)
   
   def unapply(data:Any):Option[(String, Float, Float, Float)] = data match {
-    case c:ScageColor => Some(c.name, c.red,  c.green,  c.blue)
+    case c:ScageColor => Some((c.name, c.red,  c.green,  c.blue))
     case _ => None
   }
 

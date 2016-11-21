@@ -17,7 +17,7 @@ object ScageColorTest extends ScageScreenApp("Color Test") {
     if(color_num >= 0 && color_num < fields.length) {
       print(colors(color_num), 20, windowHeight/2,
         if("BLACK".equalsIgnoreCase(fields(color_num).getName)) WHITE else BLACK)
-      try {backgroundColor = (colors(color_num))}
+      try {backgroundColor = colors(color_num)}
       catch {
         case ex:java.lang.Exception =>
       }
@@ -28,7 +28,7 @@ object ScageColorTest extends ScageScreenApp("Color Test") {
     def nextColorNumInc() {
       if(color_num < fields.length - 1) color_num += 1
       else color_num = 0
-      if(colors(color_num) != null && (!WHITE.equals(colors(color_num)) || "WHITE".equalsIgnoreCase(fields(color_num).getName))) color_num
+      if(colors(color_num) != null && (!WHITE.equals(colors(color_num)) || "WHITE".equalsIgnoreCase(fields(color_num).getName))) {}
       else nextColorNumInc()
     }
     nextColorNumInc()
@@ -37,7 +37,7 @@ object ScageColorTest extends ScageScreenApp("Color Test") {
     def nextColorNumDec() {
       if(color_num > 0) color_num -= 1
       else color_num = fields.length - 1
-      if(!WHITE.equals(colors(color_num)) || "WHITE".equalsIgnoreCase(fields(color_num).getName)) color_num
+      if(!WHITE.equals(colors(color_num)) || "WHITE".equalsIgnoreCase(fields(color_num).getName)) {}
       else nextColorNumDec()
     }
     nextColorNumDec()

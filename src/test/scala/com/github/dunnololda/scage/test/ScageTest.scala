@@ -9,6 +9,7 @@ import junit.framework._
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.language.reflectiveCalls
 
 object ScageTest {
     def suite: Test = {
