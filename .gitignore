@@ -9,3 +9,5 @@
 target
 local-build.properties
 libs
+settings.xml
+libxx.so
