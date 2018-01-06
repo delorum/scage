@@ -2,9 +2,14 @@
     <interface id="scagetest.help" x="window_width/2" y="window_height/2" yinterval="-20" color="yellow">
         <row id="help">
 WASD и Ле[rвая К[yн\[bопк\]а Мы\\[gши,
-Кол\\]есико - пр]иблизить/отд]алить
+Кол\\]есико - пр]иблизить/отд]алить.
         </row>
-        <row />
+        <row/>
+        <row/>
+        <row id="special1">Cпециальная [{GREEN}зел[{RED}ено-кра]сная] строка</row>
+        <row id="special2">Cпециальная \[{GREEN}зел[{RED}ено-кра]сная\] строка</row>
+        <row id="special3">Cпециальная [{GREEN}зел\[{RED}ено-кра\]сная] строка</row>
+        <row id="special4">Cпециальная \[{GREEN}зел\[{RED}ено-кра\]сная\] строка</row>
         <row/>
         <row id="trace.location" color="green">
 Позиция: $0

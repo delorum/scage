@@ -171,8 +171,29 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
 
   // Vec/DVec helper methods
 
-  def areLinesIntersect(a1: Vec, a2: Vec, b1: Vec, b2: Vec): Boolean = {
-    val common = (a2.x - a1.x) * (b2.y - b1.y) - (a2.y - a1.y) * (b2.x - b1.x)
+  def areLinesIntersect(p: Vec, p2: Vec, q: Vec, q2: Vec): Boolean = {
+    // http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
+    val r = p2 - p
+    val s = q2 - q
+    val r_cross_s = r */ s
+    if(r_cross_s == 0) {
+      val q_min_p_cross_r = (q - p) */ s
+      if(q_min_p_cross_r == 0) {
+        // два отрезка коллинеарны
+        val t0 = (q - p) * r / (r * r)
+        val t1 = t0 + (s * r) / (r * r)
+        (t0 <= 0 && t1 >= 0) || (t0 >= 0 && t0 <= 1)
+      } else {
+        // два отрезка параллельны, не пересекаются
+        false
+      }
+    } else {
+      val t = ((q - p) */ s) / (r */ s)
+      val u = ((q - p) */ r) / (r */ s)
+      -1E-14 <= t && t <= 1.00000000000001 && -1E-14 <= u && u <= 1.00000000000001
+    }
+    
+    /*val common = (a2.x - a1.x) * (b2.y - b1.y) - (a2.y - a1.y) * (b2.x - b1.x)
     common != 0 && {
       val rH = (a1.y - b1.y) * (b2.x - b1.x) - (a1.x - b1.x) * (b2.y - b1.y)
       val sH = (a1.y - b1.y) * (a2.x - a1.x) - (a1.x - b1.x) * (a2.y - a1.y)
@@ -181,11 +202,32 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
       val s = sH / common
 
       r >= 0 && r <= 1 && s >= 0 && s <= 1
-    }
+    }*/
   }
 
-  def areLinesIntersect(a1: DVec, a2: DVec, b1: DVec, b2: DVec): Boolean = {
-    val common = (a2.x - a1.x) * (b2.y - b1.y) - (a2.y - a1.y) * (b2.x - b1.x)
+  def areLinesIntersect(p: DVec, p2: DVec, q: DVec, q2: DVec): Boolean = {
+    // http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
+    val r = p2 - p
+    val s = q2 - q
+    val r_cross_s = r */ s
+    if(r_cross_s == 0) {
+      val q_min_p_cross_r = (q - p) */ s
+      if(q_min_p_cross_r == 0) {
+        // два отрезка коллинеарны
+        val t0 = (q - p) * r / (r * r)
+        val t1 = t0 + (s * r) / (r * r)
+        (t0 <= 0 && t1 >= 0) || (t0 >= 0 && t0 <= 1)
+      } else {
+        // два отрезка параллельны, не пересекаются
+        false
+      }
+    } else {
+      val t = ((q - p) */ s) / (r */ s)
+      val u = ((q - p) */ r) / (r */ s)
+      -1E-14 <= t && t <= 1.00000000000001 && -1E-14 <= u && u <= 1.00000000000001
+    }
+    
+    /*val common = (a2.x - a1.x) * (b2.y - b1.y) - (a2.y - a1.y) * (b2.x - b1.x)
     common != 0 && {
       val rH = (a1.y - b1.y) * (b2.x - b1.x) - (a1.x - b1.x) * (b2.y - b1.y)
       val sH = (a1.y - b1.y) * (a2.x - a1.x) - (a1.x - b1.x) * (a2.y - a1.y)
@@ -194,7 +236,7 @@ object ScageLib extends ScageMessageTrait with ScageXMLTrait with RendererLib wi
       val s = sH / common
 
       r >= 0 && r <= 1 && s >= 0 && s <= 1
-    }
+    }*/
   }
 
   def coordOnRect(coord:Vec, leftup:Vec, width:Float, height:Float):Boolean = {

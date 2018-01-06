@@ -8,6 +8,20 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import collection.JavaConversions._
 
+/**
+ * Этот класс представляет собой специальные строки, разные участки которых движок scage будет рисовать разными цветами.
+ * Другой цвет для участка задается специальной разметкой вот так: "специальная строка с [rкрасным] участком"
+ * то есть, участок отделяется квадратными скобками и сразу за открывающей квадратной скобкой ставится символ нужного цвета.
+ * Поддерживается вложенность: "специальная [gзел[rено-кра]сная] строка".
+ * Если функционал перекрашивания не нужен, а нужно именно написать что то в квадратных скобках, то перед открывающей и закрывающей
+ * скобками следует поставить слеш: "неизменяемая \[rстрока\]".
+ * Поскольку оперировать одним символом не очень удобно (задано мало цветов), синтаксис разметки расширен:
+ * вместо одного символа можно задавать полное имя цвета в фигурных скобках. Примеры:
+ * "специальная строка с [{RED}красным] участком"
+ * "специальная [{GREEN}зел[{RED}ено-кра]сная] строка"
+ * @param original_text - текст с разметкой цветных участков
+ * @param default_color - цвет по умолчанию, которым будут нарисованы участки вне разметки
+ */
 class ColoredString(original_text:String, default_color:ScageColor) {
   def this(original_text:String, c:Color) {this(original_text, new ScageColor(c))}
 
@@ -20,9 +34,22 @@ class ColoredString(original_text:String, default_color:ScageColor) {
   def originalText = original_text
   def text = new_text.mkString
 
+  /**
+   * метод вычисляет цвет в фигурных скобках
+   * @return
+   */
+  private def calculateColor(text_arr:Array[Char], left_bracket_pos:Int):Option[(ScageColor, Int)] = {
+    val right_bracket_pos = text_arr.indexOf('}', left_bracket_pos)
+    val color_name = text_arr.drop(left_bracket_pos+1).take(right_bracket_pos-1 - left_bracket_pos).mkString
+    ScageColor.fromString(color_name) match {
+      case Some(color) => Some((color, right_bracket_pos - left_bracket_pos + 2))
+      case None => None
+    }
+  }
+
   private var is_previous_slash = false
-  private def findColorSwitches(text_arr:Array[Char], pos:Int, current_color:ScageColor) {
-    if(pos < text_arr.length) {
+  private def findColorSwitches(text_arr:Array[Char], pos:Int = 0, current_color:ScageColor = default_color) {
+    if(0 <= pos && pos < text_arr.length) {
       text_arr(pos) match {
         case '\\' =>
           if(!is_previous_slash) {
@@ -36,19 +63,23 @@ class ColoredString(original_text:String, default_color:ScageColor) {
           }
         case '[' if !is_previous_slash && pos < text_arr.length-1 =>
           (text_arr(pos+1) match {
-            case 'r' => Some(RED)
-            case 'g' => Some(GREEN)
-            case 'b' => Some(BLUE)
-            case 'y' => Some(YELLOW)
-            case 'o' => Some(ORANGE)
+            case 'r' => Some((RED, 2))
+            case 'g' => Some((GREEN, 2))
+            case 'b' => Some((BLUE, 2))
+            case 'y' => Some((YELLOW, 2))
+            case 'o' => Some((ORANGE, 2))
+            case 'p' => Some((PURPLE, 2))
+            case 'm' => Some((MAGENTA, 2))
+            case 'c' => Some((CYAN, 2))
+            case '{' => calculateColor(text_arr, pos+1)
             case _ => None
           }) match {
-            case Some(color) =>
+            case Some((color, offset)) =>
               color_switches += ((pos - pos_offset) -> color)
-              pos_offset += 2
+              pos_offset += offset
               previous_colors.push(current_color)
-              if(pos < text_arr.length-2) findColorSwitches(text_arr, pos+2, color)
-            case None =>
+              if(pos < text_arr.length-offset) findColorSwitches(text_arr, pos+offset, color)
+            case _ =>
               new_text += text_arr(pos)
               findColorSwitches(text_arr, pos+1, current_color)
           }
@@ -64,7 +95,7 @@ class ColoredString(original_text:String, default_color:ScageColor) {
       }
     }
   }
-  findColorSwitches(original_text.toCharArray, 0, default_color)
+  findColorSwitches(original_text.toCharArray)
 
-  override def toString = "ColoredString("+original_text+", "+text+", "+color_switches+")"
+  override def toString = s"ColoredString($original_text, $text, $color_switches)"
 }

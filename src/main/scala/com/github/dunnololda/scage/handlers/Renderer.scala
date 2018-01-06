@@ -27,7 +27,7 @@ object DisplayListsHolder {
 
   private val lists = ArrayBuffer[(Int, () => Unit)]()
   def addDisplayList(list_code:Int, func: => Unit) {
-    lists += (list_code, () => func)
+    lists += ((list_code, () => func))
   }
   def reloadDisplayLists() {
     log.debug("reloading display lists...")
@@ -539,7 +539,7 @@ trait RendererLib {
       case _ => xmlOrDefault("app.welcome", "") match {
         case welcome_message if "" != welcome_message =>
           GL11.glClear(GL11.GL_COLOR_BUFFER_BIT/* | GL11.GL_DEPTH_BUFFER_BIT*/)
-          print(welcome_message, 20, windowHeight-25, GREEN) // TODO: custom color and position
+          ScageMessage.print(welcome_message, 20, windowHeight-25, GREEN) // TODO: custom color and position
           Display.update()
           Thread.sleep(1000) // TODO: custom pause
         case _ =>

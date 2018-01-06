@@ -48,8 +48,8 @@ object ControllerActorSystem {
 
   def shutDownAndAwaitTermination(): Unit = {
     //controllerActorSelection ! ShutdownControllerActor
-    controller_system.shutdown()
-    controller_system.awaitTermination()
+    controller_system.terminate()
+    Await.result(controller_system.whenTerminated, Duration.Inf)
   }
 
   def monitoredKeysList:List[Int] = {

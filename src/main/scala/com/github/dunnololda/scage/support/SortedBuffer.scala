@@ -20,14 +20,14 @@ class SortedBuffer(init_arr:ScageOperation*) extends Iterable[ScageOperation] wi
   })
 
   def +=(elem: ScageOperation): this.type = {
-    val a = m.get(elem.position)
+    val a = m.get(elem.position)  // O(logN)
     if(a == null) {
-      m.put(elem.position, new java.util.TreeMap[Int, ScageOperation] {put(elem.op_id, elem)})
+      m.put(elem.position, new java.util.TreeMap[Int, ScageOperation] {put(elem.op_id, elem)}) // O(logN)
     } else {
-      a.put(elem.op_id, elem)
+      a.put(elem.op_id, elem) // O(logN)
     }
-    position_by_op_id += elem.op_id -> elem.position
-    _length += 1
+    position_by_op_id += elem.op_id -> elem.position // O(1)
+    _length += 1  // O(1)
     this
   }
 
@@ -38,14 +38,14 @@ class SortedBuffer(init_arr:ScageOperation*) extends Iterable[ScageOperation] wi
   }
 
   def remove(op_id: Int): Option[ScageOperation] = {
-    position_by_op_id.get(op_id) match {
+    position_by_op_id.get(op_id) match {  // O(1)
       case Some(position) =>
-        val a = m.get(position)
+        val a = m.get(position) // O(logN)
         if(a != null) {
           val ans = Option(a.remove(op_id))
-          position_by_op_id -= op_id
+          position_by_op_id -= op_id // O(1)
           if(a.isEmpty) {
-            m.remove(position)
+            m.remove(position)  // O(logN)
           }
           _length -= 1
           ans
