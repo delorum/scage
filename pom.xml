@@ -276,9 +276,9 @@
         <configuration>
           <scalaVersion>${scala.version}</scalaVersion>
           <args>
-              <!--<arg>-optimise</arg>-->
               <arg>-unchecked</arg>
               <arg>-deprecation</arg>
+              <arg>-explaintypes</arg>
               <arg>-feature</arg>
               <arg>-Yinline-warnings</arg>
               <arg>-Xlint</arg>
