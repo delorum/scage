@@ -173,7 +173,7 @@ class ScageXML(private var _lang:String   = property("xml.lang", "en"),
                 if(message_y == -1) ypos += interface_yinterval
                 to_yield
               }).toArray
-              log.debug("added interface "+interface_id)
+              log.debug("added interfaces "+interface_id)
               (interface_id, InterfaceData(interface_id, interface_x, interface_y, interface_xinterval, interface_yinterval, messages, interface_color))
             }):_*)
           case _ => mutable.HashMap[String, InterfaceData]()  // TODO: log messages
@@ -195,7 +195,7 @@ class ScageXML(private var _lang:String   = property("xml.lang", "en"),
           to_yield
         }
       case None =>
-        log.warn("failed to find interface with id "+interface_id)
+        log.warn("failed to find interfaces with id "+interface_id)
         xmlInterfaces += (interface_id -> InterfaceData(interface_id, rows = Array(/*RowData(interface_id)*/)))
         xmlMessages += (interface_id -> interface_id)
         Array(MessageData(interface_id))
@@ -209,7 +209,7 @@ class ScageXML(private var _lang:String   = property("xml.lang", "en"),
           RowData(message_id, _, _, params_from, params_take, _) <- rows
         } yield xml(message_id, parameters.drop(params_from).take(params_take):_*)).toArray
       case None =>
-        log.warn("failed to find interface with id "+interface_id)
+        log.warn("failed to find interfaces with id "+interface_id)
         xmlInterfaces += (interface_id -> InterfaceData(interface_id, rows = Array(RowData(interface_id))))
         xmlMessages += (interface_id -> interface_id)
         Array(interface_id)

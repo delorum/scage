@@ -8,20 +8,24 @@ import collection.mutable
 import com.github.dunnololda.cli.Imports._
 
 // extracted case class to this definition because we want to extend it!
-class ScageOperation(val op_id: Int, val op: () => Any, val position:Int) extends Ordered[ScageOperation] {
-  override def equals(other:Any):Boolean = other match {
-    case that:ScageOperation => (that canEqual this) && this.op_id == that.op_id
+class ScageOperation(val op_id: Int, val op: () => Any, val position: Int) extends Ordered[ScageOperation] {
+  override def equals(other: Any): Boolean = other match {
+    case that: ScageOperation => (that canEqual this) && this.op_id == that.op_id
     case _ => false
   }
-  override val hashCode:Int = op_id
-  def canEqual(other: Any)  = other.isInstanceOf[ScageOperation]
+
+  override val hashCode: Int = op_id
+
+  def canEqual(other: Any) = other.isInstanceOf[ScageOperation]
 
   override def compare(that: ScageOperation): Int = position - that.position
 }
+
 object ScageOperation {
-  def apply(op_id: Int, op: () => Any, pos:Int) = new ScageOperation(op_id, op, pos)
-  def unapply(data:Any):Option[(Int, () => Any, Int)] = data match {
-    case v:ScageOperation => Some((v.op_id, v.op, v.position))
+  def apply(op_id: Int, op: () => Any, pos: Int) = new ScageOperation(op_id, op, pos)
+
+  def unapply(data: Any): Option[(Int, () => Any, Int)] = data match {
+    case v: ScageOperation => Some((v.op_id, v.op, v.position))
     case _ => None
   }
 }
@@ -35,34 +39,41 @@ trait OperationMapping {
   private val log = MySimpleLogger(this.getClass.getName)
 
   protected var current_operation_id = 0
+
   def currentOperation = current_operation_id
 
   protected var is_running = false
+
   def isRunning = is_running
 
-  private[scage] var scage_phase:ScagePhase = ScagePhase.NoPhase
+  private[scage] var scage_phase: ScagePhase = ScagePhase.NoPhase
+
   def currentPhase = scage_phase
 
   //private[scage] val del_operations = ArrayBuffer[() => Unit]()
-  case class DelOperation(op_id:Int, show_warnings:Boolean)
+  case class DelOperation(op_id: Int, show_warnings: Boolean)
+
   private[scage] val del_operations = ArrayBuffer[DelOperation]()
-  case class AddOperation(container:OperationContainer, operation:ScageOperation)
+
+  case class AddOperation(container: OperationContainer, operation: ScageOperation)
+
   private[scage] val add_operations = ArrayBuffer[AddOperation]()
+
   def executeDelAndAddOperationsIfExist(): Unit = {
-    if(del_operations.nonEmpty) {
+    if (del_operations.nonEmpty) {
       del_operations.foreach(delOp => {
         mapping.remove(delOp.op_id) match {
           case Some(container) =>
             container.operations.remove(delOp.op_id) match {
               case Some(operation) =>
                 log.debug("deleted operation with id " + delOp.op_id + " from the container " + container.name)
-                if(container.execute_on_deletion) {
+                if (container.execute_on_deletion) {
                   operation.op()
                 }
-                if(container.isEmpty) {
+                if (container.isEmpty) {
                   log.info(s"deleted all operations from the container ${container.name}")
                 }
-                if(mapping.isEmpty) {
+                if (mapping.isEmpty) {
                   log.info("deleted all operations from all containers")
                 }
               case None =>
@@ -74,9 +85,9 @@ trait OperationMapping {
       })
       del_operations.clear()
     }
-    if(add_operations.nonEmpty) {
+    if (add_operations.nonEmpty) {
       add_operations.foreach(addOp => {
-        if(addOp.container.execute_if_app_running && isRunning) {
+        if (addOp.container.execute_if_app_running && isRunning) {
           addOp.operation.op()
         }
         addOp.container.operations += addOp.operation
@@ -86,20 +97,20 @@ trait OperationMapping {
     }
   }
 
-  class OperationContainer(val name: String, val scage_phase:ScagePhase, val execute_if_app_running:Boolean, val execute_on_deletion:Boolean) {
+  class OperationContainer(val name: String, val scage_phase: ScagePhase, val execute_if_app_running: Boolean, val execute_on_deletion: Boolean) {
     private[scage] val operations = SortedBuffer()
-    
+
     def length: Int = operations.length
-    
+
     def isEmpty = operations.isEmpty
 
-    private[scage] def addOp(op: () => Any, position:Int): Int = {
+    private[scage] def addOp(op: () => Any, position: Int): Int = {
       val op_id = nextId
       val operation = ScageOperation(op_id, op, position)
-      if(currentPhase == scage_phase) {
+      if (currentPhase == scage_phase) {
         add_operations += AddOperation(this, operation)
       } else {
-        if(execute_if_app_running && isRunning) {
+        if (execute_if_app_running && isRunning) {
           op()
         }
         operations += operation
@@ -145,7 +156,7 @@ trait OperationMapping {
     }
   }
 
-  protected def defaultContainer(container_name: String, scage_phase:ScagePhase, execute_if_app_running:Boolean, execute_on_deletion:Boolean) = {
+  protected def defaultContainer(container_name: String, scage_phase: ScagePhase, execute_if_app_running: Boolean, execute_on_deletion: Boolean) = {
     new OperationContainer(container_name, scage_phase, execute_if_app_running, execute_on_deletion)
   }
 
@@ -154,20 +165,20 @@ trait OperationMapping {
   private[scage] def delOp(op_id: Int, show_warnings: Boolean) {
     mapping.get(op_id) match {
       case Some(container) =>
-        if(currentPhase == container.scage_phase) {
+        if (currentPhase == container.scage_phase) {
           del_operations += DelOperation(op_id, show_warnings)
         } else {
           mapping.remove(op_id)
           container.operations.remove(op_id) match {
             case Some(operation) =>
               log.debug("deleted operation with id " + op_id + " from the container " + container.name)
-              if(container.execute_on_deletion) {
+              if (container.execute_on_deletion) {
                 operation.op()
               }
-              if(container.isEmpty) {
+              if (container.isEmpty) {
                 log.info(s"deleted all operations from the container ${container.name}")
               }
-              if(mapping.isEmpty) {
+              if (mapping.isEmpty) {
                 log.info("deleted all operations from all containers")
               }
             case None =>
@@ -234,34 +245,40 @@ trait Scage extends OperationMapping {
   protected var on_pause = false
 
   private[scage] var last_pause_start_moment = 0l
+
   def lastPauseStartMoment = last_pause_start_moment
 
   private[scage] var pause_period_since_preinit = 0l
+
   def pausePeriod = pause_period_since_preinit
 
   private[scage] var pause_period_since_init = 0l
+
   def pausePeriodSinceInit = pause_period_since_init
 
   def onPause = on_pause
+
   def switchPause() {
     on_pause = !on_pause
-    if(on_pause) {
+    if (on_pause) {
       last_pause_start_moment = System.currentTimeMillis()
     } else {
       pause_period_since_preinit += (System.currentTimeMillis() - last_pause_start_moment)
-      pause_period_since_init    += (System.currentTimeMillis() - last_pause_start_moment)
+      pause_period_since_init += (System.currentTimeMillis() - last_pause_start_moment)
     }
     scage_log.info("pause = " + on_pause)
   }
+
   def pause() {
     on_pause = true
     last_pause_start_moment = System.currentTimeMillis()
     scage_log.info("pause = " + on_pause)
   }
+
   def pauseOff() {
     on_pause = false
     pause_period_since_preinit += (System.currentTimeMillis() - last_pause_start_moment)
-    pause_period_since_init    += (System.currentTimeMillis() - last_pause_start_moment)
+    pause_period_since_init += (System.currentTimeMillis() - last_pause_start_moment)
     scage_log.info("pause = " + on_pause)
   }
 
@@ -274,17 +291,20 @@ trait Scage extends OperationMapping {
     if (is_running) preinit_func
     preinits.addOp(() => preinit_func, 0)
   }
-  def preinit(position:Int)(preinit_func: => Any) = {
+
+  def preinit(position: Int)(preinit_func: => Any) = {
     if (is_running) preinit_func
     preinits.addOp(() => preinit_func, position)
   }
 
   private var preinit_moment = System.currentTimeMillis()
+
   def preinitMoment = preinit_moment
 
   def msecsFromPreinit = System.currentTimeMillis() - preinit_moment
+
   def msecsFromPreinitWithoutPause = {
-    if(on_pause) last_pause_start_moment - pause_period_since_preinit - preinit_moment
+    if (on_pause) last_pause_start_moment - pause_period_since_preinit - preinit_moment
     else System.currentTimeMillis() - pause_period_since_preinit - preinit_moment
   }
 
@@ -324,16 +344,19 @@ trait Scage extends OperationMapping {
   def init(init_func: => Any) = {
     inits.addOp(() => init_func, 0)
   }
-  def init(position:Int)(init_func: => Any) = {
+
+  def init(position: Int)(init_func: => Any) = {
     inits.addOp(() => init_func, position)
   }
 
   private var init_moment = System.currentTimeMillis()
+
   def initMoment = init_moment
 
   def msecsFromInit = System.currentTimeMillis() - init_moment
+
   def msecsFromInitWithoutPause = {
-    if(on_pause) last_pause_start_moment - pause_period_since_init - init_moment
+    if (on_pause) last_pause_start_moment - pause_period_since_init - init_moment
     else System.currentTimeMillis() - pause_period_since_init - init_moment
   }
 
@@ -372,11 +395,12 @@ trait Scage extends OperationMapping {
   def actionIgnorePause(action_func: => Any): Int = {
     actions.addOp(() => action_func, 0)
   }
-  def actionIgnorePause(position:Int)(action_func: => Any): Int = {
+
+  def actionIgnorePause(position: Int)(action_func: => Any): Int = {
     actions.addOp(() => action_func, position)
   }
 
-  def actionStaticPeriodIgnorePause(period: Long, position:Int = 0)(action_func: => Unit): Int = {
+  def actionStaticPeriodIgnorePause(period: Long, position: Int = 0)(action_func: => Unit): Int = {
     if (period > 0) {
       var last_action_time: Long = 0
       actionIgnorePause(position) {
@@ -390,7 +414,7 @@ trait Scage extends OperationMapping {
     }
   }
 
-  def actionDynamicPeriodIgnorePause(period: => Long, position:Int = 0)(action_func: => Unit): Int = {
+  def actionDynamicPeriodIgnorePause(period: => Long, position: Int = 0)(action_func: => Unit): Int = {
     var last_action_time: Long = 0
     actionIgnorePause(position) {
       if (System.currentTimeMillis - last_action_time > period) {
@@ -407,13 +431,13 @@ trait Scage extends OperationMapping {
     }
   }
 
-  def action(position:Int)(action_func: => Any): Int = {
+  def action(position: Int)(action_func: => Any): Int = {
     actionIgnorePause(position) {
       if (!on_pause) action_func
     }
   }
 
-  def actionStaticPeriod(period: Long, position:Int = 0)(action_func: => Unit): Int = {
+  def actionStaticPeriod(period: Long, position: Int = 0)(action_func: => Unit): Int = {
     if (period > 0) {
       var last_action_time: Long = 0
       action(position) {
@@ -427,7 +451,7 @@ trait Scage extends OperationMapping {
     }
   }
 
-  def actionDynamicPeriod(period: => Long, position:Int = 0)(action_func: => Unit): Int = {
+  def actionDynamicPeriod(period: => Long, position: Int = 0)(action_func: => Unit): Int = {
     var last_action_time: Long = 0
     action(position) {
       if (System.currentTimeMillis - last_action_time > period) {
@@ -444,13 +468,13 @@ trait Scage extends OperationMapping {
     }
   }
 
-  def actionOnPause(position:Int)(action_func: => Any): Int = {
+  def actionOnPause(position: Int)(action_func: => Any): Int = {
     actionIgnorePause(position) {
       if (on_pause) action_func
     }
   }
 
-  def actionStaticPeriodOnPause(period: Long, position:Int = 0)(action_func: => Unit): Int = {
+  def actionStaticPeriodOnPause(period: Long, position: Int = 0)(action_func: => Unit): Int = {
     if (period > 0) {
       var last_action_time: Long = 0
       actionOnPause(position) {
@@ -464,7 +488,7 @@ trait Scage extends OperationMapping {
     }
   }
 
-  def actionDynamicPeriodOnPause(period: => Long, position:Int = 0)(action_func: => Unit): Int = {
+  def actionDynamicPeriodOnPause(period: => Long, position: Int = 0)(action_func: => Unit): Int = {
     var last_action_time: Long = 0
     actionOnPause(position) {
       if (System.currentTimeMillis - last_action_time > period) {
@@ -475,12 +499,13 @@ trait Scage extends OperationMapping {
   }
 
   private def _execute(_actions_iterator: Iterator[ScageOperation]) {
-    while(is_running && Scage.isAppRunning && !restart_toggled && _actions_iterator.hasNext) {
+    while (is_running && Scage.isAppRunning && !restart_toggled && _actions_iterator.hasNext) {
       val ScageOperation(action_id, action_operation, _) = _actions_iterator.next()
       current_operation_id = action_id
       action_operation()
     }
   }
+
   private[scage] def executeActions() {
     scage_phase = ScagePhase.Action
     // assuming to run in cycle, so we leave off any log messages
@@ -513,7 +538,8 @@ trait Scage extends OperationMapping {
   def clear(clear_func: => Any) = {
     clears.addOp(() => clear_func, 0)
   }
-  def clear(position:Int)(clear_func: => Any) = {
+
+  def clear(position: Int)(clear_func: => Any) = {
     clears.addOp(() => clear_func, position)
   }
 
@@ -550,7 +576,7 @@ trait Scage extends OperationMapping {
     disposes.addOp(() => dispose_func, 0)
   }
 
-  def dispose(position:Int)(dispose_func: => Any) = {
+  def dispose(position: Int)(dispose_func: => Any) = {
     disposes.addOp(() => dispose_func, position)
   }
 
@@ -617,6 +643,7 @@ object Scage {
 
 class ScageApp(val unit_name: String = property("app.name", "Scage App")) extends Scage with Cli {
   val app_start_moment = System.currentTimeMillis()
+
   def msecsFromAppStart = System.currentTimeMillis() - app_start_moment
 
   override def main(args: Array[String]) {

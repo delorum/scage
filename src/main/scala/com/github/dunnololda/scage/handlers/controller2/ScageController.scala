@@ -12,28 +12,34 @@ import org.lwjgl.input.{Keyboard, Mouse}
 import scala.collection.mutable
 
 case class KeyPress(key_code: Int, var was_pressed: Boolean, var pressed_start_time: Long, private var last_pressed_time: Long) {
-  def lastPressedTime:Long = last_pressed_time
-  def updateLastPressedTime(new_time:Long): Unit = {
+  def lastPressedTime: Long = last_pressed_time
+
+  def updateLastPressedTime(new_time: Long): Unit = {
     last_pressed_time = new_time
     ScageController.updateMaxLastPressedTime(last_pressed_time)
   }
+
   def immutable: ImmutableKeyPress = ImmutableKeyPress(key_code, was_pressed, pressed_start_time, last_pressed_time)
 
   private val f = new SimpleDateFormat("HH:mm:ss.S")
+
   override def toString = s"KeyPress($key_code, $was_pressed, ${f.format(new Date(pressed_start_time))}, ${f.format(new Date(last_pressed_time))})"
 }
 
 case class ImmutableKeyPress(key_code: Int, was_pressed: Boolean, pressed_start_time: Long, last_pressed_time: Long)
 
 case class MouseButtonPress(button_code: Int, var was_pressed: Boolean, var pressed_start_time: Long, private var last_pressed_time: Long) {
-  def lastPressedTime:Long = last_pressed_time
-  def updateLastPressedTime(new_time:Long): Unit = {
+  def lastPressedTime: Long = last_pressed_time
+
+  def updateLastPressedTime(new_time: Long): Unit = {
     last_pressed_time = new_time
     ScageController.updateMaxLastPressedTime(last_pressed_time)
   }
+
   def immutable: ImmutableMouseButtonPress = ImmutableMouseButtonPress(button_code, was_pressed, pressed_start_time, last_pressed_time)
 
   private val f = new SimpleDateFormat("HH:mm:ss.S")
+
   override def toString = s"MouseButtonPress($button_code, $was_pressed, ${f.format(new Date(pressed_start_time))}, ${f.format(new Date(last_pressed_time))})"
 }
 
@@ -43,9 +49,10 @@ object ScageController {
   private val key_presses = mutable.HashMap[Int, KeyPress]()
   private val mouse_button_presses = mutable.HashMap[Int, MouseButtonPress]()
 
-  private var _max_last_pressed_time:Long = 0l
-  private[scage] def updateMaxLastPressedTime(new_time:Long) {
-    if(new_time > _max_last_pressed_time) {
+  private var _max_last_pressed_time: Long = 0l
+
+  private[scage] def updateMaxLastPressedTime(new_time: Long) {
+    if (new_time > _max_last_pressed_time) {
       _max_last_pressed_time = new_time
     }
   }
@@ -58,11 +65,11 @@ trait ScageController extends Scage {
 
   protected def mappedMouseButtons: scala.collection.Set[Int]
 
-  private implicit class SeqLongRich(s:Iterable[Long]) {
-    def maxOption:Option[Long] = if(s.nonEmpty) Some(s.max) else None
+  private implicit class SeqLongRich(s: Iterable[Long]) {
+    def maxOption: Option[Long] = if (s.nonEmpty) Some(s.max) else None
   }
 
-  protected def maxLastPressedTime:Long = ScageController._max_last_pressed_time
+  protected def maxLastPressedTime: Long = ScageController._max_last_pressed_time
 
   protected def innerKeyPress(key_code: Int): Option[KeyPress] = {
     ScageController.key_presses.get(key_code) match {
