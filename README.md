@@ -1,4 +1,4 @@
-![Scage Logo](http://dl.dropbox.com/u/11297078/public_pics/scage-logo.png)
+![Scage Logo](https://github.com/dunnololda/scage/blob/master/scage-logo.png)
 
 Latest Stable Version
 ---------------------
