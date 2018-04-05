@@ -55,7 +55,7 @@ Hello World Example
       }
     }
 
-!['rotating "Hello World!" demo'](http://dl.dropbox.com/u/11297078/public_pics/rotating_hello.png)
+!['rotating "Hello World!" demo'](http://dunnololda.github.io/pics/rotating_hello.png)
 
 More examples
 -------------
