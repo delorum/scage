@@ -37,7 +37,7 @@ Please read the project wiki and especially see [Examples](https://github.com/du
 Hello World Example
 -------------------
 
-###Rotating 'Hello World!' label
+### Rotating 'Hello World!' label
 
     import com.github.dunnololda.scage.ScageLib._
 
@@ -70,7 +70,7 @@ See [Engine methods overview](https://github.com/dunnololda/scage/wiki/Scage-met
 Usage
 ------------
 
-###For Maven users
+### For Maven users
 
 You can use the scage archetype to create a new scage project stub:
 
@@ -110,7 +110,7 @@ This command will create "jnlp" folder in "target". Then you can upload this fol
 
 More info you can find in the readme file inside the project's root.
 
-###OpenJDK
+### OpenJDK
 
 If you use OpenJDK (not Oracle JDK) you need to add the openjdk profile to all mvn commands above:
 
@@ -120,7 +120,7 @@ If you use OpenJDK (not Oracle JDK) you need to add the openjdk profile to all m
 
 Additionally you need to install the package "icedtea-web" (this is the name in Archlinux, in Ubuntu it should be something similar).
 
-###Intellij IDEA
+### Intellij IDEA
 
 You also can use some IDE with good Maven and Scala support (for example, [IntelliJ IDEA](http://www.jetbrains.com/idea/)). Here are the steps for IDEA:
 
@@ -153,7 +153,7 @@ or
 
 this means you have no native libraries in target/natives. In order to generate them, type some mvn command from above. For example, type "mvn clean compile". As a first step of the compilation process maven will generate those libraries in target/natives.
 
-###For non-Maven users.
+### For non-Maven users.
 
 You can both :
  - Compile Scage with SBT
