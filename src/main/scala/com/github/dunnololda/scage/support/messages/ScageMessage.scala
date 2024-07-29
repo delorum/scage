@@ -96,7 +96,7 @@ class ScageMessage(
 
   def reloadFont() {
     _font = try {
-      log.debug("loading font "+fonts_base+font_file+"...")
+      log.info("loading font "+fonts_base+font_file+"...")
       new UnicodeFont(fonts_base+font_file, max_font_size, glyph_from, glyph_to, glyph_symbols)
     } catch {
       case e:Exception =>
