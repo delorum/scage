@@ -28,22 +28,22 @@
   </properties>
 
   <repositories>
-      <repository>
+      <!--<repository>
           <id>dunnololda-maven-repo</id>
           <url>https://raw.github.com/dunnololda/mvn-repo/master</url>
-      </repository>
+      </repository>-->
 
-      <repository>
+      <!--<repository>
           <id>typesafe</id>
           <name>Typesafe Repository</name>
           <url>http://repo.typesafe.com/typesafe/releases/</url>
-      </repository>
+      </repository>-->
 
-    <repository>
+    <!--<repository>
       <id>scala-tools.org</id>
       <name>Scala-Tools Maven2 Repository</name>
       <url>https://oss.sonatype.org/content/groups/scala-tools/</url>
-    </repository>
+    </repository>-->
 
     <!--<repository>
       <id>slick.cokeandcode.com</id>
@@ -65,11 +65,11 @@
       <url>http://scala-tools.org/repo-releases</url>
     </pluginRepository>-->
 
-    <pluginRepository>
+    <!--<pluginRepository>
       <name>oss.sonatype.org - github-releases</name>
       <id>oss.sonatype.org-github-releases</id>
       <url>http://oss.sonatype.org/content/repositories/github-releases</url>
-    </pluginRepository>
+    </pluginRepository>-->
 
       <!--<pluginRepository>
           <id>pixie</id>
@@ -77,16 +77,16 @@
           <url>scp://pixie.qos.ch/var/mvnrepo/</url>
       </pluginRepository>-->
 
-      <pluginRepository>
+      <!--<pluginRepository>
           <id>Codehaus Snapshots</id>
           <url>http://nexus.codehaus.org/snapshots/</url>
           <snapshots>
               <enabled>true</enabled>
           </snapshots>
           <releases>
-              <enabled>true</enabled>  <!-- Workaround for MNG-2974, see note below -->
+              <enabled>true</enabled>  &lt;!&ndash; Workaround for MNG-2974, see note below &ndash;&gt;
           </releases>
-      </pluginRepository>
+      </pluginRepository>-->
   </pluginRepositories>
 
   <dependencies>
@@ -106,13 +106,14 @@
           <artifactId>akka-actor_${publish.scala.version}</artifactId>
           <version>2.4.7</version>
       </dependency>
-      <dependency>
+      <!--<dependency>
           <groupId>com.github.dunnololda</groupId>
           <artifactId>natives-linux-xinitthreads</artifactId>
           <classifier>natives-linux-xinitthreads</classifier>
-          <scope>runtime</scope>
+          <scope>system</scope>
           <version>1.0</version>
-      </dependency>
+          <systemPath>/home/aborunov/.m2/repository/com/github/dunnololda/natives-linux-xinitthreads/1.0/natives-linux-xinitthreads-1.0-natives-linux-xinitthreads.jar</systemPath>
+      </dependency>-->
       <dependency>
           <groupId>com.github.dunnololda</groupId>
           <artifactId>cli_${publish.scala.version}</artifactId>
@@ -185,6 +186,8 @@
           <groupId>phys2d</groupId>
           <artifactId>phys2d</artifactId>
           <version>060408</version>
+          <scope>system</scope>
+          <systemPath>/home/aborunov/Yandex.Disk/code/scage/phys2d-060408.jar</systemPath>
       </dependency>
       <!--<dependency>
           <groupId>org.scalaz</groupId>
@@ -201,7 +204,7 @@
   </dependencies>
 
   <build>
-      <extensions>
+      <!--<extensions>
           <extension>
             <groupId>org.apache.maven.wagon</groupId>
             <artifactId>wagon-webdav</artifactId>
@@ -212,7 +215,7 @@
               <artifactId>wagon-ssh</artifactId>
               <version>2.4</version>
           </extension>
-       </extensions>
+       </extensions>-->
 
     <sourceDirectory>src/main/scala</sourceDirectory>
     <testSourceDirectory>src/test/scala</testSourceDirectory>
@@ -369,7 +372,7 @@
             <version>2.7.2</version>
             <configuration>
                 <argLine>
-                  -Dapp.properties=scagetest-properties.txt -Djava.library.path=${project.build.directory}/natives -DLWJGL_DISABLE_XRANDR=true
+                  -Dapp.properties=scagetest-properties.txt -Djava.library.path=${project.build.directory}/natives -DLWJGL_DISABLE_XRANDR=true -Drender.framerate=100
                 </argLine>
             </configuration>
         </plugin>
@@ -423,22 +426,22 @@
 	                </execution>
 	            </executions>
         </plugin>
-        <plugin>
+        <!--<plugin>
             <groupId>com.github.github</groupId>
             <artifactId>site-maven-plugin</artifactId>
             <version>0.10</version>
             <configuration>
-                <message>Maven artifacts for ${project.artifactId} ${project.version}</message>  <!-- git commit message -->
-                <noJekyll>true</noJekyll>                                  <!-- disable webpage processing -->
-                <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory> <!-- matches distribution management repository url above -->
-                <branch>refs/heads/master</branch>                       <!-- remote branch name -->
+                <message>Maven artifacts for ${project.artifactId} ${project.version}</message>  &lt;!&ndash; git commit message &ndash;&gt;
+                <noJekyll>true</noJekyll>                                  &lt;!&ndash; disable webpage processing &ndash;&gt;
+                <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory> &lt;!&ndash; matches distribution management repository url above &ndash;&gt;
+                <branch>refs/heads/master</branch>                       &lt;!&ndash; remote branch name &ndash;&gt;
                 <includes><include>**/*</include></includes>
-                <repositoryName>mvn-repo</repositoryName>      <!-- github repo name -->
-                <repositoryOwner>dunnololda</repositoryOwner>    <!-- github username  -->
+                <repositoryName>mvn-repo</repositoryName>      &lt;!&ndash; github repo name &ndash;&gt;
+                <repositoryOwner>dunnololda</repositoryOwner>    &lt;!&ndash; github username  &ndash;&gt;
                 <merge>true</merge>
             </configuration>
             <executions>
-                <!-- run site-maven-plugin's 'site' target as part of the build's normal 'deploy' phase -->
+                &lt;!&ndash; run site-maven-plugin's 'site' target as part of the build's normal 'deploy' phase &ndash;&gt;
                 <execution>
                     <goals>
                         <goal>site</goal>
@@ -446,24 +449,9 @@
                     <phase>deploy</phase>
                 </execution>
             </executions>
-        </plugin>
+        </plugin>-->
     </plugins>
   </build>
-
-    <profiles>
-        <profile>
-            <id>openjdk</id>
-            <dependencies>
-                <dependency>
-                    <groupId>javax.jnlp</groupId>
-                    <artifactId>jnlp-api</artifactId>
-                    <version>5.0</version>
-                    <scope>system</scope>
-                    <systemPath>/usr/bin/javaws</systemPath>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
 
   <reporting>
     <plugins>
@@ -484,11 +472,11 @@
    <url>dav:https://scage.googlecode.com/svn/maven-repository/</url>
   </repository>
  </distributionManagement>-->
-    <distributionManagement>
+<!--    <distributionManagement>
         <repository>
             <id>internal.repo</id>
             <name>Temporary Staging Repository</name>
             <url>file://${project.build.directory}/mvn-repo</url>
         </repository>
-    </distributionManagement>
+    </distributionManagement>-->
 </project>
