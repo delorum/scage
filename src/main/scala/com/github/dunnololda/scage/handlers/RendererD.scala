@@ -617,34 +617,34 @@ trait RendererD extends Scage with ScageController {
   }
 
   private var next_game_tick_diff_save = 0L
-  private var msec_diff_save = 0L
-  private var msec2_diff_save = 0L
-  private var msec3_diff_save = 0L
-  private var msec4_diff_save = 0L
+  private var fpsMeasureStartMoment_diff_save = 0L
+  private var ticksMeasureStartMoment_diff_save = 0L
+  private var nextActionStartMoment_diff_save = 0L
+  private var nextFrameRenderingStartMoment_diff_save = 0L
 
   def saveCounters(): Unit = {
     next_game_tick_diff_save = System.currentTimeMillis() - next_game_tick
-    msec_diff_save = System.currentTimeMillis() - msec_diff_save
-    msec2_diff_save = System.currentTimeMillis() - msec2_diff_save
-    msec3_diff_save = System.currentTimeMillis() - msec3_diff_save
-    msec4_diff_save = System.currentTimeMillis() - msec4_diff_save
+    fpsMeasureStartMoment_diff_save = System.currentTimeMillis() - fpsMeasureStartMoment_diff_save
+    ticksMeasureStartMoment_diff_save = System.currentTimeMillis() - ticksMeasureStartMoment_diff_save
+    nextActionStartMoment_diff_save = System.currentTimeMillis() - nextActionStartMoment_diff_save
+    nextFrameRenderingStartMoment_diff_save = System.currentTimeMillis() - nextFrameRenderingStartMoment_diff_save
   }
 
   def restoreCounters(): Unit = {
     next_game_tick = next_game_tick + next_game_tick_diff_save
     next_game_tick_diff_save = 0L
 
-    fpsMeasureStartMoment = fpsMeasureStartMoment + msec_diff_save
-    msec_diff_save = 0L
+    fpsMeasureStartMoment = fpsMeasureStartMoment + fpsMeasureStartMoment_diff_save
+    fpsMeasureStartMoment_diff_save = 0L
 
-    ticksMeasureStartMoment = ticksMeasureStartMoment + msec2_diff_save
-    msec2_diff_save = 0L
+    ticksMeasureStartMoment = ticksMeasureStartMoment + ticksMeasureStartMoment_diff_save
+    ticksMeasureStartMoment_diff_save = 0L
 
-    nextActionStartMoment = nextActionStartMoment + msec3_diff_save
-    msec3_diff_save = 0L
+    nextActionStartMoment = nextActionStartMoment + nextActionStartMoment_diff_save
+    nextActionStartMoment_diff_save = 0L
 
-    nextFrameRenderingStartMoment = nextFrameRenderingStartMoment + msec4_diff_save
-    msec4_diff_save = 0L
+    nextFrameRenderingStartMoment = nextFrameRenderingStartMoment + nextFrameRenderingStartMoment_diff_save
+    nextFrameRenderingStartMoment_diff_save = 0L
   }
 
   def holdCounters(func: => Any): Unit = {
