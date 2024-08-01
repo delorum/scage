@@ -2,19 +2,19 @@ package com.github.dunnololda.scage
 
 import java.applet.Applet
 import java.awt.{BorderLayout, Canvas}
-
 import com.github.dunnololda.cli.Imports._
 import com.github.dunnololda.mysimplelogger.MySimpleLogger
 import com.github.dunnololda.scage.handlers._
 import com.github.dunnololda.scage.handlers.controller2.{ScageController, SingleController}
 import com.github.dunnololda.scage.handlers.controller3.{ActorSingleController, ControllerActorSystem}
+import com.github.dunnololda.scage.support.XInitThreadsCaller.xInitThreads
 import org.lwjgl.opengl.Display
 
 // abstract classes instead of traits to make it easy to use with MultiController
 abstract class Screen(val unit_name: String = "Scage Screen") extends Scage with Renderer with ScageController {
   private val log = MySimpleLogger(this.getClass.getName)
 
-  override def run() {
+  override def run(): Unit = {
     log.info("starting screen " + unit_name + "...")
     executePreinits()
     executeInits()
@@ -34,7 +34,7 @@ abstract class Screen(val unit_name: String = "Scage Screen") extends Scage with
 abstract class ScreenD(val unit_name: String = "Scage Screen") extends Scage with RendererD with ScageController {
   private val log = MySimpleLogger(this.getClass.getName)
 
-  override def run() {
+  override def run(): Unit = {
     log.info("starting screen " + unit_name + "...")
     executePreinits()
     executeInits()
@@ -58,9 +58,9 @@ abstract class ScreenApp(
                         ) extends Screen(title) with Cli {
   val app_start_moment = System.currentTimeMillis()
 
-  def msecsFromAppStart = System.currentTimeMillis() - app_start_moment
+  def msecsFromAppStart: Long = System.currentTimeMillis() - app_start_moment
 
-  override def run() {
+  override def run(): Unit = {
     executePreinits()
     executeInits()
     is_running = true
@@ -94,9 +94,9 @@ abstract class ScreenAppD(
                          ) extends ScreenD(title) with Cli {
   val app_start_moment = System.currentTimeMillis()
 
-  def msecsFromAppStart = System.currentTimeMillis() - app_start_moment
+  def msecsFromAppStart: Long = System.currentTimeMillis() - app_start_moment
 
-  override def run() {
+  override def run(): Unit = {
     executePreinits()
     executeInits()
     is_running = true
@@ -130,9 +130,9 @@ abstract class ScreenAppMT(
                           ) extends Screen(title) with Cli {
   val app_start_moment = System.currentTimeMillis()
 
-  def msecsFromAppStart = System.currentTimeMillis() - app_start_moment
+  def msecsFromAppStart: Long = System.currentTimeMillis() - app_start_moment
 
-  override def run() {
+  override def run(): Unit = {
     executePreinits()
     executeInits()
     is_running = true
@@ -149,18 +149,7 @@ abstract class ScreenAppMT(
 
   override def main(args: Array[String]) {
     scage_log.info("starting main screen " + title + "...")
-    if ("sun.awt.X11.XToolkit" == System.getProperty("awt.toolkit")) {
-      // in Windows: sun.awt.windows.WToolkit
-      if ("32" == System.getProperty("sun.arch.data.model")) {
-        scage_log.info("32 bit linux detected, performing XInitThreads() call to make multi-threading work by loading library libxx32.so")
-        System.loadLibrary("xx32")
-      } else if ("64" == System.getProperty("sun.arch.data.model")) {
-        scage_log.info("64 bit linux detected, performing XInitThreads() call to make multi-threading work by loading library libxx64.so")
-        System.loadLibrary("xx64")
-      } else {
-        scage_log.warn("linux of unknown arch detected, don't now how to perform XInitThreads() call, so perform nothing. Maybe the app will crash. Sorry.")
-      }
-    }
+    xInitThreads(scage_log)
     ControllerActorSystem.createControllerActor()
     ControllerActorSystem.initGLAndReleaseContext(width, height, title)
     Display.makeCurrent()
@@ -182,9 +171,9 @@ abstract class ScreenAppDMT(
                            ) extends ScreenD(title) with Cli {
   val app_start_moment = System.currentTimeMillis()
 
-  def msecsFromAppStart = System.currentTimeMillis() - app_start_moment
+  def msecsFromAppStart: Long = System.currentTimeMillis() - app_start_moment
 
-  override def run() {
+  override def run(): Unit = {
     executePreinits()
     executeInits()
     is_running = true
@@ -201,18 +190,7 @@ abstract class ScreenAppDMT(
 
   override def main(args: Array[String]) {
     scage_log.info("starting main screen " + title + "...")
-    if ("sun.awt.X11.XToolkit" == System.getProperty("awt.toolkit")) {
-      // in Windows: sun.awt.windows.WToolkit
-      if ("32" == System.getProperty("sun.arch.data.model")) {
-        scage_log.info("32 bit linux detected, performing XInitThreads() call to make multi-threading work by loading library libxx32.so")
-        System.loadLibrary("xx32")
-      } else if ("64" == System.getProperty("sun.arch.data.model")) {
-        scage_log.info("64 bit linux detected, performing XInitThreads() call to make multi-threading work by loading library libxx64.so")
-        System.loadLibrary("xx64")
-      } else {
-        scage_log.warn("linux of unknown arch detected, don't now how to perform XInitThreads() call, so perform nothing. Maybe the app will crash. Sorry.")
-      }
-    }
+    //xInitThreads(scage_log)
     ControllerActorSystem.createControllerActor()
     ControllerActorSystem.initGLAndReleaseContext(width, height, title)
     Display.makeCurrent()
@@ -265,9 +243,9 @@ abstract class ScageApplet extends Applet {
     * Once the Canvas is created its add notify method will call this method to
     * start the LWJGL Display and game loop in another thread.
     */
-  private def startScage() {
+  private def startScage(): Unit = {
     gameThread = new Thread {
-      override def run() {
+      override def run(): Unit = {
         Display.setParent(display_parent)
         screen.main(Array[String]())
       }
@@ -279,7 +257,7 @@ abstract class ScageApplet extends Applet {
     * Tell game loop to stop running, after which the LWJGL Display will be destoryed.
     * The main thread will wait for the Display.destroy() to complete
     */
-  private def stopScage() {
+  private def stopScage(): Unit = {
     screen.stop()
     try {
       gameThread.join()
@@ -293,7 +271,7 @@ abstract class ScageApplet extends Applet {
     * Applet Destroy method will remove the canvas, before canvas is destroyed it will notify
     * stopLWJGL() to stop main game loop and to destroy the Display
     */
-  override def destroy() {
+  override def destroy(): Unit = {
     remove(display_parent)
     super.destroy()
   }
@@ -303,16 +281,16 @@ abstract class ScageApplet extends Applet {
     * in another thread. It will also stop the game loop and destroy the display on canvas removal when
     * applet is destroyed.
     */
-  override def init() {
+  override def init(): Unit = {
     setLayout(new BorderLayout())
     try {
       display_parent = new Canvas() {
-        override def addNotify() {
+        override def addNotify(): Unit = {
           super.addNotify()
           startScage()
         }
 
-        override def removeNotify() {
+        override def removeNotify(): Unit = {
           stopScage()
           super.removeNotify()
         }
@@ -344,9 +322,9 @@ abstract class ScageAppletD extends Applet {
     * Once the Canvas is created its add notify method will call this method to
     * start the LWJGL Display and game loop in another thread.
     */
-  private def startScage() {
+  private def startScage(): Unit = {
     gameThread = new Thread {
-      override def run() {
+      override def run(): Unit = {
         Display.setParent(display_parent)
         screen.main(Array[String]())
       }
@@ -358,7 +336,7 @@ abstract class ScageAppletD extends Applet {
     * Tell game loop to stop running, after which the LWJGL Display will be destoryed.
     * The main thread will wait for the Display.destroy() to complete
     */
-  private def stopScage() {
+  private def stopScage(): Unit = {
     screen.stop()
     try {
       gameThread.join()
@@ -372,7 +350,7 @@ abstract class ScageAppletD extends Applet {
     * Applet Destroy method will remove the canvas, before canvas is destroyed it will notify
     * stopLWJGL() to stop main game loop and to destroy the Display
     */
-  override def destroy() {
+  override def destroy(): Unit = {
     remove(display_parent)
     super.destroy()
   }
@@ -382,16 +360,16 @@ abstract class ScageAppletD extends Applet {
     * in another thread. It will also stop the game loop and destroy the display on canvas removal when
     * applet is destroyed.
     */
-  override def init() {
+  override def init(): Unit = {
     setLayout(new BorderLayout())
     try {
       display_parent = new Canvas() {
-        override def addNotify() {
+        override def addNotify(): Unit = {
           super.addNotify()
           startScage()
         }
 
-        override def removeNotify() {
+        override def removeNotify(): Unit = {
           stopScage()
           super.removeNotify()
         }
