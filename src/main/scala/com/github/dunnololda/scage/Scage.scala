@@ -3,9 +3,11 @@ package com.github.dunnololda.scage
 import com.github.dunnololda.scage.ScagePhase.ScagePhase
 import com.github.dunnololda.scage.support.SortedBuffer
 import support.ScageId._
+
 import collection.mutable.ArrayBuffer
 import collection.mutable
 import com.github.dunnololda.cli.Imports._
+import com.github.dunnololda.mysimplelogger.MySimpleLogger.MySimpleLogger
 
 // extracted case class to this definition because we want to extend it!
 class ScageOperation(val op_id: Int, val op: () => Any, val position: Int) extends Ordered[ScageOperation] {
@@ -240,7 +242,7 @@ trait OperationMapping {
 trait Scage extends OperationMapping {
   def unit_name: String
 
-  protected val scage_log = MySimpleLogger(this.getClass.getName)
+  protected val scage_log: MySimpleLogger = MySimpleLogger(this.getClass.getName)
 
   protected var on_pause = false
 
