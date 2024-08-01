@@ -2,7 +2,6 @@ package com.github.dunnololda.scage.handlers
 
 import java.awt.GraphicsEnvironment
 import java.io.InputStream
-
 import com.github.dunnololda.cli.AppProperties._
 import com.github.dunnololda.mysimplelogger.MySimpleLogger
 import com.github.dunnololda.scage.handlers.controller2.ScageController
@@ -12,12 +11,14 @@ import com.github.dunnololda.scage.support.messages.ScageXML._
 import com.github.dunnololda.scage.support.messages.{ScageMessage, ScageXML}
 import com.github.dunnololda.scage.support.tracer3.{ScageTracer, Trace}
 import com.github.dunnololda.scage.support.{DVec, ScageColor}
-import com.github.dunnololda.scage.{ScagePhase, Scage, ScageOperation}
+import com.github.dunnololda.scage.{Scage, ScageOperation, ScagePhase}
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.{Display, DisplayMode, GL11}
 import org.lwjgl.util.glu.GLU
 import org.newdawn.slick.opengl.{Texture, TextureLoader}
 import org.newdawn.slick.util.ResourceLoader
+
+import scala.collection.immutable
 
 /**
   * All the same stuff as Renderer but using double instead of Double and DDVec instead of DVec (which is again using double not Double)
@@ -25,32 +26,32 @@ import org.newdawn.slick.util.ResourceLoader
 trait RendererLibD {
   private val log = MySimpleLogger(this.getClass.getName)
 
-  def backgroundColor = {
+  def backgroundColor: ScageColor = {
     val background_color = BufferUtils.createFloatBuffer(16)
     GL11.glGetFloat(GL11.GL_COLOR_CLEAR_VALUE, background_color)
     new ScageColor(background_color.get(0), background_color.get(1), background_color.get(2))
   }
 
-  def backgroundColor_=(c: ScageColor) {
+  def backgroundColor_=(c: ScageColor): Unit = {
     if (c != DEFAULT_COLOR) GL11.glClearColor(c.red, c.green, c.blue, 0)
   }
 
-  def clearScreen() {
+  def clearScreen(): Unit = {
     GL11.glClear(GL11.GL_COLOR_BUFFER_BIT /* | GL11.GL_DEPTH_BUFFER_BIT*/)
     GL11.glLoadIdentity()
   }
 
-  def currentColor = {
+  def currentColor: ScageColor = {
     val _color = BufferUtils.createFloatBuffer(16)
     GL11.glGetFloat(GL11.GL_CURRENT_COLOR, _color)
     new ScageColor(_color.get(0), _color.get(1), _color.get(2))
   }
 
-  def currentColor_=(c: ScageColor) {
+  def currentColor_=(c: ScageColor): Unit = {
     if (c != DEFAULT_COLOR) GL11.glColor3f(c.red, c.green, c.blue)
   }
 
-  def displayList(func: => Unit) = {
+  def displayList(func: => Unit): Int = {
     val list_code = /*nextDisplayListKey*/ nextId
     GL11.glNewList(list_code, GL11.GL_COMPILE)
     func
@@ -59,33 +60,33 @@ trait RendererLibD {
     list_code
   }
 
-  def openglLocalTransform(transform: => Unit) {
+  def openglLocalTransform(transform: => Unit): Unit = {
     GL11.glPushMatrix()
     transform
     GL11.glPopMatrix()
   }
 
-  def openglMove(vec: DVec) {
+  def openglMove(vec: DVec): Unit = {
     GL11.glTranslated(vec.x, vec.y, 0)
   }
 
-  def openglMove(x: Double, y: Double) {
+  def openglMove(x: Double, y: Double): Unit = {
     GL11.glTranslated(x, y, 0)
   }
 
-  def openglRotate(ang_deg: Double) {
+  def openglRotate(ang_deg: Double): Unit = {
     GL11.glRotated(ang_deg, 0, 0, 1)
   }
 
-  def openglRotateDeg(ang_deg: Double) {
+  def openglRotateDeg(ang_deg: Double): Unit = {
     GL11.glRotated(ang_deg, 0, 0, 1)
   }
 
-  def openglRotateRad(ang_rad: Double) {
+  def openglRotateRad(ang_rad: Double): Unit = {
     GL11.glRotated(ang_rad * 180.0 / math.Pi, 0, 0, 1)
   }
 
-  def openglScale(scale_factor: Double) {
+  def openglScale(scale_factor: Double): Unit = {
     GL11.glScaled(scale_factor, scale_factor, 1)
   }
 
@@ -109,7 +110,7 @@ trait RendererLibD {
     GL11.glEnd()
   }
 
-  def drawCircle(coord: DVec, radius: Double, color: ScageColor = DEFAULT_COLOR) {
+  def drawCircle(coord: DVec, radius: Double, color: ScageColor = DEFAULT_COLOR): Unit = {
     if (color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     GL11.glPushMatrix()
@@ -131,7 +132,7 @@ trait RendererLibD {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
-  def drawFilledCircle(coord: DVec, radius: Double, color: ScageColor = DEFAULT_COLOR) {
+  def drawFilledCircle(coord: DVec, radius: Double, color: ScageColor = DEFAULT_COLOR): Unit = {
     if (color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     GL11.glPushMatrix()
@@ -142,7 +143,7 @@ trait RendererLibD {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
-  def drawFilledEllipse(coord: DVec, radius1: Double, radius2: Double, color: ScageColor = DEFAULT_COLOR) {
+  def drawFilledEllipse(coord: DVec, radius1: Double, radius2: Double, color: ScageColor = DEFAULT_COLOR): Unit = {
     if (color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     GL11.glPushMatrix()
@@ -153,7 +154,7 @@ trait RendererLibD {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
-  def drawLine(v1: DVec, v2: DVec, color: ScageColor = DEFAULT_COLOR) {
+  def drawLine(v1: DVec, v2: DVec, color: ScageColor = DEFAULT_COLOR): Unit = {
     if (color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     GL11.glBegin(GL11.GL_LINES)
@@ -163,7 +164,7 @@ trait RendererLibD {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
-  def drawLines(edges: DVec*) {
+  def drawLines(edges: DVec*): Unit = {
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     GL11.glBegin(GL11.GL_LINES)
     edges.foreach(edge => GL11.glVertex2d(edge.x, edge.y))
@@ -171,7 +172,7 @@ trait RendererLibD {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
-  def drawSlidingLines(edges: DVec*) {
+  def drawSlidingLines(edges: DVec*): Unit = {
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     GL11.glBegin(GL11.GL_LINES)
     edges.sliding(2).foreach {
@@ -184,7 +185,7 @@ trait RendererLibD {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
-  def drawSlidingLines(edges: Seq[DVec], color: ScageColor = DEFAULT_COLOR) {
+  def drawSlidingLines(edges: Seq[DVec], color: ScageColor = DEFAULT_COLOR): Unit = {
     if (color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     GL11.glBegin(GL11.GL_LINES)
@@ -198,7 +199,7 @@ trait RendererLibD {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
-  def drawGroupedLines(edges: DVec*) {
+  def drawGroupedLines(edges: DVec*): Unit = {
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     GL11.glBegin(GL11.GL_LINES)
     val edges_ext = if (edges.length % 2 == 0) edges else edges.init
@@ -212,7 +213,7 @@ trait RendererLibD {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
-  def drawGroupedLines(edges: Seq[DVec], color: ScageColor = DEFAULT_COLOR) {
+  def drawGroupedLines(edges: Seq[DVec], color: ScageColor = DEFAULT_COLOR): Unit = {
     if (color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     GL11.glBegin(GL11.GL_LINES)
@@ -227,7 +228,7 @@ trait RendererLibD {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
-  def drawLines(edges: Traversable[DVec], color: ScageColor = DEFAULT_COLOR) {
+  def drawLines(edges: Traversable[DVec], color: ScageColor = DEFAULT_COLOR): Unit = {
     if (color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     GL11.glBegin(GL11.GL_LINES)
@@ -236,7 +237,7 @@ trait RendererLibD {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
-  def drawRect(coord: DVec, width: Double, height: Double, color: ScageColor = DEFAULT_COLOR) {
+  def drawRect(coord: DVec, width: Double, height: Double, color: ScageColor = DEFAULT_COLOR): Unit = {
     if (color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     GL11.glBegin(GL11.GL_LINE_LOOP)
@@ -248,7 +249,7 @@ trait RendererLibD {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
-  def drawFilledRect(coord: DVec, width: Double, height: Double, color: ScageColor = DEFAULT_COLOR) {
+  def drawFilledRect(coord: DVec, width: Double, height: Double, color: ScageColor = DEFAULT_COLOR): Unit = {
     if (color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     GL11.glBegin(GL11.GL_QUADS)
@@ -260,7 +261,7 @@ trait RendererLibD {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
-  def drawRectCentered(coord: DVec, width: Double, height: Double, color: ScageColor = DEFAULT_COLOR) {
+  def drawRectCentered(coord: DVec, width: Double, height: Double, color: ScageColor = DEFAULT_COLOR): Unit = {
     if (color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     GL11.glBegin(GL11.GL_LINE_LOOP)
@@ -272,7 +273,7 @@ trait RendererLibD {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
-  def drawFilledRectCentered(coord: DVec, width: Double, height: Double, color: ScageColor = DEFAULT_COLOR) {
+  def drawFilledRectCentered(coord: DVec, width: Double, height: Double, color: ScageColor = DEFAULT_COLOR): Unit = {
     if (color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     GL11.glBegin(GL11.GL_QUADS)
@@ -284,7 +285,7 @@ trait RendererLibD {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
-  def drawPolygon(coords: DVec*) {
+  def drawPolygon(coords: DVec*): Unit = {
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     GL11.glBegin(GL11.GL_LINE_LOOP)
     for (coord <- coords) GL11.glVertex2d(coord.x, coord.y)
@@ -292,7 +293,7 @@ trait RendererLibD {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
-  def drawPolygon(coords: Traversable[DVec], color: ScageColor = DEFAULT_COLOR) {
+  def drawPolygon(coords: Traversable[DVec], color: ScageColor = DEFAULT_COLOR): Unit = {
     if (color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     GL11.glBegin(GL11.GL_LINE_LOOP)
@@ -301,7 +302,7 @@ trait RendererLibD {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
-  def drawFilledPolygon(coords: DVec*) {
+  def drawFilledPolygon(coords: DVec*): Unit = {
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     /*GL11.glPolygonMode(GL11.GL_FRONT, GL11.GL_FILL)
     GL11.glPolygonMode(GL11.GL_BACK, GL11.GL_LINE)*/
@@ -311,7 +312,7 @@ trait RendererLibD {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
-  def drawFilledPolygon(coords: Traversable[DVec], color: ScageColor = DEFAULT_COLOR) {
+  def drawFilledPolygon(coords: Traversable[DVec], color: ScageColor = DEFAULT_COLOR): Unit = {
     if (color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     /*GL11.glPolygonMode(GL11.GL_FRONT, GL11.GL_FILL)
@@ -322,7 +323,7 @@ trait RendererLibD {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
-  def drawPoint(coord: DVec, color: ScageColor = DEFAULT_COLOR) {
+  def drawPoint(coord: DVec, color: ScageColor = DEFAULT_COLOR): Unit = {
     if (color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     GL11.glBegin(GL11.GL_POINTS)
@@ -331,7 +332,7 @@ trait RendererLibD {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
-  def drawPoints(coords: DVec*) {
+  def drawPoints(coords: DVec*): Unit = {
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     GL11.glBegin(GL11.GL_POINTS)
     coords.foreach(coord => GL11.glVertex2d(coord.x, coord.y))
@@ -339,7 +340,7 @@ trait RendererLibD {
     GL11.glEnable(GL11.GL_TEXTURE_2D)
   }
 
-  def drawPoints(coords: Traversable[DVec], color: ScageColor = DEFAULT_COLOR) {
+  def drawPoints(coords: Traversable[DVec], color: ScageColor = DEFAULT_COLOR): Unit = {
     if (color != DEFAULT_COLOR) currentColor = color
     GL11.glDisable(GL11.GL_TEXTURE_2D)
     GL11.glBegin(GL11.GL_POINTS)
@@ -349,7 +350,7 @@ trait RendererLibD {
   }
 
   // white color by default for display lists to draw in natural colors
-  def drawDisplayList(list_code: Int, coord: DVec = DVec.dzero, color: ScageColor = WHITE) {
+  def drawDisplayList(list_code: Int, coord: DVec = DVec.dzero, color: ScageColor = WHITE): Unit = {
     if (color != DEFAULT_COLOR) currentColor = color
     GL11.glPushMatrix()
     GL11.glTranslated(coord.x, coord.y, 0.0)
@@ -357,11 +358,11 @@ trait RendererLibD {
     GL11.glPopMatrix()
   }
 
-  def drawTraceGrid(tracer: ScageTracer[_], color: ScageColor = DEFAULT_COLOR) {
+  def drawTraceGrid(tracer: ScageTracer[_], color: ScageColor = DEFAULT_COLOR): Unit = {
     drawLines(tracer.trace_grid.map(_.toDVec), color)
   }
 
-  def drawTraceLocations[T <: Trace](tracer: ScageTracer[T], color: ScageColor = DEFAULT_COLOR, radius: Int = 3) {
+  def drawTraceLocations[T <: Trace](tracer: ScageTracer[T], color: ScageColor = DEFAULT_COLOR, radius: Int = 3): Unit = {
     tracer.tracesList.foreach(trace => drawFilledCircle(trace.location.toDVec, radius, color))
   }
 
@@ -399,7 +400,7 @@ trait RendererLibD {
     list_name
   }
 
-  val images_base = property("images.base", "resources/images/")
+  val images_base: String = property("images.base", "resources/images/")
 
   def image(filename: String, game_width: Double, game_height: Double, start_x: Double, start_y: Double, real_width: Double, real_height: Double): Int = {
     image(getTexture(images_base + filename), game_width, game_height, start_x, start_y, real_width, real_height)
@@ -407,7 +408,7 @@ trait RendererLibD {
 
   // TODO: is Array[Int] preferable or IndexedSeq[Int] is fine??
   //private var animations = new HashMap[Int, (IndexedSeq[Int], Int)]
-  def animation(filename: String, game_width: Double, game_height: Double, real_width: Double, real_height: Double, num_frames: Int) = {
+  def animation(filename: String, game_width: Double, game_height: Double, real_width: Double, real_height: Double, num_frames: Int): immutable.IndexedSeq[Int] = {
     val texture = getTexture(images_base + filename)
     val columns: Int = (texture.getImageWidth / real_width).toInt
     /*val frames = */ for {
@@ -429,11 +430,11 @@ trait RendererLibD {
     }
   }*/
 
-  def windowSize = {
+  def windowSize: DVec = {
     DVec(Display.getDisplayMode.getWidth, Display.getDisplayMode.getHeight)
   }
 
-  def windowSize_=(new_window_resolution: (Int, Int)) {
+  def windowSize_=(new_window_resolution: (Int, Int)): Unit = {
     val (new_window_width, new_window_height) = new_window_resolution
     if (new_window_width != windowWidth || new_window_height != windowHeight) {
       log.debug("changing resolution to " + new_window_width + "x" + new_window_height + "...")
@@ -448,25 +449,25 @@ trait RendererLibD {
     }
   }
 
-  def windowWidth = Display.getDisplayMode.getWidth
+  def windowWidth: Int = Display.getDisplayMode.getWidth
 
-  def windowWidth_=(new_window_width: Int) {
+  def windowWidth_=(new_window_width: Int): Unit = {
     windowSize = (new_window_width, windowHeight)
   }
 
-  def windowHeight = Display.getDisplayMode.getHeight
+  def windowHeight: Int = Display.getDisplayMode.getHeight
 
-  def windowHeight_=(new_window_height: Int) {
+  def windowHeight_=(new_window_height: Int): Unit = {
     windowSize = (windowWidth, new_window_height)
   }
 
-  def windowTitle = Display.getTitle
+  def windowTitle: String = Display.getTitle
 
-  def windowTitle_=(new_title: String = windowTitle) {
+  def windowTitle_=(new_title: String = windowTitle): Unit = {
     Display.setTitle(new_title)
   }
 
-  private[scage] def initgl(window_width: Int = windowWidth, window_height: Int = windowHeight, title: String = windowTitle) {
+  private[scage] def initgl(window_width: Int = windowWidth, window_height: Int = windowHeight, title: String = windowTitle): Unit = {
     Display.setDisplayMode(new DisplayMode(window_width, window_height))
     Display.setVSyncEnabled(property("render.vsync", false))
     Display.setTitle(title)
@@ -496,7 +497,7 @@ trait RendererLibD {
     log.info("initialized opengl system")
   }
 
-  private[scage] def drawWelcomeMessages() {
+  private[scage] def drawWelcomeMessages(): Unit = {
     ScageMessage.print(xmlOrDefault("renderer.loading", "Loading..."), 20, windowHeight - 25, GREEN)
     Display.update()
     Thread.sleep(1000)
@@ -536,7 +537,7 @@ trait RendererLibD {
     }
   }
 
-  private[scage] def renderExitMessage() {
+  private[scage] def renderExitMessage(): Unit = {
     backgroundColor = BLACK
     clearScreen()
     ScageMessage.print(xmlOrDefault("renderer.exiting", "Exiting..."), 20, windowHeight - 25, GREEN)
@@ -544,7 +545,7 @@ trait RendererLibD {
     Thread.sleep(1000)
   }
 
-  private[scage] def destroygl() {
+  private[scage] def destroygl(): Unit = {
     Display.destroy()
     log.info("destroyed opengl system")
   }
@@ -559,67 +560,69 @@ trait RendererD extends Scage with ScageController {
 
   private var _fps: Int = 0
 
-  def fps = _fps
+  // frames rendered per seconds
+  def fps: Int = _fps
 
-  private var _ticks: Int = 0
+  private var _tps: Int = 0
 
-  def ticks = {
-    if (_ticks != 0) {
-      _ticks
+  // actions and control checks executed per second
+  def tps: Int = {
+    if (_tps != 0) {
+      _tps
     } else {
       TICKS_PER_SECOND
     }
   }
 
-  private var _action_time_msec: Long = 0l
+  private var _action_time_msec: Long = 0L
   private var _average_action_time_msec: Double = 0.0
-  private var _action_time_measures_count: Long = 0l
+  private var _action_time_measures_count: Long = 0L
 
-  def currentActionTimeMsec = _action_time_msec
+  def currentActionTimeMsec: Long = _action_time_msec
 
-  def averageActionTimeMsec = _average_action_time_msec
+  def averageActionTimeMsec: Double = _average_action_time_msec
 
-  private var _render_time_msec: Long = 0l
+  private var _render_time_msec: Long = 0L
   private var _average_render_time_msec: Double = 0.0
-  private var _render_time_measures_count: Long = 0l
+  private var _render_time_measures_count: Long = 0L
 
-  def currentRenderTimeMsec = _render_time_msec
+  def currentRenderTimeMsec: Long = _render_time_msec
 
-  def averageRenderTimeMsec = _average_render_time_msec
+  def averageRenderTimeMsec: Double = _average_render_time_msec
 
-  private var msec = System.currentTimeMillis
+  private var fpsMeasureStartMoment = System.currentTimeMillis
   private var frames: Int = 0
-  private var msec4 = System.currentTimeMillis
+  private var nextFrameRenderingStartMoment = System.currentTimeMillis
 
-  private def countFPS() {
+  private def countFPS(): Unit = {
     frames += 1
-    if (System.currentTimeMillis - msec >= 1000) {
+    if (System.currentTimeMillis - fpsMeasureStartMoment >= 1000) {
       _fps = frames
       frames = 0
-      msec = System.currentTimeMillis
+      fpsMeasureStartMoment = System.currentTimeMillis
     }
   }
 
-  private var msec2 = System.currentTimeMillis
-  private var frames2: Int = 0
-  private var msec3 = System.currentTimeMillis
+  private var ticksMeasureStartMoment = System.currentTimeMillis
+  private var ticks: Int = 0
+  private var nextActionStartMoment = System.currentTimeMillis
 
-  private def countTicks() {
-    frames2 += 1
-    if (System.currentTimeMillis - msec2 >= 1000) {
-      _ticks = frames2
-      frames2 = 0
-      msec2 = System.currentTimeMillis
+  private def countTicks(): Unit = {
+    ticks += 1
+    if (System.currentTimeMillis - ticksMeasureStartMoment >= 1000) {
+      _tps = ticks
+      ticks = 0
+      ticksMeasureStartMoment = System.currentTimeMillis
     }
   }
 
-  private var next_game_tick_diff_save = 0l
-  private var msec_diff_save = 0l
-  private var msec2_diff_save = 0l
-  private var msec3_diff_save = 0l
-  private var msec4_diff_save = 0l
+  private var next_game_tick_diff_save = 0L
+  private var msec_diff_save = 0L
+  private var msec2_diff_save = 0L
+  private var msec3_diff_save = 0L
+  private var msec4_diff_save = 0L
 
-  def saveCounters() {
+  def saveCounters(): Unit = {
     next_game_tick_diff_save = System.currentTimeMillis() - next_game_tick
     msec_diff_save = System.currentTimeMillis() - msec_diff_save
     msec2_diff_save = System.currentTimeMillis() - msec2_diff_save
@@ -627,52 +630,52 @@ trait RendererD extends Scage with ScageController {
     msec4_diff_save = System.currentTimeMillis() - msec4_diff_save
   }
 
-  def restoreCounters() {
+  def restoreCounters(): Unit = {
     next_game_tick = next_game_tick + next_game_tick_diff_save
-    next_game_tick_diff_save = 0l
+    next_game_tick_diff_save = 0L
 
-    msec = msec + msec_diff_save
-    msec_diff_save = 0l
+    fpsMeasureStartMoment = fpsMeasureStartMoment + msec_diff_save
+    msec_diff_save = 0L
 
-    msec2 = msec2 + msec2_diff_save
-    msec2_diff_save = 0l
+    ticksMeasureStartMoment = ticksMeasureStartMoment + msec2_diff_save
+    msec2_diff_save = 0L
 
-    msec3 = msec3 + msec3_diff_save
-    msec3_diff_save = 0l
+    nextActionStartMoment = nextActionStartMoment + msec3_diff_save
+    msec3_diff_save = 0L
 
-    msec4 = msec4 + msec4_diff_save
-    msec4_diff_save = 0l
+    nextFrameRenderingStartMoment = nextFrameRenderingStartMoment + msec4_diff_save
+    msec4_diff_save = 0L
   }
 
-  def holdCounters(func: => Any) {
+  def holdCounters(func: => Any): Unit = {
     saveCounters()
     func
     restoreCounters()
   }
 
-  def resetCounters() {
+  def resetCounters(): Unit = {
     next_game_tick = System.currentTimeMillis()
-    msec = System.currentTimeMillis()
+    fpsMeasureStartMoment = System.currentTimeMillis()
     frames = 0
-    msec2 = System.currentTimeMillis()
-    frames2 = 0
-    msec3 = System.currentTimeMillis()
-    msec4 = System.currentTimeMillis()
+    ticksMeasureStartMoment = System.currentTimeMillis()
+    ticks = 0
+    nextActionStartMoment = System.currentTimeMillis()
+    nextFrameRenderingStartMoment = System.currentTimeMillis()
   }
 
   private var _base: () => DVec = () => DVec.zero
 
-  def base = _base()
+  def base: DVec = _base()
 
-  def base_=(coord: => DVec) {
+  def base_=(coord: => DVec): Unit = {
     _base = () => coord
   }
 
   private var _global_scale: Double = 1.0
 
-  def globalScale = _global_scale
+  def globalScale: Double = _global_scale
 
-  def globalScale_=(new_global_scale: Double) {
+  def globalScale_=(new_global_scale: Double): Unit = {
     _global_scale = new_global_scale
   }
 
@@ -680,15 +683,15 @@ trait RendererD extends Scage with ScageController {
 
   def windowCenter: DVec = window_center()
 
-  def windowCenter_=(coord: => DVec) {
+  def windowCenter_=(coord: => DVec): Unit = {
     window_center = () => coord
   }
 
   private var central_coord: () => DVec = window_center
 
-  def center = central_coord()
+  def center: DVec = central_coord()
 
-  def center_=(coord: => DVec) {
+  def center_=(coord: => DVec): Unit = {
     central_coord = () => coord
   }
 
@@ -696,62 +699,62 @@ trait RendererD extends Scage with ScageController {
   private var rotation_angle: () => Double = () => 0.0
 
   // in degrees
-  def rotation = (rotation_point(), rotation_angle())
+  def rotation: (DVec, Double) = (rotation_point(), rotation_angle())
 
-  def rotation_=(new_rotation_params: => (DVec, Double)) {
+  def rotation_=(new_rotation_params: => (DVec, Double)): Unit = {
     rotation_point = () => new_rotation_params._1
     rotation_angle = () => new_rotation_params._2
   }
 
-  @deprecated("use rotationCenter", "2.0") def rotationPoint = rotation_point()
+  @deprecated("use rotationCenter", "2.0") def rotationPoint: DVec = rotation_point()
 
-  @deprecated("use rotationCenter", "2.0") def rotationPoint_=(new_rotation_point: => DVec) {
+  @deprecated("use rotationCenter", "2.0") def rotationPoint_=(new_rotation_point: => DVec): Unit = {
     rotation_point = () => new_rotation_point
   }
 
-  def rotationCenter = rotation_point()
+  def rotationCenter: DVec = rotation_point()
 
-  def rotationCenter_=(new_rotation_point: => DVec) {
+  def rotationCenter_=(new_rotation_point: => DVec): Unit = {
     rotation_point = () => new_rotation_point
   }
 
-  def rotationDeg = (rotation_point(), rotation_angle())
+  def rotationDeg: (DVec, Double) = (rotation_point(), rotation_angle())
 
-  def rotationDeg_=(new_rotation_params: => (DVec, Double)) {
+  def rotationDeg_=(new_rotation_params: => (DVec, Double)): Unit = {
     rotation_point = () => new_rotation_params._1
     rotation_angle = () => new_rotation_params._2
   }
 
-  def rotationRad = (rotation_point(), rotation_angle() / 180.0 * math.Pi)
+  def rotationRad: (DVec, Double) = (rotation_point(), rotation_angle() / 180.0 * math.Pi)
 
-  def rotationRad_=(new_rotation_params: => (DVec, Double)) {
+  def rotationRad_=(new_rotation_params: => (DVec, Double)): Unit = {
     rotation_point = () => new_rotation_params._1
     rotation_angle = () => new_rotation_params._2 * 180 / math.Pi
   }
 
-  def rotationAngle = rotation_angle()
+  def rotationAngle: Double = rotation_angle()
 
-  def rotationAngle_=(new_rotation_angle: => Double) {
+  def rotationAngle_=(new_rotation_angle: => Double): Unit = {
     rotation_angle = () => new_rotation_angle
   }
 
-  def rotationAngleDeg = rotation_angle()
+  def rotationAngleDeg: Double = rotation_angle()
 
-  def rotationAngleDeg_=(new_rotation_angle: => Double) {
+  def rotationAngleDeg_=(new_rotation_angle: => Double): Unit = {
     rotation_angle = () => new_rotation_angle
   }
 
-  def rotationAngleRad = rotation_angle() / 180.0 * math.Pi
+  def rotationAngleRad: Double = rotation_angle() / 180.0 * math.Pi
 
-  def rotationAngleRad_=(new_rotation_angle_rad: => Double) {
+  def rotationAngleRad_=(new_rotation_angle_rad: => Double): Unit = {
     rotation_angle = () => new_rotation_angle_rad * 180 / math.Pi
   }
 
-  @deprecated("use absCoord", "2.0") def scaledCoord(coord: DVec) = {
+  @deprecated("use absCoord", "2.0") def scaledCoord(coord: DVec): DVec = {
     (coord / globalScale) + (center - windowCenter / globalScale)
   }
 
-  def absCoord(coord: DVec) = {
+  def absCoord(coord: DVec): DVec = {
     val x = (coord / globalScale) + (center - windowCenter / globalScale)
     val a = rotation_angle()
     if (a != 0) {
@@ -764,23 +767,23 @@ trait RendererD extends Scage with ScageController {
 
   private[scage] val renders = defaultContainer("renders", ScagePhase.Render, execute_if_app_running = false, execute_on_deletion = false)
 
-  def render(render_func: => Any) = renders.addOp(() => render_func, 0)
+  def render(render_func: => Any): Int = renders.addOp(() => render_func, 0)
 
-  def render(position: Int)(render_func: => Any) = renders.addOp(() => render_func, position)
+  def render(position: Int)(render_func: => Any): Int = renders.addOp(() => render_func, position)
 
-  def delRender(operation_id: Int) = {
+  def delRender(operation_id: Int): Unit = {
     renders.delOperation(operation_id)
   }
 
-  def delRenders(operation_ids: Int*) {
+  def delRenders(operation_ids: Int*): Unit = {
     renders.delOperations(operation_ids: _*)
   }
 
-  def delAllRenders() {
+  def delAllRenders(): Unit = {
     renders.delAllOperations()
   }
 
-  def delAllRendersExcept(except_operation_ids: Int*) {
+  def delAllRendersExcept(except_operation_ids: Int*): Unit = {
     renders.delAllOperationsExcept(except_operation_ids: _*)
   }
 
@@ -800,41 +803,41 @@ trait RendererD extends Scage with ScageController {
     }
   }
 
-  def delInterface(operation_id: Int) = {
+  def delInterface(operation_id: Int): Unit = {
     interfaces.delOperation(operation_id)
   }
 
-  def delInterfaces(operation_ids: Int*) {
+  def delInterfaces(operation_ids: Int*): Unit = {
     interfaces.delOperations(operation_ids: _*)
   }
 
-  def delAllInterfaces() {
+  def delAllInterfaces(): Unit = {
     interfaces.delAllOperations()
   }
 
-  def delAllInterfacesExcept(except_operation_ids: Int*) {
+  def delAllInterfacesExcept(except_operation_ids: Int*): Unit = {
     interfaces.delAllOperationsExcept(except_operation_ids: _*)
   }
 
-  val TICKS_PER_SECOND = property("render.ticks", 60)
-  val SKIP_TICKS = 1000 / TICKS_PER_SECOND
-  val MAX_FRAMESKIP = property("render.frameskip", 5)
+  val TICKS_PER_SECOND: Int = property("render.ticks", 60)
+  val SKIP_TICKS: Int = 1000 / TICKS_PER_SECOND  // 16 by default
+  val MAX_FRAMESKIP: Int = property("render.frameskip", 5)
   private var loops = 0
 
   private var next_game_tick = System.currentTimeMillis()
 
-  private[scage] def prepareRendering() {
+  private[scage] def prepareRendering(): Unit = {
     next_game_tick = System.currentTimeMillis()
   }
 
   private var _interpolation: Double = 0
 
-  def interpolation = _interpolation
+  def interpolation: Double = _interpolation
 
   /*private var actions_run_count = 0
   private var actions_run_moment = System.currentTimeMillis()*/
 
-  private def _execute(_actions_iterator: Iterator[ScageOperation]) {
+  private def _execute(_actions_iterator: Iterator[ScageOperation]): Unit = {
     scage_phase = ScagePhase.Action
     while (is_running && Scage.isAppRunning && !restart_toggled && _actions_iterator.hasNext) {
       val ScageOperation(action_id, action_operation, _) = _actions_iterator.next()
@@ -845,7 +848,7 @@ trait RendererD extends Scage with ScageController {
     scage_phase = ScagePhase.NoPhase
   }
 
-  private[scage] def checkControlsAndExecuteActions() {
+  private[scage] def checkControlsAndExecuteActions(): Unit = {
     // maybe rename it to not confuse clients
     if (System.currentTimeMillis() - next_game_tick > 60000) {
       resetCounters()
@@ -857,11 +860,11 @@ trait RendererD extends Scage with ScageController {
       executeDelAndAddOperationsIfExist()
       scage_phase = ScagePhase.NoPhase
       restart_toggled = false
-      msec3 = System.currentTimeMillis()
+      nextActionStartMoment = System.currentTimeMillis()
       if (is_running && Scage.isAppRunning && actions.operations.nonEmpty) {
         _execute(actions.operations.iterator)
       }
-      _action_time_msec = System.currentTimeMillis() - msec3
+      _action_time_msec = System.currentTimeMillis() - nextActionStartMoment
       _action_time_measures_count += 1
       _average_action_time_msec = 1.0 * (_average_action_time_msec * (_action_time_measures_count - 1) + _action_time_msec) / _action_time_measures_count
       countTicks()
@@ -871,9 +874,9 @@ trait RendererD extends Scage with ScageController {
     _interpolation = (System.currentTimeMillis() + SKIP_TICKS - next_game_tick) * 1.0 / SKIP_TICKS
   }
 
-  val framerate = property("render.framerate", 0)
+  val framerate: Int = property("render.framerate", 0)
 
-  private def executeRenders(_renders_iterator: Iterator[ScageOperation]) {
+  private def executeRenders(_renders_iterator: Iterator[ScageOperation]): Unit = {
     scage_phase = ScagePhase.Render
     while (is_running && Scage.isAppRunning && !restart_toggled && _renders_iterator.hasNext) {
       val ScageOperation(render_id, render_operation, _) = _renders_iterator.next()
@@ -886,7 +889,7 @@ trait RendererD extends Scage with ScageController {
     scage_phase = ScagePhase.NoPhase
   }
 
-  private def executeInterfaces(_interfaces_iterator: Iterator[ScageOperation]) {
+  private def executeInterfaces(_interfaces_iterator: Iterator[ScageOperation]): Unit = {
     scage_phase = ScagePhase.Interface
     while (is_running && Scage.isAppRunning && !restart_toggled && _interfaces_iterator.hasNext) {
       val ScageOperation(interface_id, interface_operation, _) = _interfaces_iterator.next()
@@ -897,10 +900,10 @@ trait RendererD extends Scage with ScageController {
     scage_phase = ScagePhase.NoPhase
   }
 
-  private[scage] def performRendering() {
+  private[scage] def performRendering(): Unit = {
     if (Display.isCloseRequested) Scage.stopApp()
     else {
-      msec4 = System.currentTimeMillis()
+      nextFrameRenderingStartMoment = System.currentTimeMillis()
       clearScreen()
       GL11.glPushMatrix()
       val coord = window_center() - (central_coord() - _base()) * _global_scale
@@ -924,7 +927,7 @@ trait RendererD extends Scage with ScageController {
 
       if (framerate != 0) Display.sync(framerate)
       Display.update()
-      _render_time_msec = System.currentTimeMillis() - msec4
+      _render_time_msec = System.currentTimeMillis() - nextFrameRenderingStartMoment
       _render_time_measures_count += 1
       _average_render_time_msec = 1.0 * (_average_render_time_msec * (_render_time_measures_count - 1) + _render_time_msec) / _render_time_measures_count
       countFPS()
