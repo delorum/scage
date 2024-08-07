@@ -622,7 +622,7 @@ trait RendererD extends Scage with ScageController {
   private var nextActionStartMoment_diff_save = 0L
   private var nextFrameRenderingStartMoment_diff_save = 0L
 
-  def saveCounters(): Unit = {
+  private def saveCounters(): Unit = {
     next_game_tick_diff_save = System.currentTimeMillis() - next_game_tick
     fpsMeasureStartMoment_diff_save = System.currentTimeMillis() - fpsMeasureStartMoment_diff_save
     ticksMeasureStartMoment_diff_save = System.currentTimeMillis() - ticksMeasureStartMoment_diff_save
@@ -630,7 +630,7 @@ trait RendererD extends Scage with ScageController {
     nextFrameRenderingStartMoment_diff_save = System.currentTimeMillis() - nextFrameRenderingStartMoment_diff_save
   }
 
-  def restoreCounters(): Unit = {
+  private def restoreCounters(): Unit = {
     next_game_tick = next_game_tick + next_game_tick_diff_save
     next_game_tick_diff_save = 0L
 
