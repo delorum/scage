@@ -925,11 +925,11 @@ trait RendererD extends Scage with ScageController {
         executeInterfaces(interfaces.operations.iterator)
       }
 
-      if (framerate != 0) Display.sync(framerate)
       Display.update()
       _render_time_msec = System.currentTimeMillis() - nextFrameRenderingStartMoment
       _render_time_measures_count += 1
       _average_render_time_msec = 1.0 * (_average_render_time_msec * (_render_time_measures_count - 1) + _render_time_msec) / _render_time_measures_count
+      if (framerate != 0) Display.sync(framerate)
       countFPS()
     }
   }
